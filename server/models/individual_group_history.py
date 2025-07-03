@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 from models.generals import TimeStamps
-from models.individuals import Individual
+from models.individual import Individual
 from models.group import Group
 
 

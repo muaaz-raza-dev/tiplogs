@@ -6,7 +6,7 @@ from models.generals import TimeStamps
 from models.user import User
 from pydantic import Field , BaseModel
 from datetime import datetime     
-
+from typing import Optional,List
 class days (Enum):
     mon = "mon"
     tue = "tue" 
@@ -18,8 +18,6 @@ class days (Enum):
 
 class attendance_frequency (Enum): 
     daily = "daily" 
-    monthly = "monthly" 
-    weekly = "weekly" 
     custom = "custom"
 
 class Group_to_User (BaseModel):
@@ -29,9 +27,11 @@ class Group_to_User (BaseModel):
 class attendance_module(Document,TimeStamps):
     name:str
     description:Optional[str] 
+
     groups: List[Link(Group)]
+    
     frequency: attendance_frequency 
-    holidays: List[Days] = Field(default_factory=lambda: [Days.sat, Days.sun])
+
     organization_id : Link(Organization) 
 
     # Assign User to take attendance

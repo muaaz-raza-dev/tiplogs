@@ -1,7 +1,8 @@
 from beanie import Document , Indexed 
-# from typing import Optional,List,Literal
+from typing import Optional,List,Literal
 from datetime import datetime
 from models.generals import TimeStamps
+from models.group import Group
 
  
 
@@ -17,7 +18,8 @@ class Individual(Document,TimeStamps):
     # Class Identities
     grno:Indexed(str,unique = True)
     roll_no:Optional[str]  
-
+    current_group : Link(Group)
+    
     # id details 
     #* username = grno 
     password : str 
