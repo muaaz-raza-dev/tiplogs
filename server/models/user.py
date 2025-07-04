@@ -19,11 +19,13 @@ class User(Document,TimeStamps):
     phone:Optional[str] 
 
     #Links
-    organization_id : Link(Organization)
+    organizations : Optional[List[Link(Organization)]]
     role : UserRole = UserRole.staff
 
     # Authentication / Authorizations 
-    refresh_tokens : str 
-    registered_by:Link(User)
-    is_blocked:bool
-    is_deleted:bool 
+    is_verified :  bool = False
+    refresh_tokens :Optional[str] 
+    registered_by:Optional[Link(User)] = None
+    is_blocked:Optional[bool] = False 
+    is_deleted:Optional[bool] = False 
+    

@@ -9,6 +9,7 @@ class Plans (str,Enum):
 
 class Organization (Document,TimeStamps) :
     name : Indexed(str,unique=True)
-    admin : Link(User)
+
     individuals_name:str = "students"
+    
     plan : Plans = Plans.basic
