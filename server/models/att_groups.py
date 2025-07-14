@@ -2,7 +2,7 @@ from beanie import Document,Link ,Field
 from models.att_daily_base import AttendanceDailyBase
 from models.att_custom_base import AttendanceCustomBase
 from models.att_module import attendance_frequency
-from models.group import Group
+from models.class import Group
 from models.generals import TimeStamps
 from models.user import User
 from typing import List

@@ -13,19 +13,21 @@ class UserRole(str, Enum):
 
 class User(Document,TimeStamps):
     full_name:str 
-    email:Optional[EmailStr]
-    username:Indexed(str,unique=True)
+    email:EmailStr
+    username:Indexed(str,unique=True) # type: ignore
     password:str
     phone:Optional[str] 
 
     #Links
-    organizations : Optional[List[Link(Organization)]]
+    organization : Optional[Link(Organization)] # type: ignore
     role : UserRole = UserRole.staff
 
     # Authentication / Authorizations 
     is_verified :  bool = False
+    verification_hash : Optional[str]  
     refresh_tokens :Optional[str] 
-    registered_by:Optional[Link(User)] = None
+    registered_by:Optional[Link(User)] = None # type: ignore
     is_blocked:Optional[bool] = False 
     is_deleted:Optional[bool] = False 
+    is_approved : Optional[bool] = False
     

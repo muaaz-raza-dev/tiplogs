@@ -5,7 +5,7 @@ from datetime import datetime
 
 from models.generals import TimeStamps
 from models.individual import Individual
-from models.group import Group
+from models.class import Group
 
 
 class GroupHistory(BaseModel):

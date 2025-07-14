@@ -1,5 +1,5 @@
 from  beanie import Document,Link 
-from models.group import Group
+from models.class import Group
 from enum import Enum
 from models.organization import Organization
 from models.generals import TimeStamps
