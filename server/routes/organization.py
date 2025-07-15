@@ -1,5 +1,5 @@
 from fastapi import APIRouter ,Depends 
-from type.auth import PayloadRegisterOrganization
+from tschema.auth import PayloadRegisterOrganization
 from models.organization import Organization
 from utils.response import Respond
 from pydantic import ValidationError

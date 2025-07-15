@@ -1,11 +1,10 @@
 from beanie import Document,Link 
-from models.att_module import attendance_module
 from models.generals import TimeStamps
-from models.user import User
-from typing import List
 from enum import Enum
 from datetime import datetime
-from models.Individual import Individual
+if TYPE_CHECKING:  # type: ignore
+    from models.att_module import attendance_module 
+    from models.user import User
 
 # * Attendance data od custom frequency designed for each class 
 
@@ -15,11 +14,11 @@ class AttendanceEventStatus (str,Enum):
      complete = "complete"
 
 class AttendanceCustomBase(Document,TimeStamps):
-    att_module_id:Link(attendance_module)
+    att_module_id:Link["attendance_module"]
 
     status : AttendanceEventStatus 
     att_date : datetime
-    created_by: Link(User) 
+    created_by: Link["User"] 
 
 
     att_complete_time : datetime

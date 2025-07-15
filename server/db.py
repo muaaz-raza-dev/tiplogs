@@ -1,17 +1,17 @@
-from beanie import init_beanie, Document
-import asyncio
+from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import DATABASE_URL
-class Sample(Document):
-    name: str
+from models.user import User
+from models.organization import Organization
+from models.group import Group
+from models.Individual import Individual
+
+
 
 async def init():
     # Create Motor client
     client = AsyncIOMotorClient(DATABASE_URL)
 
     # Initialize beanie with the Sample document class and a database
-    await init_beanie(database=client["test"], document_models=[Sample])
-    
-    sample = Sample(name="Muaaz")
-    await sample.insert()
-
+    await init_beanie(database=client["tiplogs"], document_models=[User, Organization, Group, Individual])
+    print("Database initialized successfully")

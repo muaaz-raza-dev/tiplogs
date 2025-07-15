@@ -1,6 +1,6 @@
-from pydantic import BaseModel ,Literal
-from typing import Optional 
-
+from pydantic import BaseModel 
+from typing import TYPE_CHECKING,Optional 
+from typing import Literal
 class PayloadRegisterIndividualManual(BaseModel):
     name: str
     f_name: Optional[str] = None

@@ -1,8 +1,10 @@
 # config.py
 from dotenv import load_dotenv
 import os
-
+from pathlib import Path
 # Load .env variables
+env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=env_path)
 load_dotenv()
 
 # Access environment variables
@@ -23,4 +25,5 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 APP_NAME = os.getenv("APP_NAME")
 APP_SERVER_LINK = os.getenv("APP_SERVER_LINK")
-APP_LINK=os.getenv("APP_LINK")
+APP_LINK=os.getenv("APP_LINK") 
+

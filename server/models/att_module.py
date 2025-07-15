@@ -1,12 +1,13 @@
 from  beanie import Document,Link 
-from models.class import Group
 from enum import Enum
-from models.organization import Organization
 from models.generals import TimeStamps
-from models.user import User
-from pydantic import Field , BaseModel
+from pydantic import  BaseModel
 from datetime import datetime     
-from typing import Optional,List
+from typing import TYPE_CHECKING,Optional,List
+from models.organization import Organization
+if TYPE_CHECKING: # type: ignore
+    from models.user import User
+    from models.group import Group
 class days (Enum):
     mon = "mon"
     tue = "tue" 
@@ -21,18 +22,18 @@ class attendance_frequency (Enum):
     custom = "custom"
 
 class Group_to_User (BaseModel):
-    group : Link(Group)
-    users :  List[Link(User)]
+    group : Link["Group"]
+    users :  List[Link["User"]]
 
 class attendance_module(Document,TimeStamps):
     name:str
     description:Optional[str] 
 
-    groups: List[Link(Group)]
+    groups: List[Link["Group"]]
     
     frequency: attendance_frequency 
 
-    organization_id : Link(Organization) 
+    organization_id : Link["Organization"]
 
     # Assign User to take attendance
     groups_to_user : List[Group_to_User]  

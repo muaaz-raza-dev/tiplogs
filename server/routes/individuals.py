@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, Response 
-from type.individual import PayloadRegisterIndividualManual , PayloadRegisterIndividualAuto
+from fastapi import APIRouter, Depends
+from tschema.individual import PayloadRegisterIndividualManual , PayloadRegisterIndividualAuto
 from middleware.authorization import authorize_user
 from models.user import UserRole, User
 from models.Individual import Individual
 from utils.response import Respond 
-from organization import Organization
+from models.organization import Organization
 
 router = APIRouter(prefix="/students")
 
 @router.post("/register/manual")
-async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user: Depends(authorize_user)): # type:ignore
+async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user= Depends(authorize_user)): # type:ignore
     user_details = await User.get(user.user_id).project({"organization": 1})
     try :         
         student = await Individual(
@@ -60,7 +60,7 @@ async def RegisterStudentAuto(payload: PayloadRegisterIndividualAuto,): # type:i
 
 
 @router.put("/edit/{sid}")
-async def EditStudent(sid: str, payload: PayloadRegisterIndividualManual, user: Depends(authorize_user)): # type:ignore
+async def EditStudent(sid: str, payload: PayloadRegisterIndividualManual, user= Depends(authorize_user)): # type:ignore
 
 
 

@@ -1,12 +1,11 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING,List, Optional
 from beanie import Document, Link
 from pydantic import BaseModel, Field
 from datetime import datetime
-
 from models.generals import TimeStamps
-from models.individual import Individual
-from models.class import Group
-
+if TYPE_CHECKING:  # type: ignore
+    from models.group import Group
+    from models.Individual import Individual
 
 class GroupHistory(BaseModel):
     admission_date: datetime

@@ -1,11 +1,11 @@
 from fastapi import APIRouter ,Response ,Cookie,Depends 
 from fastapi_mail import MessageSchema , FastMail , MessageType
-from type.auth import PayloadRegisterAdmin,PayloadLogin
+from tschema.auth import PayloadRegisterAdmin,PayloadLogin
 from models.user import User 
 from utils.hash import Hash,VerifyHash
-from models.user import UserRole
+from models.common import UserRole
 from utils.response import Respond
-from pydantic import BaseModel,ValidationError
+from pydantic import BaseModel
 from jose import jwt, JWTError, ExpiredSignatureError
 from jose.exceptions import ExpiredSignatureError ,JWTError
 from config import JWT_SECRET,APP_REFRESH_COOKIE_KEY,JWT_ALGORITHM,ACCESS_TOKEN_EXPIRE_MINUTES,REFRESH_TOKEN_EXPIRE_DAYS , APP_SERVER_LINK ,APP_LINK
@@ -19,28 +19,31 @@ from utils.mail import conf
 router = APIRouter(prefix="/auth")
 
 @router.post("/register/admin")
-async def RegisterAdmin(req:PayloadRegisterAdmin,res:Response):
+async def RegisterAdmin(body:PayloadRegisterAdmin,res:Response):
+
+    is_username = await User.find_one(User.username == body.username)
     
-    
-    is_username = await User.find_one(User.username == req.user.username) 
     if is_username:
         return Respond(status_code=400, message="Username already exists", success=False)
     
-    hashed_password =  Hash(req.user.password)
-    user = User(**req.model_dump(),password=hashed_password,role=UserRole,is_verified=False,is_approved=True)
-    await user.insert()
+    hashed_password =  Hash(body.password)
 
+    data = body.model_dump(exclude={"password", "role"})
+
+    user = User(**data,password=hashed_password,role=UserRole.admin,is_verified=False,is_approved=True)
+
+    await user.insert()
     accessToken = jwt.encode( 
-    {"user_id":user.id,"is_verified":False,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc()) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
+    {"id":str(user.id),"is_verified":False,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))}
     ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     refresh_token = jwt.encode(
-    {"user_id":user.id,"is_verified":False, "exp": datetime.now(timezone.utc()) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
+    {"id":str(user.id),"is_verified":False, "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
     ,JWT_SECRET , algorithm=JWT_ALGORITHM)
 
-    res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httpOnly=True,max_age= 3600*24*30, secure=True )    
+    res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httponly=True,max_age= 36004*30, secure=True )    
 
-    Respond(message="Your profile is created" , payload={"accessToken":accessToken})
+    return Respond(message="Your profile is created" , payload={"accessToken":accessToken})
 
 
 
@@ -51,7 +54,7 @@ async def VerifyAccount(user=Depends(authorize_user)):
             return Respond(status_code=400, message="Invalid credentials",success=False)
 
         # Fetch user from DB
-        user_details = await User.get(user.user_id)
+        user_details = await User.get(user.id)
         if not user_details:
             return Respond(status_code=404, message="User not found",success=False)
 
@@ -61,9 +64,9 @@ async def VerifyAccount(user=Depends(authorize_user)):
         # Generate hash and verification token
         verification_hash = str(random.randint(100000, 999999))
         payload = {
-            "user_id": str(user_details.id),
+            "id": str(user_details.id),
             "hash": verification_hash,
-            "exp": datetime.now(timezone.utc()) + timedelta(minutes=15)
+            "exp": datetime.now(timezone.utc)+ timedelta(minutes=15)
         }
 
         token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
@@ -99,10 +102,10 @@ async def VerifyAccount(token:str,res:Response,user=Depends(authorize_user)):
         
         token = await jwt.decode(token,JWT_SECRET,algorithms=JWT_ALGORITHM)
 
-        if token.user_id != user.id :
+        if token.id != user.id :
             return Respond(success=False, status_code=401, message="Invalid Token")
         
-        user_details =await User(id==user.user_id).find_one()
+        user_details =await User(id==user.id).find_one()
 
         if user_details.verification_hash != token.verification : 
             return Respond(success=False,message="Invalid Token",status_code=401)
@@ -111,17 +114,17 @@ async def VerifyAccount(token:str,res:Response,user=Depends(authorize_user)):
         user_details.verification_hash = None
         await user_details.save()           
 
-        accessToken = jwt.encode({"user_id":user.id,"is_verified":True,"username":user.username , },JWT_SECRET,algorithm=JWT_ALGORITHM)
+        accessToken = jwt.encode({"id":user.id,"is_verified":True,"username":user.username , },JWT_SECRET,algorithm=JWT_ALGORITHM)
 
         refresh_token = jwt.encode(
-        {"user_id":user.id,"is_verified":True, "exp": datetime.now(timezone.utc()) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
+        {"id":user.id,"is_verified":True, "exp": datetime.now(timezone.u) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
         ,JWT_SECRET , algorithm=JWT_ALGORITHM)
 
         res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httpOnly=True,max_age= 3600*24*30, secure=True )    
-        return Respond(payload={accessToken,},message="Your account is verified successfully")
+        return Respond(payload={accessToken},message="Your account is verified successfully")
 
     except ExpiredSignatureError :
-        await User(id= user.user_id).update({"$unset":{"verification_hash":""}})
+        await User(id= user.id).update({"$unset":{"verification_hash":""}})
         return Respond(success=False, status_code=401, message="Your token is expired. Request again for verification")
 
     except Exception as e : 
@@ -156,11 +159,11 @@ async def Login(req:PayloadLogin,res:Response):
         Respond(status_code=401,message="Invalid Credentials",success=False)        
 
     accessToken = jwt.encode( 
-    {"user_id":user.id,"is_verified":user.is_verified,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc()) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
+    {"id":user.id,"is_verified":user.is_verified,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
     ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     refresh_token = jwt.encode(
-    {"user_id":user.id,"is_verified":user.is_verified, "exp": datetime.now(timezone.utc()) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
+    {"id":user.id,"is_verified":user.is_verified, "exp": datetime.now(timezone.utc)+ timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
     ,JWT_SECRET , algorithm=JWT_ALGORITHM)
 
     res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httpOnly=True,max_age= 3600*24*30, secure=True )   
@@ -185,7 +188,7 @@ async def AvailablityUsername(username:str):
 
 
 @router.post("/refresh")
-async def RenewAccessToken(RefreshToken:Cookie(default=None,alias=APP_REFRESH_COOKIE_KEY)): # type: ignore
+async def RenewAccessToken(RefreshToken:str|None = Cookie(default=None,alias=APP_REFRESH_COOKIE_KEY)): # type: ignore
     try:
         token = jwt.decode(RefreshToken,JWT_SECRET,algorithms=JWT_ALGORITHM)
     except ExpiredSignatureError:
@@ -193,17 +196,17 @@ async def RenewAccessToken(RefreshToken:Cookie(default=None,alias=APP_REFRESH_CO
     except JWTError:
         return Respond(status_code=403, message="Invalid token")
     
-    user_id = token.get("user_id")
-    if not user_id :
+    id = token.get("id")
+    if not id :
         return Respond(status_code = 403 , message="Malformed token")
     
-    user = User(id=user_id).find_one()
+    user = User(id=id).find_one()
     if not user.id :
         Respond(status_code=401,message="Invalid credentials",payload={"events":{"logout":True}})
         return 
     
     accessToken = jwt.encode( 
-    {"user_id":user.id,"is_verified":False,"username":user.username , "exp":datetime.now(timezone.utc()) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
+    {"id":user.id,"is_verified":False,"username":user.username , "exp":datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)}
     ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     Respond(payload={"accessToken":accessToken,})
@@ -220,7 +223,7 @@ async def LogOut(res:Response):
 async def UserDetails(user=Depends(authorize_user)):
 
 
-    user_details = await User.find_one(id==user.user_id).project(
+    user_details = await User.find_one(id==user.id).project(
         User.id,
         User.username,
         User.email,

@@ -1,13 +1,12 @@
 from beanie import Document,Link 
-from models.att_module import attendance_module
 from models.generals import TimeStamps
-from pydantic import BaseModel
 from  datetime import datetime 
-from typing import Optional 
+from typing import TYPE_CHECKING,Optional 
 from models.att_custom_base import AttendanceEventStatus
-
+if TYPE_CHECKING:  # type: ignore
+    from models.att_module import attendance_module
 class AttendanceDailyBase(Document,TimeStamps):
-    att_module_id:Link(attendance_module)
+    att_module_id:Link["attendance_module"]
 
     att_date : datetime 
     status : AttendanceEventStatus

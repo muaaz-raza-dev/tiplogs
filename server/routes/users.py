@@ -1,5 +1,5 @@
 from fastapi import APIRouter ,Depends
-from type.auth import PayloadRegisterUserManual,PayloadRegisterUserAuto,PayloadApproveUser
+from tschema.auth import PayloadRegisterUserManual,PayloadRegisterUserAuto,PayloadApproveUser
 from models.user import User 
 from utils.hash import Hash
 from models.user import UserRole
@@ -11,7 +11,7 @@ from models.organization import Organization
 router = APIRouter(prefix="/user")
 
 @router.post('/register/users/manual')
-async def RegisterUserManual(user:Depends(authorize_user),userpayload:PayloadRegisterUserManual): # type: ignore
+async def RegisterUserManual(userpayload:PayloadRegisterUserManual,user=Depends(authorize_user)): 
     try :
 
         if user.role != UserRole.admin and user.role != UserRole.manager:
