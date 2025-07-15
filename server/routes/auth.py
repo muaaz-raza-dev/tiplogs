@@ -5,7 +5,7 @@ from models.user import User
 from utils.hash import Hash,VerifyHash
 from models.common import UserRole
 from utils.response import Respond
-from pydantic import BaseModel
+from pydantic import BaseModel ,ValidationError
 from jose import jwt, JWTError, ExpiredSignatureError
 from jose.exceptions import ExpiredSignatureError ,JWTError
 from config import JWT_SECRET,APP_REFRESH_COOKIE_KEY,JWT_ALGORITHM,ACCESS_TOKEN_EXPIRE_MINUTES,REFRESH_TOKEN_EXPIRE_DAYS , APP_SERVER_LINK ,APP_LINK
@@ -20,30 +20,38 @@ router = APIRouter(prefix="/auth")
 
 @router.post("/register/admin")
 async def RegisterAdmin(body:PayloadRegisterAdmin,res:Response):
+    try :
+        is_username = await User.find_one(User.username == body.username)
 
-    is_username = await User.find_one(User.username == body.username)
+        if is_username:
+            return Respond(status_code=400, message="Username already exists", success=False)
+
+ 
+        hashed_password =  Hash(body.password)
+
+        data = body.model_dump(exclude={"password", "role"})
+
+        user = User(**data,password=hashed_password,role=UserRole.admin,is_verified=False,is_approved=True)
+
+        await user.insert()
+        accessToken = jwt.encode( 
+        {"id":str(user.id),"is_verified":False,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))}
+        ,JWT_SECRET,algorithm=JWT_ALGORITHM)
+
+        refresh_token = jwt.encode(
+        {"id":str(user.id),"is_verified":False, "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
+        ,JWT_SECRET , algorithm=JWT_ALGORITHM)
+
+        res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httponly=True,max_age= 36004*30, secure=True )    
+
+        return Respond(message="Your profile is created" , payload={"accessToken":accessToken})
+    except Exception as e:
+        print(f"Error : \n {e}")
+        return Respond(status_code=501, message="Internal server error", success=False)
     
-    if is_username:
-        return Respond(status_code=400, message="Username already exists", success=False)
-    
-    hashed_password =  Hash(body.password)
-
-    data = body.model_dump(exclude={"password", "role"})
-
-    user = User(**data,password=hashed_password,role=UserRole.admin,is_verified=False,is_approved=True)
-
-    await user.insert()
-    accessToken = jwt.encode( 
-    {"id":str(user.id),"is_verified":False,"username":user.username, "role" : user.role , "exp":datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))}
-    ,JWT_SECRET,algorithm=JWT_ALGORITHM)
-
-    refresh_token = jwt.encode(
-    {"id":str(user.id),"is_verified":False, "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
-    ,JWT_SECRET , algorithm=JWT_ALGORITHM)
-
-    res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httponly=True,max_age= 36004*30, secure=True )    
-
-    return Respond(message="Your profile is created" , payload={"accessToken":accessToken})
+    except ValidationError as e:
+        print(f"Validation Error : \n {e}")
+        return Respond(status_code=400,payload=e.errors, message="Invalid data provided", success=False)
 
 
 
