@@ -1,5 +1,5 @@
 from fastapi import APIRouter ,Response ,Cookie,Depends 
-from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 from tschema.auth import PayloadRegisterAdmin,PayloadLogin,PayloadRequestVerification
 from models.user import User 
 from utils.hash import Hash,VerifyHash
@@ -8,7 +8,7 @@ from utils.response import Respond,RespondCookie
 from pydantic import BaseModel ,ValidationError
 from jose import jwt, JWTError, ExpiredSignatureError
 from jose.exceptions import ExpiredSignatureError ,JWTError
-from config import JWT_SECRET,APP_REFRESH_COOKIE_KEY,JWT_ALGORITHM,ACCESS_TOKEN_EXPIRE_MINUTES,REFRESH_TOKEN_EXPIRE_DAYS , APP_SERVER_LINK ,APP_LINK
+from config import JWT_SECRET,APP_REFRESH_COOKIE_KEY,JWT_ALGORITHM,REFRESH_TOKEN_EXPIRE_DAYS ,APP_LINK
 from datetime import datetime , timedelta , timezone
 from middleware.authorization import authorize_user
 from utils.verification_mail import SendVerificationMail
@@ -37,7 +37,7 @@ async def RegisterAdmin(body:PayloadRegisterAdmin,res:Response):
         ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
         refresh_token = jwt.encode(
-        {"id":str(user.id),"is_verified":False, "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
+        {"id":str(user.id), "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
         ,JWT_SECRET , algorithm=JWT_ALGORITHM)
 
 
@@ -87,39 +87,36 @@ async def VerifyAccount(payload:PayloadRequestVerification,user=Depends(authoriz
         return Respond(message="Internal server error", status_code=501 , success=False)
     
 
+
+
 @router.get("/verify/account/{token}")
-async def VerifyAccount(token:str,res:Response,user=Depends(authorize_user)):
-    try :
-        
-        token = await jwt.decode(token,JWT_SECRET,algorithms=JWT_ALGORITHM)
+async def VerifyAccount(token: str):
+    try:
+        payload =  jwt.decode(token, JWT_SECRET, algorithms=JWT_ALGORITHM)
+        user = await User.get(payload["id"])
 
-        if token.id != user.id :
-            return Respond(success=False, status_code=401, message="Invalid Token")
-        
-        user_details =await User(id==user.id).find_one()
+        if not user:
+            return Respond(status_code=401, message="Invalid request")
 
-        if user_details.verification_hash != token.verification : 
-            return Respond(success=False,message="Invalid Token",status_code=401)
-        
-        user_details.is_verified = True 
-        user_details.verification_hash = None
-        await user_details.save()           
+        if user.verification_hash != payload["hash"]:
+            return Respond(success=False, message="Invalid Token", status_code=401)
+        user.is_verified = True
+        user.verification_hash = None
+        await user.save()
 
-        accessToken = jwt.encode({"id":user.id,"is_verified":True,"username":user.username , },JWT_SECRET,algorithm=JWT_ALGORITHM)
+        return RedirectResponse(url=f"{APP_LINK}/dashboard", status_code=302)
 
-        refresh_token = jwt.encode(
-        {"id":user.id,"is_verified":True, "exp": datetime.now(timezone.u) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
-        ,JWT_SECRET , algorithm=JWT_ALGORITHM)
-
-        res.set_cookie( key=APP_REFRESH_COOKIE_KEY ,value=refresh_token ,httpOnly=True,max_age= 3600*24*30, secure=True )    
-        return Respond(payload={accessToken},message="Your account is verified successfully")
-
-    except ExpiredSignatureError :
-        await User(id= user.id).update({"$unset":{"verification_hash":""}})
+    except ExpiredSignatureError:
+        payload = jwt.decode(token, JWT_SECRET, options={"verify_exp": False})
+        user = await User.find_one(User.id == payload["id"])
+        if user:
+            user.verification_hash = None
+            await user.save()
         return Respond(success=False, status_code=401, message="Your token is expired. Request again for verification")
 
-    except Exception as e : 
-        return Respond(success = False, status_code=501, message= " Internal server error")
+    except Exception as e:
+        print(f"Verification error: {e}")  # Log error for debugging
+        return Respond(success=False, status_code=501, message="Internal server error")
 
 
 
@@ -155,7 +152,7 @@ async def Login(req:PayloadLogin,res:Response):
     ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     refresh_token = jwt.encode(
-    {"id":str(user.id),"is_verified":user.is_verified, "exp": datetime.now(timezone.utc)+ timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
+    {"id":str(user.id), "exp": datetime.now(timezone.utc)+ timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)}
     ,JWT_SECRET , algorithm=JWT_ALGORITHM)
 
 

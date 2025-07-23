@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Cookie from "js-cookie";
 import { UserRole } from "@/types/user.t";
+import { AxiosError } from "axios";
 export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
     const router = useRouter();
@@ -25,7 +26,7 @@ export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
                 user: data.payload.user,
             });
 
-            router.push("/auth/verify");
+            router.push("/auth/request/verify");
 
         },
         
@@ -49,7 +50,7 @@ export function useLogin({ reset }: { reset?: () => void; } = {}) {
                 user: data.payload.user,
             });
             if (data?.payload?.user.role == UserRole.ADMIN && !data?.payload?.user.is_verified){
-              router.push("/auth/verify");
+              router.push("/auth/request/verify");
             }
 
         },
@@ -77,12 +78,17 @@ export default function useAuthenticate() {
         user: query.data.payload.user,
       });
     }
-    if (query.status === "error") {
-      setState({
-        accessToken: null,
-        isLoggedIn: false,
-      });    
-    Cookie.remove(process.env.NEXT_PUBLIC_REFRESH_TOKEN_COOKIE_KEY||"tl_refresh_token");
+    if (query.isError ) {
+        const error = query.error as AxiosError;
+        if (error?.response?.status === 401 || error?.response?.status === 403) { 
+          setState({
+            accessToken: null,
+            isLoggedIn: false,
+          });    
+          toast.error("Authentication failed. Please log in again.");
+          Cookie.remove(process.env.NEXT_PUBLIC_REFRESH_TOKEN_COOKIE_KEY||"tl_refresh_token");
+          router.push("/auth/login");
+        }
     }
   }, [query.status, query.data, setState]);
 

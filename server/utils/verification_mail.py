@@ -1,5 +1,5 @@
 import random
-from config import JWT_ALGORITHM, JWT_SECRET, APP_LINK, VERIFICATION_ATTEMPT_LIMIT
+from config import JWT_ALGORITHM, JWT_SECRET,APP_SERVER_LINK, VERIFICATION_ATTEMPT_LIMIT
 from datetime import datetime, timedelta, timezone
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from fastapi_mail.errors import ConnectionErrors
@@ -18,13 +18,13 @@ async def SendVerificationMail(user_details : User):
         verification_hash = str(random.randint(100000, 999999))
 
         payload = {
-            "id": str(id),
+            "id": str(user_details.id),
             "hash": verification_hash,
             "exp": datetime.now(timezone.utc) + timedelta(minutes=45)
         }
         token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
         
-        verification_link = f"{APP_LINK}/auth/verify/account/{token}"
+        verification_link = f"{APP_SERVER_LINK}/api/auth/verify/account/{token}"
 
 
         message = MessageSchema(
@@ -62,7 +62,7 @@ async def SendVerificationMail(user_details : User):
         )
     except Exception as e:
         return Respond(
-            message="An unexpected error occurred while sending the email.",
+            message="An unexpected error occurred while sending the .",
             status_code=500,
             payload={"error": str(e)}
         )
