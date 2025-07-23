@@ -6,6 +6,8 @@ from routes.groups import router as Classrouter
 from routes.individuals import router as Individualrouter
 from db import init 
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 @asynccontextmanager
@@ -14,6 +16,15 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(Authrouter,prefix="/api")
 app.include_router(Userrouter,prefix="/api")

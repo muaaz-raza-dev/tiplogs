@@ -3,6 +3,7 @@ from beanie import Document , Indexed , Link
 from pydantic import EmailStr
 from models.generals import TimeStamps
 from models.common import UserRole
+from datetime import datetime
 if TYPE_CHECKING: # type: ignore
     from models.organization import Organization  # Avoid circular import
     from models.user import User  # For self-reference (User → registered_by: Link[User])
@@ -20,7 +21,10 @@ class User(Document,TimeStamps):
 
     # Authentication / Authorizations 
     is_verified :  bool = False
-    verification_hash : Optional[str]  =None
+    verification_hash : Optional[str]  = None 
+    last_verification_attempt : Optional[datetime] = None
+    verification_attempts : Optional[int]  = 0
+
     refresh_tokens :Optional[str] =None
     registered_by:Optional[Link["User"]] = None # type: ignore
     is_blocked:Optional[bool] = False 

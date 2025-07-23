@@ -15,6 +15,7 @@ class PayloadRegisterAdmin(BaseModel):
     phone:Optional[str] = Field(None,pattren=r"^\+?[1-9]\d{1,14}$")   # E.164 format for phone numbers
     role : UserRole=UserRole.admin 
     email:str
+    terms:bool = True  
 
 class PayloadLogin(BaseModel):
     username:str
@@ -38,3 +39,7 @@ class PayloadApproveUser(BaseModel):
     organization_id: str
     role: UserRole = UserRole.staff  # Default role is staff
     is_approved: bool = True  
+
+
+class PayloadRequestVerification(BaseModel):
+    email:Optional[str] =None
