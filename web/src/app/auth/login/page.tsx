@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ISignupAdminForm, SignupAdminSchema } from "@/types/auth.t";
+import { ILoginForm,LoginSchema } from "@/types/auth.t";
 
 import { Button } from "@/shadcn/components/ui/button";
 import {
@@ -16,14 +16,12 @@ import {
 } from "@/shadcn/components/ui/card";
 import { Input } from "@/shadcn/components/ui/input";
 import { Label } from "@/shadcn/components/ui/label";
-import { Checkbox } from "@/shadcn/components/ui/checkbox";
-import { Eye, EyeOff, Mail, User, Lock } from "lucide-react";
-import Link from "next/link";
-import { useSignUpAdminQ } from "@/hooks/query/auth/useAuthQ";
+import { Eye, EyeOff, User, Lock } from "lucide-react";
 import { AxiosError } from "axios";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
+import { useLogin, useSignUpAdminQ } from "@/hooks/query/auth/useAuthQ";
 
-export default function RegistrationPage() {
+export default function LoginPage() {
   const [showPassword, setShowPassword] = React.useState(false);
   const {
     register,
@@ -32,53 +30,33 @@ export default function RegistrationPage() {
     reset,
     control,
     
-  } = useForm<ISignupAdminForm>({
-    resolver: zodResolver(SignupAdminSchema),
+  } = useForm<ILoginForm>({
+    resolver: zodResolver(LoginSchema),
   });
   
-  const {mutate,error,isPending:isLoading} = useSignUpAdminQ({ reset })
+  const {mutate,error,isPending:isLoading} = useLogin({ reset })
   const axiosError = error as AxiosError<{ message: string }>
 
-  const onSubmit = (data: ISignupAdminForm) => {
-    
-    mutate(data);
+  const onSubmit = (data: ILoginForm) => {
+    mutate(data)
 
   };
 
   return (
     <div className="relative z-10 ">
-      <Card className="w-full max-w-md shadow-2xl border  backdrop-blur-md">
+      <Card className="w-xl max-md:w-full  shadow-2xl border  backdrop-blur-md">
         <CardHeader className="space-y-1 relative">
           <CardTitle className="text-2xl font-bold text-center text-white">
-            Create an account
+            Login 
           </CardTitle>
           <CardDescription className="text-center text-gray-300">
-            Enter your details below to create your account
+            Enter your details below to access your account
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="firstName" className="text-gray-200 pb-1.5">
-                Full Name
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  {...register("full_name")}
-                  id="firstName"
-                  type="text"
-                  placeholder="John"
-                  className="pl-10 "
-                />
-              </div>
-              {errors.full_name && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.full_name.message}
-                </p>
-              )}
-            </div>
+    
               <div>
               <Label htmlFor="username" className="text-gray-200 pb-1.5">
                 Username 
@@ -99,26 +77,7 @@ export default function RegistrationPage() {
                 </p>
               )}
             </div>
-            <div>
-              <Label htmlFor="email" className="text-gray-200 pb-1.5">
-                Email
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  {...register("email")}
-                  id="email"
-                  type="email"
-                  placeholder="john.doe@example.com"
-                  className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400 "
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
+          
 
             <div>
               <Label htmlFor="password" className="text-gray-200 pb-1.5">
@@ -155,43 +114,8 @@ export default function RegistrationPage() {
             </div>
 
             
-            <div className="flex items-center gap-2">
-              <Controller
-                control={control}
-                name="terms"
-                
-                defaultValue={false}
-                render={({ field }) => (
-                  <Checkbox
-                    id="terms"
-                    className="border-gray-600   mt-1"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="terms" className="text-sm text-center  text-gray-300">
-                I agree to the{" "}
-                <Link
-                  href="/terms"
-                  className="font-bold underline"
-                >
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="/privacy"
-                  className="font-bold underline"
-                >
-                  Privacy Policy
-                </Link>
-              </Label>
-            </div>
-            {errors.terms && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.terms.message}
-              </p>
-            )}
+           
+          
 
             {axiosError && (
               <p className="text-xs text-center text-red-500 mt-1">
@@ -207,7 +131,7 @@ export default function RegistrationPage() {
               {isLoading?
               <ServerRequestLoader/>:
               <>
-              Create account
+              Login
               </>
               }
             </Button>
@@ -215,15 +139,7 @@ export default function RegistrationPage() {
         </CardContent>
 
         <CardFooter>
-          <div className="text-center text-sm text-gray-400 w-full">
-            Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-accent hover:accent-accent-foreground underline font-medium"
-            >
-              Sign in
-            </Link>
-          </div>
+        
         </CardFooter>
       </Card>
     </div>

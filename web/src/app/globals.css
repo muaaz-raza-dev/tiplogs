@@ -44,6 +44,7 @@
 }
 
 :root {
+
   --radius: 0.625rem;
 
   /* New Palette */
@@ -106,7 +107,6 @@
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
 }
-
 
 @layer base {
   * {

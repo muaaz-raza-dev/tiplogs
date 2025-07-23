@@ -20,8 +20,8 @@ export function AuthNavbar() {
               TipLogs
             </span>
           </Link>
+            {!pathname.includes("/verify") ?
 
-          {/* Navigation Links */}
           <div className="flex gap-2">
 
           <div className="flex items-center bg-secondary rounded-md px-4 py-2  space-x-4">
@@ -59,8 +59,9 @@ export function AuthNavbar() {
               </Button>
             </Link>
         </div>
-          </div>
-
+          </div> : 
+          null
+}
 
         </div>
       </div>
