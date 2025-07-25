@@ -1,12 +1,11 @@
-from typing import TYPE_CHECKING,Optional ,TYPE_CHECKING
+from typing import Optional , TYPE_CHECKING
 from beanie import Document , Indexed , Link
 from pydantic import EmailStr
 from models.generals import TimeStamps
 from models.common import UserRole
 from datetime import datetime
-if TYPE_CHECKING: # type: ignore
-    from models.organization import Organization  # Avoid circular import
-    from models.user import User  # For self-reference (User → registered_by: Link[User])
+if TYPE_CHECKING:  # type: ignore
+    from models.organization import Organization
 
 class User(Document,TimeStamps):
     full_name:str 
@@ -17,7 +16,7 @@ class User(Document,TimeStamps):
 
     #Links
     organization : Optional[Link["Organization"]] =None # type: ignore
-    role : UserRole = UserRole.staff
+    role : UserRole = UserRole.user
 
     # Authentication / Authorizations 
     is_verified :  bool = False
@@ -26,7 +25,6 @@ class User(Document,TimeStamps):
     verification_attempts : Optional[int]  = 0
 
     refresh_tokens :Optional[str] =None
-    registered_by:Optional[Link["User"]] = None # type: ignore
     is_blocked:Optional[bool] = False 
     is_deleted:Optional[bool] = False 
     is_approved : Optional[bool] = False
@@ -34,5 +32,4 @@ class User(Document,TimeStamps):
     class Settings:
         name = "users"
 
-from models.organization import Organization
-User.model_rebuild() 
+

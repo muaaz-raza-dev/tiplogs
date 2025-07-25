@@ -5,6 +5,7 @@ const restrictedRoutesAfterLogin=["/auth/login","/auth/register/user","/auth/reg
 export function middleware(req: NextRequest) {
   const token = req.cookies.get(process.env.NEXT_PUBLIC_REFRESH_TOKEN_COOKIE_KEY||"tl_refreshtoken")?.value;
   // Protect all /dashboard routes
+
   if (!token){
     if (req.nextUrl.pathname.includes('/dashboard') || req.nextUrl.pathname == "/"   ) {
       return NextResponse.redirect(new URL('/auth/login', req.url));
@@ -14,6 +15,9 @@ export function middleware(req: NextRequest) {
     }
   }
   else {
+    if (req.nextUrl.pathname == "/"){
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
     // If the user is logged in, redirect from /auth to /dashboard
     if (restrictedRoutesAfterLogin.includes(req.nextUrl.pathname) ) {
       return NextResponse.redirect(new URL('/dashboard', req.url));

@@ -1,6 +1,5 @@
-import { Iuser } from "@/types/user.t";
-import {Axios} from "../axios";
 import {IgeneralAuthResponse, ILoginForm, ISignupAdminForm} from "@/types/auth.t";
+import { Axios } from "./axios";
 
 export async function registerAdminApi(data: ISignupAdminForm) {
   const res = await Axios.post("/auth/register/admin", data) 

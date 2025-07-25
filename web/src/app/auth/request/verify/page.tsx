@@ -8,7 +8,7 @@ import { AuthSession, UserVerificationAttempts } from "@/lib/atoms/auth-session.
 import { Label } from "@/shadcn/components/ui/label"
 import { Input } from "@/shadcn/components/ui/input"
 import {  useEffect, useState } from "react"
-import { useRequestVerification } from "@/hooks/query/auth/useAuthQ"
+import { useRequestVerification } from "@/hooks/query/useAuthQ"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import ServerRequestLoader from "@/components/loaders/server-request-loader"

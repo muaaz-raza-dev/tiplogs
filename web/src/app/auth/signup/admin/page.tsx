@@ -19,7 +19,7 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Checkbox } from "@/shadcn/components/ui/checkbox";
 import { Eye, EyeOff, Mail, User, Lock } from "lucide-react";
 import Link from "next/link";
-import { useSignUpAdminQ } from "@/hooks/query/auth/useAuthQ";
+import { useSignUpAdminQ } from "@/hooks/query/useAuthQ";
 import { AxiosError } from "axios";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
 
@@ -31,7 +31,6 @@ export default function RegistrationPage() {
     formState: { errors },
     reset,
     control,
-    
   } = useForm<ISignupAdminForm>({
     resolver: zodResolver(SignupAdminSchema),
   });

@@ -19,7 +19,7 @@ import { Label } from "@/shadcn/components/ui/label";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
 import { AxiosError } from "axios";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
-import { useLogin, useSignUpAdminQ } from "@/hooks/query/auth/useAuthQ";
+import { useLogin, useSignUpAdminQ } from "@/hooks/query/useAuthQ";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = React.useState(false);

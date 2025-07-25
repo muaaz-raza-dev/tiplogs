@@ -33,8 +33,11 @@ async def RegisterAdmin(body:PayloadRegisterAdmin,res:Response):
 
         await user.insert()
         accessToken = jwt.encode( 
-        {"id":str(user.id),"is_verified":False,"username":user.username, "role" : user.role }
-        ,JWT_SECRET,algorithm=JWT_ALGORITHM)
+        {"id":str(user.id),"is_verified":False,"username":user.username, "role" : user.role ,"organization":None}
+        ,JWT_SECRET
+        ,algorithm=JWT_ALGORITHM)
+
+        
 
         refresh_token = jwt.encode(
         {"id":str(user.id), "exp": datetime.now(timezone.utc)+timedelta(days=int(REFRESH_TOKEN_EXPIRE_DAYS))}
@@ -46,7 +49,10 @@ async def RegisterAdmin(body:PayloadRegisterAdmin,res:Response):
         
         RespondCookie(res=res,key=APP_REFRESH_COOKIE_KEY,value=refresh_token)
     
-        return Respond(payload={"accessToken":accessToken,"user":user.model_dump(include=["is_verified","email","username","organization","full_name","role"])},message="Your profile is created",status_code=201,headers=res.headers)
+        return Respond(payload={"accessToken":accessToken,   "user": {
+        **user.model_dump(include={"is_verified", "email", "username", "full_name", "role"}),
+        "organization": None
+    }},message="Your profile is created",status_code=201,headers=res.headers)
     
     except Exception as e:
         print(f"Error : \n {e}")
@@ -148,7 +154,7 @@ async def Login(req:PayloadLogin,res:Response):
         Respond(status_code=401,message="Invalid Credentials",success=False)        
 
     accessToken = jwt.encode( 
-    {"id":str(user.id),"is_verified":user.is_verified,"username":user.username, "role" : user.role , }
+    {"id":str(user.id),"is_verified":user.is_verified,"username":user.username, "role" : user.role ,"organization":str(user.organization.ref.id) if user.organization else None,  }
     ,JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     refresh_token = jwt.encode(
@@ -158,7 +164,10 @@ async def Login(req:PayloadLogin,res:Response):
 
     RespondCookie(res=res,key=APP_REFRESH_COOKIE_KEY,value=refresh_token)
 
-    return Respond(payload={"accessToken":accessToken,"user":user.model_dump(include=["is_verified","email","username","organization","full_name","role"])},message="Your profile is created",status_code=201,headers=res.headers)
+    return Respond(payload={"accessToken":accessToken,   "user": {
+        **user.model_dump(include={"is_verified", "email", "username", "full_name", "role"}),
+        "organization": str(user.organization.ref.id) if user.organization else None
+    }},message="Your profile is created",status_code=201,headers=res.headers)
 
 
 
@@ -192,13 +201,18 @@ async def RenewAccessToken(RefreshToken:str|None = Cookie(default=None,alias=APP
     if not id :
         return Respond(status_code = 403 , message="Malformed token")
     
-    user = await User.find_one({"_id":ObjectId(id)})
+    user = await User.find_one(User.id==ObjectId(id))
     if not user :
         return Respond(status_code=401,message="Invalid credentials",payload={"events":{"logout":True}})
     
-    accessToken = jwt.encode( {"id":str(user.id),"is_verified":user.is_verified,"username":user.username },JWT_SECRET,algorithm=JWT_ALGORITHM)
+    accessToken = jwt.encode( {"id":str(user.id),"is_verified":user.is_verified,"username":user.username,"organization":str(user.organization.ref.id),"role":user.role },JWT_SECRET,algorithm=JWT_ALGORITHM)
 
-    return Respond(payload={"accessToken":accessToken,"user":user.model_dump(include=["is_verified","email","username","organization","full_name","role"])})
+    return Respond(payload={"accessToken":accessToken,
+                               "user": {
+        **user.model_dump(include={"is_verified", "email", "username", "full_name", "role"}),
+        "organization": str(user.organization.ref.id) if user.organization else None
+    }
+                            })
 
 
 
@@ -208,18 +222,6 @@ async def LogOut(res:Response):
     return Respond(message="logged out successfully")
 
 
-@router.get("/me")
-async def UserDetails(user=Depends(authorize_user)):
-
-
-    user_details = await User.find_one(id==user.id).project(
-        User.id,
-        User.username,
-        User.email,
-        User.is_verified,
-        User.role
-    )
-    return Respond(payload={user:user_details})
 
 
   

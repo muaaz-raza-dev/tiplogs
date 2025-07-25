@@ -1,19 +1,10 @@
 "use client"
 
-import type * as React from "react"
 import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
   FileText,
-  Filter,
   Home,
   LogOut,
-  Search,
-  Settings,
-  Shield,
   Users,
-  Zap,
 } from "lucide-react"
 
 import {
@@ -27,9 +18,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/shadcn/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/components/ui/avatar"
 import {
@@ -39,7 +27,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shadcn/components/ui/dropdown-menu"
-import { Badge } from "@/shadcn/components/ui/badge"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 // Navigation data
 const data = {
@@ -52,10 +41,15 @@ const data = {
     {
       title: "Home",
       url: "/dashboard",
+      exact:true,
       icon: Home,
-      isActive: true,
     },
-   
+    {
+      title: "Users",
+      url: "/dashboard/users",
+      exact:false,
+      icon: Users,
+    }
   
   ],
 
@@ -63,13 +57,14 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="sidebar" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/">
+        <SidebarMenu >
+          <SidebarMenuItem >
+          <SidebarMenuButton size={"default"} asChild >
+            <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <FileText className="size-4" />
                 </div>
@@ -77,25 +72,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-semibold">TipLogs</span>
                   <span className="truncate text-xs">Log Management</span>
                 </div>
-              </a>
+            </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Basics</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navMain.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.isActive}>
-                    <a href={item.url}>
+                  <SidebarMenuButton asChild isActive={item.exact ? pathname == item.url : pathname.includes(item.url)}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
              
                 </SidebarMenuItem>

@@ -2,5 +2,5 @@ from enum import Enum
 
 class UserRole(str, Enum):
     admin = "admin"
-    staff = "staff"
+    user = "user"
     manager = "manager"

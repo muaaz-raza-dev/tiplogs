@@ -1,6 +1,6 @@
 "use client"
 
-import { authenticateApi,  loginApi,  registerAdminApi, RequestEmailVerificationApi } from "@/app/api/auth/auth.api";
+import { authenticateApi,  loginApi,  registerAdminApi, RequestEmailVerificationApi } from "@/app/api/auth.api";
 import { AuthSession, UserVerificationAttempts } from "@/lib/atoms/auth-session.atom";
 import { ILoginForm, ISignupAdminForm } from "@/types/auth.t";
 import { useMutation, useQuery,type QueryObserverOptions  } from "@tanstack/react-query" 
@@ -9,8 +9,8 @@ import { useSetAtom,useAtomValue} from "jotai";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Cookie from "js-cookie";
-import { UserRole } from "@/types/user.t";
 import { AxiosError } from "axios";
+import { UserRole } from "@/types/users";
 export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
     const router = useRouter();

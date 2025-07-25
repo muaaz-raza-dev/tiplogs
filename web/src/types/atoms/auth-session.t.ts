@@ -1,4 +1,4 @@
-import { Iuser } from "../user.t";
+import { Iuser } from "../users";
 
 export enum AuthRole{
     USER = 'user',

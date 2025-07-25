@@ -28,3 +28,4 @@ APP_NAME = os.getenv("APP_NAME")
 APP_SERVER_LINK = os.getenv("APP_SERVER_LINK")
 APP_LINK=os.getenv("APP_LINK") 
 
+USERS_PER_PAGE = int(os.getenv("USERS_PER_PAGE", 10)) 

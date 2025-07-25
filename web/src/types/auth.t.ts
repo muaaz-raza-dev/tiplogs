@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { Iuser } from './user.t'
 import { IgeneralResponseApi } from './general'
+import { Iuser } from './users'
 
 export const SignupAdminSchema = z.object({
   full_name: z.string().min(1, "Full name is required"),
