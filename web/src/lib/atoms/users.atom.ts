@@ -3,8 +3,13 @@ import {atom} from "jotai"
 
 export const UsersListingAtom = atom<IusersListAtom>(
   {
-    users : [],
-    count:1,
-    total:0
+    users : {},
+    count:0,
+    total:0,
+    filters : {
+      input: "",
+      role: "all",
+      status: "active"
+    }
 }
 );

@@ -34,7 +34,12 @@ export const RegisterUserSchema = z.object({
 export type IRegisterUserForm = z.infer<typeof RegisterUserSchema>
 
 export interface IusersListAtom{
-    users: Iuser[];
+    users: {[key:number]:Iuser[]};
     count: number;
-    total:number
+    total:number;
+    filters: {
+        input: string;
+        role: "all" | "user" | "manager";
+        status: "active" | "blocked";
+    } 
 }

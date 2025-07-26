@@ -7,7 +7,6 @@ export enum AuthRole{
 }
 
 export interface IAuthSession{
-    accessToken: string|null;
     isLoggedIn: boolean;
     user?: Iuser
 }

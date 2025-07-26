@@ -1,9 +1,9 @@
 "use client"
 
 import { authenticateApi,  loginApi,  registerAdminApi, RequestEmailVerificationApi } from "@/app/api/auth.api";
-import { AuthSession, UserVerificationAttempts } from "@/lib/atoms/auth-session.atom";
+import { AuthSession, userAccessTokenAtom, UserVerificationAttempts } from "@/lib/atoms/auth-session.atom";
 import { ILoginForm, ISignupAdminForm } from "@/types/auth.t";
-import { useMutation, useQuery,type QueryObserverOptions  } from "@tanstack/react-query" 
+import { useMutation, useQuery  } from "@tanstack/react-query" 
 import toast from "react-hot-toast";
 import { useSetAtom,useAtomValue} from "jotai";
 import { useRouter } from "next/navigation";
@@ -13,15 +13,16 @@ import { AxiosError } from "axios";
 import { UserRole } from "@/types/users";
 export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
+    const setAccessToken = useSetAtom(userAccessTokenAtom)
     const router = useRouter();
     return useMutation({ 
         mutationFn: (data:ISignupAdminForm)=> registerAdminApi(data),
         onSuccess: (data) => {
             toast.success("Registration successful !");
             reset?.();
-            
+            setAccessToken(data.payload.accessToken)
+
             setState({
-                accessToken: data.payload.accessToken,
                 isLoggedIn: true,
                 user: data.payload.user,
             });
@@ -37,15 +38,15 @@ export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
 
 export function useLogin({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
+    const setAccessToken = useSetAtom(userAccessTokenAtom)
     const router = useRouter();
     return useMutation({ 
         mutationFn: (data:ILoginForm)=> loginApi(data),
         onSuccess: (data) => {
             toast.success("Registration successful !");
             reset?.();
-
+            setAccessToken(data.payload.accessToken)
             setState({
-                accessToken: data.payload.accessToken,
                 isLoggedIn: true,
                 user: data.payload.user,
             });
@@ -63,6 +64,7 @@ export function useLogin({ reset }: { reset?: () => void; } = {}) {
 export default function useAuthenticate() {
     const setState = useSetAtom(AuthSession);
     const router = useRouter();
+    const setAccessToken = useSetAtom(userAccessTokenAtom)
     const query = useQuery({
         queryKey: ["auth-session"],
         queryFn: authenticateApi,
@@ -72,8 +74,8 @@ export default function useAuthenticate() {
 })
   useEffect(() => {
     if (query.status === "success" && query.data) {
+      setAccessToken(query.data.payload.accessToken)
       setState({
-        accessToken: query.data.payload.accessToken,
         isLoggedIn: true,
         user: query.data.payload.user,
       });
@@ -81,8 +83,8 @@ export default function useAuthenticate() {
     if (query.isError ) {
         const error = query.error as AxiosError;
         if (error?.response?.status === 401 || error?.response?.status === 403) { 
+        setAccessToken("")
           setState({
-            accessToken: null,
             isLoggedIn: false,
           });    
           toast.error("Authentication failed. Please log in again.");
@@ -101,7 +103,7 @@ export function useRequestVerification() {
   const state = useAtomValue(AuthSession);
   const setVerificationAttempts = useSetAtom(UserVerificationAttempts);
   return useMutation({
-    mutationFn:(email:string)=>RequestEmailVerificationApi(state?.accessToken??"", {email}),
+    mutationFn:(email:string)=>RequestEmailVerificationApi({email}),
     onSuccess: (data) => {
       toast.success("Verification email sent successfully!");
       setVerificationAttempts(+data?.payload?.verification_attempts);

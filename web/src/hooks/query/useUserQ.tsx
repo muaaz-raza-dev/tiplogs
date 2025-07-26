@@ -1,19 +1,18 @@
 "use client"
-import { getAllUsersApi, registerUserbyAdminApi } from "@/app/api/user.api";
-import { AuthSession } from "@/lib/atoms/auth-session.atom";
+import { getAllUsersApi, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi } from "@/app/api/user.api";
+import {  userAccessTokenAtom } from "@/lib/atoms/auth-session.atom";
 import { UsersListingAtom } from "@/lib/atoms/users.atom";
 import { IRegisterUserForm } from "@/types/users";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useAtom, useAtomValue } from "jotai";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 
 export function useRegisterUserByAdmin( reset?: () => void ) {
-    const {accessToken} = useAtomValue(AuthSession);
+    const accessToken = useAtomValue(userAccessTokenAtom);
     return useMutation({ 
-        mutationFn: (data:IRegisterUserForm)=> registerUserbyAdminApi(data,accessToken??""),
+        mutationFn: (data:IRegisterUserForm)=> registerUserbyAdminApi(data),
         onSuccess: (data) => {
             toast.success(data.message || "User registered successfully!");
             reset?.();
@@ -23,34 +22,59 @@ export function useRegisterUserByAdmin( reset?: () => void ) {
 
 }
 
-export function useGetAllUsers() {
-    const {accessToken} = useAtomValue(AuthSession);
-    const [state,setState] = useAtom(UsersListingAtom)
-    const query = useQuery({
-        queryKey:["users"],
-        queryFn: () => getAllUsersApi(state.count, accessToken ?? ""),
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        enabled: !!accessToken,
-        retry:2,
-        staleTime: 1000 * 60 * 5, 
+export function useFetchAllUsers() {
+    const [state,setState] = useAtom(UsersListingAtom);
+    
+    const query = useMutation({
+        mutationKey:["users",state.count],
+        mutationFn: (payload:IGetAllUsersPayload) => getAllUsersApi(payload ),
+        onSuccess(data) {
+            setState(s=>({
+                ...s,
+                users: {...s.users,[state.count]:data.payload.users},
+                total : data.payload.total
+            }));
+        },
+        onError(error){
+            if (error instanceof AxiosError){
+                toast.error(error.response?.data.message || "Failed to fetch users");   
+            }
+        }
 
     });
 
-    useEffect(() => {
-        if (query.status === "success" && query.data) {
-            setState({
-                ...state,
-                users: query.data.payload.users,
-                total : query.data.payload.total
-            });
-        }
-        if (query.isError ) {
-            if (query.error instanceof AxiosError) {
-              toast.error(query.error.response?.data.message || "Failed to fetch users");   
-            }
-            }
+ 
+    return query
+}
 
-        }, [query.status,query.data]);
-        return query
+
+
+
+export function useToggleUserBLockQ() {
+    const [state,setState] = useAtom(UsersListingAtom);
+    const query = useMutation({
+        mutationKey:["users","block"],
+        mutationFn: (userid:string) => ToggleBlockUserApi(userid),
+        onSuccess(data) {
+            setState(s=>({
+                ...s,
+                users: {...s.users,[state.count]:[
+
+                
+                    ...s.users[state.count].filter(e=>e.id!=data.payload.user.id),data.payload.user ]
+
+                }, 
+                total : data.payload.total
+            }));
+        },
+        onError(error){
+            if (error instanceof AxiosError){
+                toast.error(error.response?.data.message || "Failed to fetch users");   
+            }
+        }
+
+    });
+
+ 
+    return query
 }

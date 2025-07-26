@@ -13,6 +13,7 @@ from middleware.authorization import authorize_user
 from models.organization import Organization
 from bson import ObjectId
 from beanie import PydanticObjectId
+from tschema.users import FetchAllUsersPayload
 
 router = APIRouter(prefix="/user")
 
@@ -155,23 +156,30 @@ class UserProjection(BaseModel):
     is_blocked: bool
 
 
-@router.get("/users")
-async def GetAllUsers(count: int = 1, user=Depends(authorize_user)):
+
+
+@router.post("/users")
+async def GetAllUsers(payload:FetchAllUsersPayload, user=Depends(authorize_user)):
+    
     if user["role"] != UserRole.admin:
         return Respond(status_code=403, message="You are not authorized to perform this action", success=False)
-
+    print(payload)
     query = {
         "organization.$id": PydanticObjectId(user["organization"]),
         "_id": {"$ne": PydanticObjectId(user["id"])},
+        "role" : payload.role if payload.role != "all" else {"$exists": True},
+        **({"$text": {"$search": payload.input} }if payload.input else {}),
+        "is_blocked": False if payload.status=="active" else True if payload.status != "all" else {"$exists": True},
         "is_deleted": False,
     }
-    users = await User.find(query).limit(USERS_PER_PAGE).skip(max(0, (count-1)*USERS_PER_PAGE)).sort("-created_at").project(UserProjection).to_list()
+
+    users = await User.find(query).limit(USERS_PER_PAGE).skip(max(0, (payload.count)*USERS_PER_PAGE)).sort("-created_at").project(UserProjection).to_list()
 
     total = await User.find(query).count()
-    print([user.model_dump() for user in users])
+
     return Respond(message="Users retrieved successfully", payload={
         "users": [{**u.model_dump(exclude={"created_at", "id"}), "created_at": u.created_at.date().isoformat(),"id":str(u.id)} for u in users]
-        , "count": count, "total": total})
+        , "count": payload.count, "total": total})
 
 
 @router.get("/users/{user_id}")
@@ -184,3 +192,21 @@ async def GetUserById(user_id: str, user=Depends(authorize_user)):
         return Respond(status_code=404, message="User not found", success=False)
 
     return Respond(message="User details retrieved successfully", payload=user_details.model_dump())
+
+
+@router.put("/toggle/block/{user_id}")
+async def BlockUserById(user_id: str, user=Depends(authorize_user)):
+    if user["role"] != UserRole.admin:
+        return Respond(status_code=403, message="You are not authorized to perform this action", success=False)
+
+    user = await User.find_one(id=user_id,organization=PydanticObjectId(user["organization"]))
+
+    if not user:
+        return Respond(status_code=404, message="User not found", success=False)
+
+    user.is_blocked = not user.is_blocked
+    await user.save()
+
+    return Respond(message="Task completed successfully", payload={
+        "user": {"id":str(user.id),"username":user.username, "is_blocked":user.is_blocked,"email" : user.email, "full_name": user.full_name, "role": user.role.name,
+                  "created_at": user.created_at.date().isoformat()}})

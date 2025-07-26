@@ -31,5 +31,5 @@ class User(Document,TimeStamps):
 
     class Settings:
         name = "users"
-
+        indexes = ["username","organization", [("username","text"),("full_name","text")]]
 

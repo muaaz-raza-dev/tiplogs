@@ -24,7 +24,8 @@ export async function authenticateApi() {
   return res.data
 }
 
-export async function RequestEmailVerificationApi(token: string,payload: {email: string}) {
+export async function RequestEmailVerificationApi(payload: {email: string}) {
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
   const res = await Axios.post(`/auth/request/verification`,payload,{headers:{Authorization: `Bearer ${token}`}});
   return res.data;
 }

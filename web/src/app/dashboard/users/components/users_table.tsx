@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import moment from "moment";
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Ban,
 } from "lucide-react";
 import {
   Card,
@@ -30,19 +31,19 @@ import {
   CardTitle,
 } from "@/shadcn/components/ui/card";
 import { Badge } from "@/shadcn/components/ui/badge";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shadcn/components/ui/avatar";
 import { useAtom, useAtomValue } from "jotai";
 import { UsersListingAtom } from "@/lib/atoms/users.atom";
 import { Button } from "@/shadcn/components/ui/button";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
-import { useGetAllUsers } from "@/hooks/query/useUserQ";
 import clsx from "clsx";
+import { useFetchAllUsers } from "@/hooks/query/useUserQ";
+import BlockUserAction from "./block_user_action";
 function UsersTable() {
-  const { isPending } = useGetAllUsers();
+  const { isPending, mutate, status } = useFetchAllUsers();
+  const state = useAtomValue(UsersListingAtom);
+  useEffect(() => {
+    mutate({ count: 0, ...state.filters });
+  }, []);
 
   if (isPending) {
     return <ServerRequestLoader />;
@@ -62,11 +63,17 @@ function UsersTable() {
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Join Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <Users />
+              {isPending ? (
+                <div className="flex items-center justify-center">
+                  <ServerRequestLoader />
+                </div>
+              ) : (
+                <Users />
+              )}
             </TableBody>
           </Table>
         </div>
@@ -81,6 +88,7 @@ export default UsersTable;
 
 function Users() {
   const state = useAtomValue(UsersListingAtom);
+
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
       case "admin":
@@ -91,7 +99,8 @@ function Users() {
         return "bg-gray-100 text-gray-800";
     }
   };
-  if (state.users.length == 0) {
+
+  if (Object.values(state.users).length == 0) {
     return (
       <TableRow>
         <TableCell colSpan={5} className="text-center py-6">
@@ -100,7 +109,8 @@ function Users() {
       </TableRow>
     );
   }
-  return state.users.map((user) => (
+
+  return state.users[state.count].map((user) => (
     <TableRow key={user.id}>
       <TableCell>
         <div className="flex items-center space-x-3">
@@ -131,26 +141,21 @@ function Users() {
       <TableCell className="text-sm">
         {moment(user.created_at).calendar()}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuCheckboxItem className="flex items-center">
-              <Eye className="w-4 h-4 mr-2" />
-              View Details
+          <DropdownMenuContent>
+            <DropdownMenuCheckboxItem className="flex items-center justify-center pl-0">
+              <Edit className="w-4 h-4 " />
+              Edit user
             </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem className="flex items-center">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit User
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem className="flex items-center text-red-600">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete User
-            </DropdownMenuCheckboxItem>
+
+            <BlockUserAction isblocked={user.is_blocked}/>
+         
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>
@@ -159,46 +164,63 @@ function Users() {
 }
 
 function Pagination() {
-  const [state,setState] = useAtom(UsersListingAtom);
-  const { isPending, refetch } = useGetAllUsers();
-  const usersPerPage =  Number(process.env["NEXT_PUBLIC_USERS_PER_PAGE"])
-  const total_count = Math.ceil( state.total / usersPerPage )
-  function FetchNext(){
-    if(state.count < total_count){
-      setState({...state,count:state.count+1})
-      refetch()
+  const [state, setState] = useAtom(UsersListingAtom);
+  const { isPending, mutate } = useFetchAllUsers();
+  const usersPerPage = Number(process.env["NEXT_PUBLIC_USERS_PER_PAGE"]);
+  const total_count = Math.ceil(state.total / usersPerPage);
+  function FetchNext() {
+    if (state.count + 1 < total_count) {
+      const payload = { count: state.count + 1, ...state.filters };
+      setState({ ...state, count: state.count + 1 });
+      if (state?.users?.[state.count + 1].length != 0) {
+        return;
+      } else {
+        mutate(payload);
+      }
     }
   }
-  function FetchPrevious(){
-  if(state.count > 1 ){
-      setState({...state,count:state.count+1})
-      refetch()
+  function FetchPrevious() {
+    if (state.count + 1 > 1) {
+      const payload = { count: state.count - 1, ...state.filters };
+      setState({ ...state, count: state.count - 1 });
+      if (state?.users?.[state.count - 1].length != 0) {
+      } else {
+        mutate(payload);
+      }
     }
   }
 
   return (
     <div className="flex items-center justify-between mt-4">
       <div className="text-sm text-muted-foreground">
-        Page {state.count} of {total_count}
+        Page {state.count + 1} of {total_count}
       </div>
       <div className="flex items-center space-x-2">
         <Button
           variant="outline"
           size="sm"
           onClick={FetchPrevious}
-          disabled={state.count  <= 1}
+          disabled={state.count + 1 <= 1}
         >
-          <ChevronLeft className="h-4 w-4" />
+          {isPending ? (
+            <ServerRequestLoader />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
           Previous
         </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={FetchNext}
-          disabled={ state.count >= total_count }
+          disabled={state.count + 1 >= total_count}
         >
           Next
-          <ChevronRight className="h-4 w-4" />
+          {isPending ? (
+            <ServerRequestLoader />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>
