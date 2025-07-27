@@ -17,13 +17,11 @@ import {
 } from "@/shadcn/components/ui/table";
 import {
   MoreHorizontal,
-  Eye,
   Edit,
-  Trash2,
   ChevronLeft,
   ChevronRight,
-  Ban,
 } from "lucide-react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -45,9 +43,6 @@ function UsersTable() {
     mutate({ count: 0, ...state.filters });
   }, []);
 
-  if (isPending) {
-    return <ServerRequestLoader />;
-  }
 
   return (
     <Card>
@@ -60,8 +55,8 @@ function UsersTable() {
             <TableHeader>
               <TableRow>
                 <TableHead>User</TableHead>
+                <TableHead>Username</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead>Join Date</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -86,9 +81,9 @@ function UsersTable() {
 
 export default UsersTable;
 
+
 function Users() {
   const state = useAtomValue(UsersListingAtom);
-
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
       case "admin":
@@ -100,7 +95,7 @@ function Users() {
     }
   };
 
-  if (Object.values(state.users).length == 0) {
+  if (state.total == 0) {
     return (
       <TableRow>
         <TableCell colSpan={5} className="text-center py-6">
@@ -121,22 +116,15 @@ function Users() {
         </div>
       </TableCell>
       <TableCell>
+          <p className="font-medium">@{user.username}</p>
+      </TableCell>
+
+      <TableCell>
         <Badge variant="secondary" className={getRoleColor(user.role)}>
           {user.role}
         </Badge>
       </TableCell>
-      <TableCell>
-        <Badge
-          variant="secondary"
-          className={clsx(
-            user.is_blocked
-              ? "bg-red-100 text-red-800"
-              : "bg-green-100 text-green-800"
-          )}
-        >
-          {user.is_blocked ? "Blocked" : "Active"}
-        </Badge>
-      </TableCell>
+   
 
       <TableCell className="text-sm">
         {moment(user.created_at).calendar()}
@@ -149,12 +137,14 @@ function Users() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuCheckboxItem className="flex items-center justify-center pl-0">
+            <DropdownMenuCheckboxItem  className="flex items-center justify-start pl-2">              
+              <Link   className="flex items-center justify-start  gap-2 w-full" href={`users/edit/${user.id}`}>
               <Edit className="w-4 h-4 " />
               Edit user
+              </Link>
             </DropdownMenuCheckboxItem>
 
-            <BlockUserAction isblocked={user.is_blocked}/>
+            <BlockUserAction isblocked={user.is_blocked} id={user.id}/>
          
           </DropdownMenuContent>
         </DropdownMenu>
@@ -193,7 +183,7 @@ function Pagination() {
   return (
     <div className="flex items-center justify-between mt-4">
       <div className="text-sm text-muted-foreground">
-        Page {state.count + 1} of {total_count}
+        Page {total_count == 0 ? 0 : state.count + 1 } of {total_count}
       </div>
       <div className="flex items-center space-x-2">
         <Button

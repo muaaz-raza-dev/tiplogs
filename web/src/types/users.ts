@@ -31,6 +31,19 @@ export const RegisterUserSchema = z.object({
   role: z.enum(user_roles.slice(1), {error:"Role must be either 'manager' or 'user'"})
 })
 
+export const UpdateUserSchema = z.object({
+  full_name: z.string().min(1, "Full name is required"),
+  email: z.email("Invalid email address"),
+  username: z.string().min(3, "Username must be greater than 3 characters").regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  role:z.enum(user_roles.slice(1), {error:"Role must be either 'manager' or 'user'"}),
+  password: z.string().min(8, "Password must be at least 8 characters").regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\s]{6,}$/,
+    "Password must include uppercase, lowercase, number, and no spaces"
+  ).optional().or(z.literal("")),
+})
+
+export type IUpdateUserForm = z.infer<typeof UpdateUserSchema>
+
 export type IRegisterUserForm = z.infer<typeof RegisterUserSchema>
 
 export interface IusersListAtom{

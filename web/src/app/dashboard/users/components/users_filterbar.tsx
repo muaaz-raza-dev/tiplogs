@@ -22,13 +22,13 @@ function UsersFilterBar() {
     const {mutate,isPending} = useFetchAllUsers()
       const debounced = useDebouncedCallback(
     (value) => {
-        setState({...state,filters:{...state.filters,input:value},count:0,users:{}})
+        setState({...state,filters:{...state.filters,input:value},count:0,users:{0:[]}})
         mutate({count:0,...state.filters,input:value})
     },
     1000
   );
   function handleFiltersChange(type:"role"|"status",value:string){
-     setState({...state,filters:{...state.filters,[type]:value},count:0,users:{}})
+     setState({...state,filters:{...state.filters,[type]:value},count:0,users:{0:[]}})
      mutate({count:0,...state.filters,[type]:value})
   }
   
@@ -75,7 +75,6 @@ function UsersFilterBar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuRadioGroup   value={state.filters.status} onValueChange={(value) => handleFiltersChange("status",value)} >
-                    <DropdownMenuRadioItem value="all">All Status</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="active">Active</DropdownMenuRadioItem>
                     <DropdownMenuRadioItem value="blocked">Blocked</DropdownMenuRadioItem>
 

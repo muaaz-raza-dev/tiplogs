@@ -1,9 +1,10 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse 
+from pydantic import BaseModel, Field 
 from typing import Optional
 from config import USERS_PER_PAGE
-from tschema.auth import PayloadRegisterUserManual, PayloadRegisterUserAuto, PayloadApproveUser
+from tschema.auth import PayloadRegisterUserManual, PayloadRegisterUserAuto, PayloadApproveUser,PayloadUpdateUser
 from models.user import User
 from utils.hash import Hash
 from models.user import UserRole
@@ -14,7 +15,7 @@ from models.organization import Organization
 from bson import ObjectId
 from beanie import PydanticObjectId
 from tschema.users import FetchAllUsersPayload
-
+from middleware.authorize_role import AuthorizeRole
 router = APIRouter(prefix="/user")
 
 
@@ -196,17 +197,84 @@ async def GetUserById(user_id: str, user=Depends(authorize_user)):
 
 @router.put("/toggle/block/{user_id}")
 async def BlockUserById(user_id: str, user=Depends(authorize_user)):
-    if user["role"] != UserRole.admin:
-        return Respond(status_code=403, message="You are not authorized to perform this action", success=False)
+    try : 
+        res = AuthorizeRole("admin",user["role"])
+        if isinstance(res,JSONResponse) :
+            return res 
+        if not ObjectId.is_valid(user_id):
+            return Respond(status_code=400, message="Invalid user ID format", success=False)
+        
+        user = await User.find_one(User.id==ObjectId(user_id),User.organization.id==ObjectId(user["organization"])) 
 
-    user = await User.find_one(id=user_id,organization=PydanticObjectId(user["organization"]))
+        if not user:
+            return Respond(status_code=404, message="User not found", success=False)
 
-    if not user:
-        return Respond(status_code=404, message="User not found", success=False)
+        user.is_blocked = not user.is_blocked
+        await user.save()
 
-    user.is_blocked = not user.is_blocked
-    await user.save()
-
-    return Respond(message="Task completed successfully", payload={
+        return Respond(message="Task completed successfully", payload={
         "user": {"id":str(user.id),"username":user.username, "is_blocked":user.is_blocked,"email" : user.email, "full_name": user.full_name, "role": user.role.name,
                   "created_at": user.created_at.date().isoformat()}})
+    except Exception as e:
+        print(f"Error: {e}")
+        return Respond(status_code=500, message="Internal server error", success=False)
+
+
+@router.get("/basic/{user_id}")
+async def FetchUserBasicDetails (user_id:str,user=Depends(authorize_user)):
+    try:
+        res = AuthorizeRole("admin",user["role"])
+        if isinstance(res,JSONResponse) :
+            return res 
+        if not ObjectId.is_valid(user_id):
+            return Respond(status_code=400, message="Invalid user ID format", success=False)
+        user = await User.find_one(User.id==ObjectId(user_id),User.organization.id==ObjectId(user["organization"]))
+        if not user:
+            return Respond(status_code=404, message="User not found", success=False)
+        return Respond(message="User details retrieved successfully", payload={"username": user.username, "full_name": user.full_name, "email": user.email, "role": user.role.name, })
+    except Exception as e:
+        print(f"Error: {e}")
+        return Respond(status_code=500, message="Internal server error", success=False)
+    
+   
+   
+   
+
+
+@router.put("/update/{user_id}")
+async def UpdateUserDetails(user_id: str, user_payload:PayloadUpdateUser , user=Depends(authorize_user)):
+    try:
+        res = AuthorizeRole("admin", user["role"])
+        if isinstance(res, JSONResponse):
+            return res
+
+        if not ObjectId.is_valid(user_id):
+            return Respond(status_code=400, message="Invalid user ID format", success=False)
+        is_username_taken = await User.find_one(User.username == user_payload.username, User.id != ObjectId(user_id))
+
+        if is_username_taken:
+            return Respond(status_code=409, message="Username already exists", success=False)
+        
+        is_email_exist = await User.find_one(User.email == user_payload.email, User.id != ObjectId(user_id),User.is_approved==True)
+        
+        if is_email_exist :
+            return Respond(status_code=409, message="username with this email already exists", success=False)
+
+        user_to_update = await User.find_one(User.id == ObjectId(user_id), User.organization.id == ObjectId(user["organization"]))
+        
+        if not user_to_update:
+            return Respond(status_code=404, message="User not found", success=False)
+
+        user_to_update.username = user_payload.username
+        user_to_update.full_name = user_payload.full_name
+        user_to_update.email = user_payload.email
+
+        if user_payload.password:
+            user_to_update.password = Hash(user_payload.password) 
+        
+        await user_to_update.save()
+
+        return Respond(message="User details updated successfully", payload={"user_id": str(user_to_update.id)})
+    except Exception as e:
+        print(f"Error: {e}")
+        return Respond(status_code=500, message="Internal server error", success=False)

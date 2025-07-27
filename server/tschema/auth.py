@@ -1,4 +1,4 @@
-from pydantic import BaseModel ,Field ,EmailStr
+from pydantic import BaseModel ,Field ,EmailStr,field_validator
 from   models.user import UserRole
 from typing import Optional
 
@@ -24,9 +24,31 @@ class PayloadLogin(BaseModel):
 class PayloadRegisterUserManual(BaseModel):
     full_name:str 
     username:str 
-    password:str = Field(...,min_length=8, pattren=r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,20}$")  
+    password:str = Field(
+    default=None,
+    min_length=8,
+    max_length=20,
+    pattern=r"^[A-Za-z\d]+$"
+    ) 
     email:EmailStr
     role:UserRole = UserRole.user  # Default role is staff 
+
+class PayloadUpdateUser(BaseModel):
+    full_name:str 
+    username:str 
+    email:EmailStr
+    password:Optional[str] = Field(
+    default=None,
+    min_length=8,
+    max_length=20,
+    pattern=r"^[A-Za-z\d]+$"
+    )
+    role :UserRole
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        return v or None
+
 
 class PayloadRegisterUserAuto(PayloadRegisterUserManual):
     organization_name:str 

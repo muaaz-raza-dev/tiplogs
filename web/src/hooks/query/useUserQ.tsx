@@ -1,16 +1,15 @@
 "use client"
-import { getAllUsersApi, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi } from "@/app/api/user.api";
-import {  userAccessTokenAtom } from "@/lib/atoms/auth-session.atom";
+import { FetchUserBasicDetailsApi, getAllUsersApi, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi, updateUserByAdminApi } from "@/app/api/user.api";
 import { UsersListingAtom } from "@/lib/atoms/users.atom";
-import { IRegisterUserForm } from "@/types/users";
-import { useMutation } from "@tanstack/react-query";
+import { IRegisterUserForm, IUpdateUserForm } from "@/types/users";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
+import { useParams,useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 
 export function useRegisterUserByAdmin( reset?: () => void ) {
-    const accessToken = useAtomValue(userAccessTokenAtom);
     return useMutation({ 
         mutationFn: (data:IRegisterUserForm)=> registerUserbyAdminApi(data),
         onSuccess: (data) => {
@@ -20,6 +19,26 @@ export function useRegisterUserByAdmin( reset?: () => void ) {
         
     });
 
+}
+
+export function useUpdateUserByAdmin(reset?: () => void) {
+    const params = useParams()
+    const user_id = params.id as string; 
+    const router = useRouter()
+    return useMutation({
+        mutationFn: (data:IUpdateUserForm) => updateUserByAdminApi(user_id,data),
+        onSuccess: (data) => {
+            toast.success(data.payload.message || "User updated successfully!");
+            reset?.();
+            router.push("/dashboard/users");
+            router.refresh();
+        },
+        onError: (error) => {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message || "Failed to update user");
+            }
+        }
+    });
 }
 
 export function useFetchAllUsers() {
@@ -59,17 +78,16 @@ export function useToggleUserBLockQ() {
             setState(s=>({
                 ...s,
                 users: {...s.users,[state.count]:[
-
-                
                     ...s.users[state.count].filter(e=>e.id!=data.payload.user.id),data.payload.user ]
-
                 }, 
                 total : data.payload.total
             }));
+            
+            toast.success(!data.payload.user.is_blocked ? "User unblocked successfully" : "User blocked successfully")
         },
         onError(error){
             if (error instanceof AxiosError){
-                toast.error(error.response?.data.message || "Failed to fetch users");   
+                toast.error(error.response?.data.message || "Internal server error");   
             }
         }
 
@@ -77,4 +95,18 @@ export function useToggleUserBLockQ() {
 
  
     return query
+}
+
+
+export function useFetchBasicDetailsUser(){
+    const params = useParams()
+    const user_id = params.id as string;
+    return useQuery({
+        queryKey:["user","basic",user_id],
+        queryFn: () => FetchUserBasicDetailsApi(user_id),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnMount:false,
+        refetchOnWindowFocus: false,
+
+    })
 }
