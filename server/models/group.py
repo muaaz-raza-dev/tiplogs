@@ -1,22 +1,24 @@
 from beanie import Document , Link 
 from models.generals import TimeStamps
+from pymongo.operations import IndexModel
 from typing import Optional ,List
 from models.organization import Organization
 from datetime import datetime
 from pydantic import BaseModel
 class HistoryItem(BaseModel):
-    name: str 
     updated_at: datetime
-    is_activated: bool
+    is_active: bool
 
 class Group(Document,TimeStamps):
     name : str 
     organization : Link[Organization]
     
-    is_activated : Optional[bool] = True
+    is_active : Optional[bool] = True
     history : Optional[List[HistoryItem]]  =None
     class Settings :
         name= "groups"
-        indexes = ["organization",("name","text")]
+        indexes = ["organization",
+                               IndexModel([("name", "text")])
+                   ]
 
 

@@ -1,4 +1,5 @@
 interface Igroup{
+    id:string
     name:string;
     is_active:boolean
 }

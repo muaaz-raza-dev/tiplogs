@@ -1,6 +1,5 @@
-import { Card, CardContent } from "@/shadcn/components/ui/card"
-import {  Search } from "lucide-react"
-import { Input } from "@/shadcn/components/ui/input"
+import GroupsList from "./components/groups_list"
+import GroupSearch from "./components/group_search"
 
 const classes = [
   {
@@ -49,19 +48,9 @@ export default function ClassesPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-     
 
-        {/* Search Bar */}
-        <Card className="mb-6 w-full">
-            <CardContent>
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input placeholder="Search classes..." className="pl-10" />
-          </div>
-            </CardContent>
-        </Card>
-
-        {/* Classes List */}
+        <GroupSearch/>
+        <GroupsList/>
        
       </div>
     </div>
