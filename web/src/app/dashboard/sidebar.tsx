@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  Box,
   FileText,
   Home,
   LogOut,
@@ -49,7 +50,13 @@ const data = {
       url: "/dashboard/users",
       exact:false,
       icon: Users,
-    }
+    },
+    {
+      title: "Groups",
+      url: "/dashboard/groups",
+      exact:false,
+      icon: Box ,
+    },
   
   ],
 

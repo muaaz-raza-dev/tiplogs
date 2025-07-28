@@ -10,7 +10,7 @@ function AuthenticateMiddleware({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     if (!isPending ) {
-      console.log(data?.payload.user);
+      
       if( data?.payload?.user?.role == "admin") {
         if(!data?.payload?.user?.is_verified) {
           router.push("/auth/verify");

@@ -29,3 +29,4 @@ APP_SERVER_LINK = os.getenv("APP_SERVER_LINK")
 APP_LINK=os.getenv("APP_LINK") 
 
 USERS_PER_PAGE = int(os.getenv("USERS_PER_PAGE", 10)) 
+CLASSES_PER_PAGE = int(os.getenv("CLASSES_PER_PAGE", 15)) 

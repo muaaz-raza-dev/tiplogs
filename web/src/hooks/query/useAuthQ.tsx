@@ -6,7 +6,7 @@ import { ILoginForm, ISignupAdminForm } from "@/types/auth.t";
 import { useMutation, useQuery  } from "@tanstack/react-query" 
 import toast from "react-hot-toast";
 import { useSetAtom,useAtomValue} from "jotai";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Cookie from "js-cookie";
 import { AxiosError } from "axios";
@@ -14,7 +14,6 @@ import { UserRole } from "@/types/users";
 export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
     const setAccessToken = useSetAtom(userAccessTokenAtom)
-    const router = useRouter();
     return useMutation({ 
         mutationFn: (data:ISignupAdminForm)=> registerAdminApi(data),
         onSuccess: (data) => {
@@ -26,8 +25,6 @@ export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
                 isLoggedIn: true,
                 user: data.payload.user,
             });
-
-            router.push("/auth/request/verify");
 
         },
         

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from routes.auth import router as Authrouter
 from routes.users import router as Userrouter
 from routes.organization import router as Organizationrouter 
-from routes.groups import router as Classrouter
+from routes.groups import router as GroupRouter
 from routes.individuals import router as Individualrouter
 from db import init 
 from contextlib import asynccontextmanager
@@ -29,8 +29,8 @@ app.add_middleware(
 app.include_router(Authrouter,prefix="/api")
 app.include_router(Userrouter,prefix="/api")
 app.include_router(Organizationrouter,prefix="/api")
-app.include_router(Classrouter,prefix="/api")
 app.include_router(Individualrouter,prefix="/api")
+app.include_router(GroupRouter,prefix="/api")
 
 
 
