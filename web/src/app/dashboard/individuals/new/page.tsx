@@ -10,8 +10,9 @@ import { Input } from "@/shadcn/components/ui/input"
 import { Label } from "@/shadcn/components/ui/label"
 import { IRegisterIndividualForm, RegisterIndividualSchema } from "@/types/individual.t"
 import { Select,SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/components/ui/select"
-import { useGetMetaRegistrationPayload } from "@/hooks/query/useIndividualQ"
+import { useCreateNewIndividual, useGetMetaRegistrationPayload } from "@/hooks/query/useIndividualQ"
 import ServerRequestLoader from "@/components/loaders/server-request-loader"
+import { AxiosError } from "axios"
 
 
 export default function StudentRegistrationPage() {
@@ -20,9 +21,10 @@ export default function StudentRegistrationPage() {
     resolver: zodResolver(RegisterIndividualSchema),
     defaultValues:{photo: "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png",gender:"male"}
   })
-
+  const {mutate,isPending:isCreating,isError,error} = useCreateNewIndividual(reset) 
+  const Error = error as AxiosError<{message:string}>
   const onSubmit = (data: IRegisterIndividualForm) => {
-    console.log(data)
+    mutate(data)
   }
   
   return (
@@ -230,21 +232,24 @@ export default function StudentRegistrationPage() {
                 )}
               </div>
             </div>
+                {
+                  isError ? 
 
-              {/* <div className="mt-4 text-sm text-red-500" role="alert">
-                <p>fatal error</p>
-                <ul className="list-disc pl-5">
-
-                </ul>
-              </div> */}
+              <div className="mt-1 text-sm text-destructive" >
+                <p>{Error.response?.data.message||"Registration failed"}</p>
+              </div> :
+              null
+              }
 
 
             <CardFooter className="flex justify-end gap-2 p-0 ">
             <Button type="button" variant={"secondary"} onClick={()=>reset()}  >
                 Reset
               </Button>
-              <Button type="submit"  >
-                Create
+              <Button type="submit" disabled={isCreating} >
+                {
+                  isCreating ? <ServerRequestLoader/>: "Create"
+                }
               </Button>
             </CardFooter>
           </form>

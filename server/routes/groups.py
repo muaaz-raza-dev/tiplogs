@@ -6,6 +6,8 @@ from models.user import User
 from models.group import Group
 from utils.response import Respond
 from config import CLASSES_PER_PAGE
+from models.organization import Organization 
+from models.Individual import Individual
 
 router = APIRouter(prefix="/groups")
 
@@ -96,5 +98,24 @@ async def GetGroups(id:str , user=Depends(authorize_user)):
 
 
     
+
+
+@router.get("/meta/registration")
+async def GetGroupMaps(user=Depends(authorize_user)):
+    try : 
+        payload = {}
+        organization = await Organization.get(ObjectId(user["organization"]))
+        if organization.GRNO_auto_assign : 
+                ind = await Individual.find(Individual.organization==user["organization"],sort=[("created_at", -1)]).first_or_none()
+                if ind and ind.GRNO:
+                    payload["GRNO"] = int(ind.GRNO) + 1
+
+        groups = await Group.find(Group.organization.id==ObjectId(user["organization"]),Group.is_active==True).to_list();
+        payload = {**payload,"groups":[{"id":str(g.id),"name":g.name} for g in groups]}
+        return Respond(payload=payload)
+    except Exception as e : 
+        print(e)
+        return Respond(message="Internal server error",status_code=501)
+
 
 

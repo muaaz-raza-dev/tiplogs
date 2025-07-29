@@ -1,16 +1,21 @@
-from pydantic import BaseModel 
-from typing import TYPE_CHECKING,Optional 
+from pydantic import BaseModel ,EmailStr 
+from typing import Optional 
+from models.group import Group
 from typing import Literal
 class PayloadRegisterIndividualManual(BaseModel):
-    name: str
-    f_name: Optional[str] = None
-    photo: Optional[str] = "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png"
-    contact: Optional[list[str]] = None
-    dob: Optional[str] = None  # Assuming date is in string format
+    full_name: str
+    father_name: str
+    photo: str = "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png"
+    contact: Optional[str] = None
+    dob: str  # Assuming date is in string format
+    email:Optional[EmailStr]=None 
     gender: Literal["male","female","other"] # type: ignore
+
+    doa : str
     grno: str
     roll_no: Optional[str] = None
-    password: Optional[str] = None  # Assuming password can be optional
+    group:str
+    
 
 class PayloadRegisterIndividualAuto(PayloadRegisterIndividualManual):
     organization_name: str 

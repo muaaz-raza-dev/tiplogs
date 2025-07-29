@@ -19,7 +19,7 @@ class Organization (Document,TimeStamps) :
     admin:Link["User"] # type: ignore
 
     user_auto_registration:bool = False  # Default is False, meaning manual registration is required 
-    individual_auto_registration:bool = False
+    GRNO_auto_assign:bool = True
 
 Organization.model_rebuild()
 User.model_rebuild()
