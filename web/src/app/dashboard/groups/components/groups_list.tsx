@@ -6,13 +6,17 @@ import { Edit, MoreHorizontal } from "lucide-react";
 import {  DropdownMenu, DropdownMenuContent, DropdownMenuItem,DropdownMenuTrigger,} from "@/shadcn/components/ui/dropdown-menu";
 import { useAtomValue } from "jotai";
 import { GroupsListingAtom } from "@/lib/atoms/groups.atom";
-import { useGetGroups } from "@/hooks/query/useGroupQ";
-import { useEffect } from "react";
+import { useFetchGroupHistory, useGetGroups } from "@/hooks/query/useGroupQ";
+import { useEffect, useState } from "react";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
 import clsx from "clsx";
 import EditGroupDialog from "./edit_group_dialog";
+import { IgroupList } from "@/types/group";
+import GroupHistoryDialog from "./group_history_dailog";
 
 function GroupsList() {
+  const [OpenHistory, setOpenHistory] = useState(false)
+  const {mutate:fetchHistory,isPending:isLoading,data,isError} = useFetchGroupHistory()
   const { mutate, isPending } = useGetGroups();
   const state = useAtomValue(GroupsListingAtom);
   useEffect(() => {
@@ -32,18 +36,46 @@ function GroupsList() {
       </Card>
     );
   }
+  function RequestFetchHistory(id:string,){
+    setOpenHistory(true)
+    fetchHistory(id)
+  }
   
   return (
     <Card>
       <CardContent>
         <div className="space-y-4">
-          {(state.groups).map((c,i) => (
-            <div
+          {(state.groups).map((c,i) => ( <EachGroup c={c} key={c.id} index={i} RequestFetchHistory={RequestFetchHistory} />))}
+        </div>
+        <GroupFetchMoreButton count={state.count} total={state.total} mutate={mutate} isPending={isPending}  />
+         <GroupHistoryDialog  history={data?.payload?.history||[]} isError={isError} isPending={isLoading} open={OpenHistory} setOpen={setOpenHistory}/>
+      </CardContent>
+    </Card>
+  );
+}
+
+function GroupFetchMoreButton({count,total,mutate,isPending,}:{count:number,total:number,isPending:boolean,mutate:(payload:{count:number,input?:string})=>void,
+
+}){
+  const limit = Number(process.env["NEXT_PUBLIC_GROUPS_PER_PAGE"]) || 15
+  const fetchMore = ()=>{
+    mutate({count:count+1})
+
+  }
+  return <CardFooter className="justify-end mt-4 mx-0 px-0">
+          <Button onClick={fetchMore} variant={"outline"} disabled={isPending || limit*(count+1) >= total}> Load More </Button>
+         </CardFooter>
+}
+
+
+function EachGroup({c,index,RequestFetchHistory}:{c:IgroupList,index:number,RequestFetchHistory(id: string): void}){
+
+   return ( <div
               key={c.id}
               className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
               <div className="flex gap-2 items-center">
-                <Badge variant={"outline"} className="!rounded-md">{i+1} </Badge>
+                <Badge variant={"outline"} className="!rounded-md">{index+1} </Badge>
               <h3 className="text-xl font-bold">{c.name}</h3>
               </div>
 
@@ -65,7 +97,7 @@ function GroupsList() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       
-                      <DropdownMenuItem>View Details</DropdownMenuItem> 
+                      <DropdownMenuItem onClick={()=>RequestFetchHistory(c.id)}>View Details</DropdownMenuItem> 
 
                       <DropdownMenuItem className="text-destructive">
                         Deactivate
@@ -75,25 +107,7 @@ function GroupsList() {
                   </DropdownMenu>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <GroupFetchMoreButton count={state.count} total={state.total} mutate={mutate} isPending={isPending} />
-         
-      </CardContent>
-    </Card>
-  );
-}
-
-function GroupFetchMoreButton({count,total,mutate,isPending}:{count:number,total:number,isPending:boolean,mutate:(payload:{count:number,input?:string})=>void}){
-  const limit = Number(process.env["NEXT_PUBLIC_GROUPS_PER_PAGE"]) || 15
-  const fetchMore = ()=>{
-    mutate({count:count+1})
-
-  }
-  return <CardFooter className="justify-end mt-4 mx-0 px-0">
-          <Button onClick={fetchMore} variant={"outline"} disabled={isPending || limit*(count+1) >= total}> Load More </Button>
-         </CardFooter>
+            </div>)
 }
 
 

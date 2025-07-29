@@ -2,6 +2,7 @@
 
 import {
   Box,
+  CircleUser,
   FileText,
   Home,
   LogOut,
@@ -49,7 +50,7 @@ const data = {
       title: "Users",
       url: "/dashboard/users",
       exact:false,
-      icon: Users,
+      icon: CircleUser,
     },
     {
       title: "Groups",
@@ -57,6 +58,13 @@ const data = {
       exact:false,
       icon: Box ,
     },
+    {
+      title:"Individuals" ,
+      url:"/dashboard/individuals",
+      exact:false,
+      icon : Users
+
+    }
   
   ],
 

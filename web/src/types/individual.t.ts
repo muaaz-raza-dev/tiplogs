@@ -1,0 +1,48 @@
+import { z } from "zod";
+
+export const RegisterIndividualSchema = z.object({
+  full_name: z
+    .string()
+    .min(1, "Full name is required"),
+
+  father_name: z
+    .string()
+    .min(1, "Father name is required"),
+
+  photo: z
+    .string().optional()
+    ,
+
+  email: z
+    .email()
+    .optional(),
+
+  contact: z.string().optional(),
+
+  dob: z
+    .string()
+    .min(1, "Date of birth is required"),
+
+  doa: z
+    .string()
+    .min(1, "Date of admission is required"),
+
+  gender: z.enum(["male", "female", "other"], {
+    error: () => ({ message: "Gender is required" }),
+  }),
+
+  grno: z
+    .string()
+    .min(1, "GR No is required"),
+
+  roll_no: z
+    .string()
+    .min(1, "Roll No is required"),
+
+  group: z
+    .string()
+    .min(1, "Group is required"),
+});
+
+
+export type IRegisterIndividualForm = z.infer<typeof RegisterIndividualSchema>

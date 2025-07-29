@@ -1,4 +1,4 @@
-import { CreateGroupApi, EditGroupApi, GetGroupsApi } from "@/app/api/group.api";
+import { CreateGroupApi, EditGroupApi, FetchGroupActicationHistory, GetGroupsApi } from "@/app/api/group.api";
 import { GroupsListingAtom } from "@/lib/atoms/groups.atom";
 import { useMutation } from "@tanstack/react-query";
 import { useAtom } from "jotai";
@@ -44,5 +44,16 @@ export function useGetGroups(){
         onSuccess(data) {
         setState({...state,groups:data.payload.groups,total:data.payload.total,count:data.payload.count})
         },
+    })
+}
+
+
+
+
+export function useFetchGroupHistory(){
+    return useMutation({
+        mutationKey:["group","history"],
+        mutationFn:(id:string)=>FetchGroupActicationHistory(id),
+        
     })
 }

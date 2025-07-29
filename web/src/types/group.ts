@@ -4,9 +4,17 @@ interface Igroup{
     is_active:boolean
 }
 
-interface IgroupList extends Igroup{
+export interface IgroupList extends Igroup{
  individual : number ;
 
+}
+
+export interface IgroupHistory{
+    history:{
+        is_active:boolean ;
+        updated_at:string ; 
+    }[]
+    created_at:string
 }
 
 export interface IGroupListingAtom{
