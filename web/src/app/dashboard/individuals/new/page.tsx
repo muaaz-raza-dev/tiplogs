@@ -157,6 +157,7 @@ export default function StudentRegistrationPage() {
                 <Label htmlFor="grNo">GRNO * </Label>
                 <Input
                   id="grNo"
+type="number"
                   {...register("grno")}
                   placeholder="GR-001"
                   aria-invalid={!!errors.grno}
