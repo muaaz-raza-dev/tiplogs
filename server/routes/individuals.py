@@ -1,16 +1,21 @@
 import traceback
 from fastapi import APIRouter, Depends
-from tschema.individual import PayloadRegisterIndividualManual , PayloadRegisterIndividualAuto
+from tschema.individual import PayloadRegisterIndividualManual , PayloadRegisterIndividualAuto ,PayloadIndividualFiltersPayload
 from middleware.authorization import authorize_user
 from models.user import  User
 from datetime import datetime ,timezone
 from models.Individual import Individual
 from utils.response import Respond 
 from models.organization import Organization
-from bson import ObjectId
+from bson import ObjectId ,DBRef
 from models.group import Group
 from models.individual_group_history import IndividualGroupHistory ,GroupHistory
 from utils.hash import Hash
+from beanie.operators import Or
+from beanie.odm.operators.find.evaluation import Text
+from utils.populate import PopulateDocs
+
+
 router = APIRouter(prefix="/individuals")
 
 @router.post("/register/manual")
@@ -19,11 +24,12 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user= 
     try :     
         if not ObjectId.is_valid(payload.group):
             return Respond(message="Invalid Group id",status_code=400)
-        
         is_grno_exist = await Individual.find_one(Individual.grno==payload.grno,Individual.organization.id==ObjectId(user["organization"]))
         if is_grno_exist :
             return Respond(message="GRNO is already registered",status_code=403)
         
+        if not str(payload.grno).isdigit() or int(payload.grno) <= 0:
+            return Respond(message="Invalid GRNO selected. Choose only positive numbers.")
         
         group = await Group.get(ObjectId(payload.group))
         if not group:
@@ -108,3 +114,40 @@ async def EditStudent(sid: str, payload: PayloadRegisterIndividualManual, user= 
     return Respond(message="Student details have been updated", data={"student_id": str(student.id)})
 
 
+
+
+@router.post("/get")
+async def GetIndiviudals(filters: PayloadIndividualFiltersPayload, user=Depends(authorize_user)):
+    try :
+      
+        query_list = []
+        query_list.append(Individual.organization.id == ObjectId(user["organization"]))
+        query_list.append(Individual.is_approved == True)
+        if filters.group : 
+            query_list.append(Individual.group.id == ObjectId(filters.group))
+        if filters.q: 
+            query_list.append(
+                Or(
+                    Text(filters.q),               # Text search on all indexed fields
+                    Individual.grno == filters.q   # Match GRNO
+                ))
+    
+        Individuals = await Individual.find(*query_list).to_list()
+        populated_Individuals =await PopulateDocs(Individuals,["group"],{"group":Group})
+        
+
+
+
+
+    
+
+        print(populated_Individuals)
+        total = await Individual.find(*query_list).count()
+
+        payload = {"count":filters.count,"total":total, "results":
+                [{**i.model_dump(include={"full_name","email","contact","grno"}),"id":str(i.id),"group":filters.group,"doa":i.doa.date().isoformat()} for i in Individuals]
+                }
+        return Respond(payload=payload)
+    except Exception as e :
+        print(e)
+        return Respond(message="Internal server error",status_code=501)

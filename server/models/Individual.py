@@ -1,5 +1,5 @@
 from beanie import Document ,Link 
-from typing import TYPE_CHECKING,Optional,Literal
+from typing import Optional,Literal
 from datetime import datetime
 from models.generals import TimeStamps
 from models.organization import Organization
@@ -33,7 +33,10 @@ class Individual(Document,TimeStamps):
     is_terminated : bool = False 
     is_approved : bool = False
     is_blocked : bool = False
-    is_deleted : bool = False
+
+    class Settings :
+        name = "individuals" 
+        indexes = ["full_name",("full_name","text") , "grno"]
 
     
 

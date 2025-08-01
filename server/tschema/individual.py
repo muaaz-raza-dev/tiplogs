@@ -19,3 +19,10 @@ class PayloadRegisterIndividualManual(BaseModel):
 
 class PayloadRegisterIndividualAuto(PayloadRegisterIndividualManual):
     organization_name: str 
+
+class PayloadIndividualFiltersPayload (BaseModel):
+    group :str 
+    q : str 
+    count:int
+
+

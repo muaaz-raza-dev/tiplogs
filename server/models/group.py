@@ -17,8 +17,6 @@ class Group(Document,TimeStamps):
     history : Optional[List[HistoryItem]]  =None
     class Settings :
         name= "groups"
-        indexes = ["organization",
-                               IndexModel([("name", "text")])
-                   ]
+        indexes = ["organization",IndexModel([("name", "text")])]
 
 
