@@ -1,6 +1,6 @@
-import { CreateGroupApi, EditGroupApi, FetchGroupActicationHistory, GetGroupsApi } from "@/app/api/group.api";
+import { CreateGroupApi, EditGroupApi, FetchGroupActicationHistory, GetGroupIdPairs, GetGroupsApi } from "@/app/api/group.api";
 import { GroupsListingAtom } from "@/lib/atoms/groups.atom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import toast from "react-hot-toast";
 
@@ -56,4 +56,15 @@ export function useFetchGroupHistory(){
         mutationFn:(id:string)=>FetchGroupActicationHistory(id),
         
     })
+}
+
+
+export function useGetGroupPairs(){
+    return useQuery({
+        queryFn : GetGroupIdPairs ,
+        queryKey : ["Groups Pairs","id"],
+        refetchOnMount:false,
+        refetchOnWindowFocus:false
+    })
+
 }

@@ -45,4 +45,28 @@ export const RegisterIndividualSchema = z.object({
 });
 
 
-export type IRegisterIndividualForm = z.infer<typeof RegisterIndividualSchema>
+export type IRegisterIndividualForm = z.infer<typeof RegisterIndividualSchema> 
+
+
+
+export interface IindividualList{
+  full_name:string
+  father_name:string 
+  group:string ;
+  contact:string ;
+  grno:string
+  email:string ;
+  id:string;
+  doa:string
+}
+export interface IindividualListingAtom {
+  results: { [key: string]: IindividualList[] }; 
+
+  filters: {
+    q: string;
+    group: string;
+  };
+
+  count: number;
+  total: number;
+}

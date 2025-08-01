@@ -31,3 +31,8 @@ export async function FetchGroupActicationHistory(id:string){
     return res.data
 
 }
+export async function GetGroupIdPairs (){
+    const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+    const res = await Axios.get<{payload:{id:string,name:string}[],message:string}>(`/groups/pair`,{ headers: { Authorization: `Bearer ${t}`,}} );
+    return res.data
+}

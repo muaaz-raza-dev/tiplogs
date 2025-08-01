@@ -16,5 +16,18 @@ export async function GetMetaRegistrationPayload(){
 export async function CreateNewIndividuals(payload:IRegisterIndividualForm){
   const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
   const res = await Axios.post(`/individuals/register/manual`,payload,{headers:{Authorization: `Bearer ${token}`}});
-    return res.data
+  return res.data
 }
+
+export interface IGetIndividualfilters {
+  q:string ;
+  count:number ;
+  group:string ;
+}
+
+export async function GetIndividualsApi(payload:IGetIndividualfilters){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.post(`/individuals/get`,payload,{headers:{Authorization: `Bearer ${token}`}});
+  return res.data
+}
+

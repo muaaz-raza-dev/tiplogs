@@ -5,7 +5,8 @@ from models.generals import TimeStamps
 from models.organization import Organization
 from models.group import Group
 from models.user import User
- 
+from pymongo import TEXT
+
 
 class Individual(Document,TimeStamps):
     # basic information
@@ -36,7 +37,7 @@ class Individual(Document,TimeStamps):
 
     class Settings :
         name = "individuals" 
-        indexes = ["full_name",("full_name","text") , "grno"]
+        indexes = ["full_name",[("full_name",TEXT)] , "grno"]
 
     
 

@@ -1,9 +1,25 @@
-import React from 'react'
+"use client";
+import { Card, CardContent } from "@/shadcn/components/ui/card";
+import IndividualListing, { IndividualPagination } from "./components/individual-listing";
+import IndividualFilterbar from "./components/individual-filterbar";
 
-function IndividualListingPage() {
+export default function StudentsListingPage() {
+  
   return (
-    <div>IndividualListingPage</div>
-  )
-}
+    <div>
+      <Card className="mb-4 ">
+        <CardContent className="p-6">
+          <IndividualFilterbar />
+        </CardContent>
+      </Card>
 
-export default IndividualListingPage
+      <Card >
+        <CardContent>
+          <IndividualListing />
+        </CardContent>
+      </Card>
+
+      <IndividualPagination />
+    </div>
+  );
+}

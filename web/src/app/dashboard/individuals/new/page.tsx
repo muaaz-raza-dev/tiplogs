@@ -1,43 +1,82 @@
-"use client"
+"use client";
 
-import React, { useEffect } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import React from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button } from "@/shadcn/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shadcn/components/ui/card"
-import { Input } from "@/shadcn/components/ui/input"
-import { Label } from "@/shadcn/components/ui/label"
-import { IRegisterIndividualForm, RegisterIndividualSchema } from "@/types/individual.t"
-import { Select,SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/components/ui/select"
-import { useCreateNewIndividual, useGetMetaRegistrationPayload } from "@/hooks/query/useIndividualQ"
-import ServerRequestLoader from "@/components/loaders/server-request-loader"
-import { AxiosError } from "axios"
-
+import { Button } from "@/shadcn/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shadcn/components/ui/card";
+import { Input } from "@/shadcn/components/ui/input";
+import { Label } from "@/shadcn/components/ui/label";
+import {
+  IRegisterIndividualForm,
+  RegisterIndividualSchema,
+} from "@/types/individual.t";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/components/ui/select";
+import {
+  useCreateNewIndividual,
+  useGetMetaRegistrationPayload,
+} from "@/hooks/query/useIndividualQ";
+import ServerRequestLoader from "@/components/loaders/server-request-loader";
+import { AxiosError } from "axios";
 
 export default function StudentRegistrationPage() {
-  const {data,isPending} = useGetMetaRegistrationPayload()
-  const { register, handleSubmit, control, formState: { errors },reset,} = useForm<IRegisterIndividualForm>({
+  const { data, isPending } = useGetMetaRegistrationPayload();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<IRegisterIndividualForm>({
     resolver: zodResolver(RegisterIndividualSchema),
-    defaultValues:{photo: "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png",gender:"male"}
-  })
-  const {mutate,isPending:isCreating,isError,error} = useCreateNewIndividual(reset) 
-  const Error = error as AxiosError<{message:string}>
-  const onSubmit = (data: IRegisterIndividualForm) => {
-    mutate(data)
-  }
+    defaultValues: {
+      photo:
+        "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png",
+      gender: "male",
+    },
+  });
+  const {
+    mutate,
+    isPending: isCreating,
+    isError,
+    error,
+  } = useCreateNewIndividual(reset);
+  const Error = error as AxiosError<{ message: string }>;
   
+  const onSubmit = (data: IRegisterIndividualForm) => {
+    mutate(data);
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center  px-4">
       <Card className="w-full ">
         <CardHeader>
           <CardTitle className="text-2xl">Individual Registration</CardTitle>
-          <CardDescription>Fill out the form below to register a new individual.</CardDescription>
+          <CardDescription>
+            Fill out the form below to register a new individual.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
             <div className="bg-secondary py-2 rounded text-center">
-        <h2 className="font-medium ">Personal Information</h2>
+              <h2 className="font-medium ">Personal Information</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -73,8 +112,8 @@ export default function StudentRegistrationPage() {
               <div className="space-y-2">
                 <Label htmlFor="dateOfBirth">Date of Birth * </Label>
                 <Input
-                type="date"
-                {...register("dob")}
+                  type="date"
+                  {...register("dob")}
                   id="dateOfBirth"
                   placeholder="Select date of birth"
                 />
@@ -84,7 +123,7 @@ export default function StudentRegistrationPage() {
                   </p>
                 )}
               </div>
-          
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -116,48 +155,56 @@ export default function StudentRegistrationPage() {
                   </p>
                 )}
               </div>
-                <div className="space-y-2">
+              <div className="space-y-2">
                 <Label htmlFor="phone">Gender</Label>
-                <Controller name="gender"  control={control} render={({field,fieldState})=>{
+                <Controller
+                  name="gender"
+                  control={control}
+                  render={({ field, fieldState }) => {
                     return (
-                            <>
-                        <Select  value={field.value} onValueChange={field.onChange} >
-                  <SelectTrigger id="gender"  aria-describedby="gender-error" className="w-full">
-                    <SelectValue placeholder="Gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                {fieldState.error && (
-                    <p id="contact-error" className="text-sm text-red-500">
-                  {fieldState.error.message}
-                  </p>
-                )}
-                </>
-        ) }
-    }
-            />
+                      <>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger
+                            id="gender"
+                            aria-describedby="gender-error"
+                            className="w-full"
+                          >
+                            <SelectValue placeholder="Gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {fieldState.error && (
+                          <p
+                            id="contact-error"
+                            className="text-sm text-red-500"
+                          >
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </>
+                    );
+                  }}
+                />
               </div>
             </div>
 
-
-
             <div className="bg-secondary py-2 rounded text-center">
-                <h2 className="font-medium ">Academic Information</h2>
+              <h2 className="font-medium ">Academic Information</h2>
             </div>
 
-
             <div className="grid gap-4 md:grid-cols-2">
-
-
               <div className="space-y-2">
                 <Label htmlFor="grNo">GRNO * </Label>
                 <Input
                   id="grNo"
-type="number"
+                  type="number"
                   {...register("grno")}
                   placeholder="GR-001"
                   aria-invalid={!!errors.grno}
@@ -186,42 +233,54 @@ type="number"
               </div>
               <div className="space-y-2">
                 <div className="w-full flex gap-2 items-center">
-
-                <Label htmlFor="className">Group * </Label>
-                {
-                    isPending &&
-                    <ServerRequestLoader size={14}/>
-                    }
+                  <Label htmlFor="className">Group * </Label>
+                  {isPending && <ServerRequestLoader size={14} />}
                 </div>
 
-                <Controller name="group"  control={control} render={({field,fieldState})=>{
-                    return (<>
-                        <Select value={field.value} onValueChange={field.onChange} >
-                  <SelectTrigger id="className"  aria-describedby="className-error" className="relative w-full">
-                      <SelectValue placeholder="Select current group" />
-                    
-                  </SelectTrigger>
-                  <SelectContent>
-                            {
-                                data?.payload.groups.map(e=>(<SelectItem value={e.id} key={e.id}>{e.name}</SelectItem>))
-                            }
-                  </SelectContent>
-                </Select>
-                {fieldState.error && (
-                  <p id="className-error" className="text-sm text-red-500">
-                    {fieldState.error.message}
-                  </p>
-                )}
-            
-                    </>)
-                }
-            }/>
-              </div> 
+                <Controller
+                  name="group"
+                  control={control}
+                  render={({ field, fieldState }) => {
+                    return (
+                      <>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger
+                            id="className"
+                            aria-describedby="className-error"
+                            className="relative w-full"
+                          >
+                            <SelectValue placeholder="Select current group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {data?.payload.groups.map((e) => (
+                              <SelectItem value={e.id} key={e.id}>
+                                {e.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fieldState.error && (
+                          <p
+                            id="className-error"
+                            className="text-sm text-red-500"
+                          >
+                            {fieldState.error.message}
+                          </p>
+                        )}
+                      </>
+                    );
+                  }}
+                />
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dateOfAdmission">Date of Admission *</Label>
-                <Input type="date"
-                {...register("doa")}
+                <Input
+                  type="date"
+                  {...register("doa")}
                   id="dateOfAdmission"
                   className="w-full "
                   placeholder="Select date of admission"
@@ -233,29 +292,28 @@ type="number"
                 )}
               </div>
             </div>
-                {
-                  isError ? 
 
-              <div className="mt-1 text-sm text-destructive" >
-                <p>{Error.response?.data.message||"Registration failed"}</p>
-              </div> :
-              null
-              }
-
+            {isError ? (
+              <div className="mt-1 text-sm text-destructive">
+                <p>{Error.response?.data.message || "Registration failed"}</p>
+              </div>
+            ) : null}
 
             <CardFooter className="flex justify-end gap-2 p-0 ">
-            <Button type="button" variant={"secondary"} onClick={()=>reset()}  >
+              <Button
+                type="button"
+                variant={"secondary"}
+                onClick={() => reset()}
+              >
                 Reset
               </Button>
-              <Button type="submit" disabled={isCreating} >
-                {
-                  isCreating ? <ServerRequestLoader/>: "Create"
-                }
+              <Button type="submit" disabled={isCreating}>
+                {isCreating ? <ServerRequestLoader /> : "Create"}
               </Button>
             </CardFooter>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

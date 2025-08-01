@@ -9,3 +9,4 @@ export interface Organization {
     plan : OrganizationPlan;
 
 }
+
