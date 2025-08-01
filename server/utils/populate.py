@@ -9,7 +9,7 @@ async def PopulateDocs(
         for f in fields :
             value = getattr(doc,f)
             populated = await value.fetch() 
-        setattr(doc, f, populated)
+            setattr(doc, f, populated)
 
     return documents
 

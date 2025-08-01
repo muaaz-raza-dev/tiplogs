@@ -14,13 +14,14 @@ class Individual(Document,TimeStamps):
     father_name:Optional[str]
     photo:str = "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png"
     contact :Optional[str]
-    dob : datetime
-    doa : datetime
+    cnic:Optional[str] =None
+    dob : Optional[datetime]
+    doa : Optional[datetime]
     gender : Literal["male","female","other"]
     
     
     # Class Identities
-    grno:str
+    grno:Optional[str]
     roll_no:Optional[str]  
     organization:Link[Organization] 
     group : Link[Group]

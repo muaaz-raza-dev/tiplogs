@@ -148,3 +148,33 @@ async def GetIndiviudals(filters: PayloadIndividualFiltersPayload, user=Depends(
         traceback.print_exc()
         print(e)
         return Respond(message="Internal server error", status_code=501)
+
+
+@router.get("/get/{id}") 
+async def GetIndiviudalDetailed(id:str, user=Depends(authorize_user)):
+    try :
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Object id",status_code=402)
+        
+        individual = await Individual.find_one(Individual.id==ObjectId(id),Individual.organization.id == ObjectId(user["organization"]) )
+
+        if not individual:
+            return Respond(message="Invalid Object id",status_code=402)
+        populatedIndividual = await PopulateDocs([individual],["group","approved_by"])
+
+
+        return Respond(
+            payload= {
+                **populatedIndividual[0].model_dump(exclude={"approved_by","group","created_at","updated_at","id","dob","doa","organization",}),"id":str(populatedIndividual[0].id), 
+                                                "created_at":populatedIndividual[0].created_at.date().isoformat(),
+                                                "doa":populatedIndividual[0].doa.date().isoformat(),
+                                                "dob":populatedIndividual[0].dob.date().isoformat(),
+                                                "group":{"name":populatedIndividual[0].group.name,"id":str(populatedIndividual[0].group.id)},
+                                                "approved_by" :{"name":populatedIndividual[0].approved_by.full_name, "id" :str(populatedIndividual[0].approved_by.id)}
+                                                })
+        
+    except Exception as e :
+        print(e)
+        traceback.print_exc()
+        return Respond(message="Internal server error",status_code=501)
+    
