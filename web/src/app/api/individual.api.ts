@@ -1,4 +1,4 @@
-import { IRegisterIndividualForm } from "@/types/individual.t";
+import { IindividualDetailedResponse, IRegisterIndividualForm } from "@/types/individual.t";
 import { Axios } from "./axios";
 
 
@@ -28,6 +28,13 @@ export interface IGetIndividualfilters {
 export async function GetIndividualsApi(payload:IGetIndividualfilters){
   const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
   const res = await Axios.post(`/individuals/get`,payload,{headers:{Authorization: `Bearer ${token}`}});
+  return res.data
+}
+
+
+export async function GetDetailedIndividualApi(id:string){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<{payload:IindividualDetailedResponse}>(`/individuals/get/${id}`,{headers:{Authorization: `Bearer ${token}`}});
   return res.data
 }
 

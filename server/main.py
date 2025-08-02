@@ -7,7 +7,7 @@ from routes.individuals import router as Individualrouter
 from db import init 
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-
+from routes.general import router as GeneralRouter
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(Userrouter,prefix="/api")
 app.include_router(Organizationrouter,prefix="/api")
 app.include_router(Individualrouter,prefix="/api")
 app.include_router(GroupRouter,prefix="/api")
+app.include_router(GeneralRouter,prefix="/api")
 
 
 

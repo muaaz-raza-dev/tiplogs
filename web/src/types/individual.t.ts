@@ -70,3 +70,29 @@ export interface IindividualListingAtom {
   count: number;
   total: number;
 }
+
+
+export interface IindividualDetailedResponse {
+  personal_details:{
+    full_name:string
+  father_name:string 
+  contact:string ;
+  email:string ;
+  id:string;
+  doa:string
+  gender :string ;
+  cnic:string ;
+  photo :string ;
+}
+acedemic_details : {
+  roll_no:string ;
+  group :{id:string,name:string}
+  grno:string
+  doa:string
+  }
+  account_details:{
+    approved_by:{id:string,name:string}
+    username:string;
+    created_at:string ;
+  }
+}

@@ -5,7 +5,8 @@ import { Badge } from '@/shadcn/components/ui/badge'
 import { Button } from '@/shadcn/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shadcn/components/ui/table'
 import { useAtomValue } from 'jotai'
-import { Mail, MoreHorizontal, Phone } from 'lucide-react'
+import { ArrowRight, Mail, MoreHorizontal, Phone } from 'lucide-react'
+import Link from 'next/link'
 import React, { useEffect } from 'react'
 
 function IndividualListing() {
@@ -63,12 +64,19 @@ function IndividualListing() {
                         </a>
                         }
                       </TableCell>
-                        <TableCell>
+                        <TableCell className=''>
+                          <div className="flex items-center gap-3">
 
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Actions</span>
                         </Button>
+                        <Link href={`/dashboard/individuals/${student.id}`}>
+                  <Button variant="ghost" size="icon">
+                          <ArrowRight/>
+                </Button>
+                        </Link>
+                          </div>
                         </TableCell>
                     </TableRow>
                   ))

@@ -1,8 +1,10 @@
-import { CreateNewIndividuals,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters } from "@/app/api/individual.api";
+"use client"
+import { CreateNewIndividuals,  GetDetailedIndividualApi,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters } from "@/app/api/individual.api";
 import { individualListingAtom } from "@/lib/atoms/indiviudals.atom";
 import { IRegisterIndividualForm } from "@/types/individual.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
+import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 
@@ -36,4 +38,14 @@ export function useGetIndividuals(){
         }
 
     })
+}
+
+export function useGetIndividualDetailed(){
+    const params = useParams()
+    const id =( params.id || "") as string
+    return useQuery({queryKey:["individual",id], 
+        queryFn:()=>GetDetailedIndividualApi(id)
+        ,enabled:!!id,retry:2,refetchOnMount:false,refetchOnWindowFocus:false} 
+    )
+
 }

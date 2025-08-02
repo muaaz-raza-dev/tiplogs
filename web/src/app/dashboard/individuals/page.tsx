@@ -8,13 +8,13 @@ export default function StudentsListingPage() {
   return (
     <div>
       <Card className="mb-4 ">
-        <CardContent className="p-6">
+        <CardContent className="py-0">
           <IndividualFilterbar />
         </CardContent>
       </Card>
 
       <Card >
-        <CardContent>
+        <CardContent >
           <IndividualListing />
         </CardContent>
       </Card>
