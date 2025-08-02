@@ -9,16 +9,13 @@ export const RegisterIndividualSchema = z.object({
     .string()
     .min(1, "Father name is required"),
 
-  photo: z
-    .string().optional()
-    ,
 
   email: z
     .email()
     .optional(),
 
   contact: z.string().optional(),
-
+  cnic: z.number().optional(),
   dob: z
     .string()
     .min(1, "Date of birth is required"),

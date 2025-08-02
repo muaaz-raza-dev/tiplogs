@@ -41,8 +41,8 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user=D
         ind = Individual(
             full_name=payload.full_name,
             father_name=payload.father_name,
-            photo=payload.photo,
             group=group,
+            cnic=payload.cnic,
             contact=payload.contact,
             email=payload.email,
             dob=dob,
@@ -77,7 +77,6 @@ async def RegisterStudentAuto(payload: PayloadRegisterIndividualAuto,):  # type:
         student = await Individual(
             name=payload.name,
             f_name=payload.f_name,
-            photo=payload.photo,
             contact=payload.contact,
             dob=payload.dob,
             gender=payload.gender,
@@ -95,25 +94,45 @@ async def RegisterStudentAuto(payload: PayloadRegisterIndividualAuto,):  # type:
         return Respond(status_code=501, message="Internal server error", success=False)
 
 
-@router.put("/edit/{sid}")
-async def EditStudent(sid: str, payload: PayloadRegisterIndividualManual, user=Depends(authorize_user)):  # type:ignore
 
-    student = await Individual.get(sid)
-    if not student:
-        return Respond(status_code=404, message="Invalid student id", success=False)
+def to_datetime(date_str, fallback):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d") if date_str else fallback
+    except (ValueError, TypeError):
+        return fallback
+    
+@router.put("/edit/{id}")
+async def EditStudent(id: str, payload: PayloadRegisterIndividualManual, user=Depends(authorize_user)):  # type:ignore
+    try : 
+        if not ObjectId.is_valid(id) :
+            return Respond(message="Invalid Individual Id" , status_code=400)
+        individual = await Individual.get(id)
+        if not individual:
+            return Respond(status_code=404, message="Invalid individual id", success=False)
+        if payload.grno != individual.grno :
+            student_exist = await Individual.find({"_id":{"$ne":ObjectId(id)},"grno":payload.grno}).first_or_none()
+            if student_exist :
+                return Respond(message="GRNO is already assigned ",status_code=402)
+            
+        individual.full_name = payload.full_name or individual.full_name
+        individual.father_name = payload.father_name or individual.father_name
+        individual.photo = payload.photo or individual.photo
+        individual.contact = payload.contact or individual.contact
+        individual.cnic = payload.cnic or individual.cnic
+        individual.email = payload.email or individual.email
+        individual.dob = to_datetime(payload.dob, individual.dob)
+        individual.doa =  to_datetime(payload.doa, individual.doa)
+        individual.roll_no = payload.roll_no or individual.roll_no
+        individual.grno = payload.grno or individual.grno
 
-    student.name = payload.name or student.name
-    student.f_name = payload.f_name or student.f_name
-    student.photo = payload.photo or student.photo
-    student.contact = payload.contact or student.contact
-    student.dob = payload.dob or student.dob
-    student.roll_no = payload.roll_no or student.roll_no
-    # Assuming password can be updated
-    student.password = payload.password or student.password
-    student.approved_by = user.user_id  # Update the approver to the current user
 
-    await student.save()
-    return Respond(message="Student details have been updated", data={"student_id": str(student.id)})
+        await individual.save()
+        return Respond(message="Student details have been updated", data={"student_id": str(individual.id)})
+           
+    except Exception as e :
+        print(e)
+        traceback.print_exc()
+        return Respond(message="Internal server error",status_code=501)
 
 
 @router.post("/get")
@@ -187,5 +206,36 @@ async def GetIndiviudalDetailed(id:str, user=Depends(authorize_user)):
         traceback.print_exc()
         return Respond(message="Internal server error",status_code=501)
     
+
+
+
+
+@router.get("/get/edit/{id}") 
+async def GetIndividualEditData(id:str, user=Depends(authorize_user)):
+    try :
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Object id",status_code=402)
+        
+        individual = await Individual.find_one(Individual.id==ObjectId(id),Individual.organization.id == ObjectId(user["organization"]) )
+
+        if not individual:
+            return Respond(message="Invalid Object id",status_code=402)
+
+
+        return Respond(
+            payload= {
+                **individual.model_dump(include={"email","contact","photo","grno","roll_no","gender","cnic","full_name","father_name","photo"}) , "dob":individual.dob.date().isoformat()
+                ,"doa":individual.doa.date().isoformat() , "group":str(individual.group.ref.id)
+            })
+        
+    except Exception as e :
+        print(e)
+        traceback.print_exc()
+        return Respond(message="Internal server error",status_code=501)
+    
+
+
+
+
 
 

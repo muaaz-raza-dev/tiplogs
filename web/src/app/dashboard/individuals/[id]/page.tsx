@@ -7,6 +7,8 @@ import ServerRequestLoader from "@/components/loaders/server-request-loader"
 import { DescriptionList } from "./components/description-list"
 import { useMemo } from "react"
 import PhotoComponent from "./components/photo-component"
+import { Pen } from "lucide-react"
+import Link from "next/link"
 
 
 export default function StudentDetailsPage() {
@@ -34,7 +36,9 @@ const s  = data?.payload
           </div>
 
         <div className="flex items-center gap-2">
-            <Button variant={"outline"}>Edit </Button>
+          <Link href={`/dashboard/individuals/edit/${id}`}>
+            <Button className="flex items-center gap-2 " variant={"outline"}><Pen/> Edit </Button>
+          </Link>
             <Button >Print ID card </Button>
         </div>
         </CardHeader>
