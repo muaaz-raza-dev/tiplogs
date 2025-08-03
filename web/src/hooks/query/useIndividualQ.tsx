@@ -16,7 +16,7 @@ export function useCreateNewIndividual(reset?:()=>void){
     return useMutation({
         mutationFn:(payload:IRegisterIndividualForm)=>CreateNewIndividualsApi(payload),
         onSuccess(data) {
-            toast.success(data?.payload?.message||"Individual is created successfully ")
+            toast.success(data?.message||"Individual is created successfully ")
             reset?.()
         },
         onError(){
@@ -33,7 +33,7 @@ export function useEditIndividualData(){
     return useMutation({
         mutationFn:(payload:IRegisterIndividualForm)=>EditNewIndividualApi(id,payload),
         onSuccess(data) {
-            toast.success(data?.payload?.message||"Editted successfully ")
+            toast.success(data?.message||"Editted successfully ")
             router.push(`/dashboard/individuals/${id}`)
         },
         onError(){
@@ -78,12 +78,13 @@ export function useGetEditIndividualData(enabled?:boolean){
 }
 
 
-export function useRegisterSelfIndividualRequest(){
+export function useRegisterSelfIndividualRequest(reset:()=>void){
     const params = useParams()
     const token =( params.token || "") as string
     return useMutation({mutationFn:(payload:IIselfRegisterSchemaRequestPayload)=>RegisterSelfIndividualRequest(token,payload)
         , onSuccess(data) {
-            toast.success(data.payload.message)
+            reset()
+            toast.success(data.message)
         },
         onError(error){
             console.log(error)

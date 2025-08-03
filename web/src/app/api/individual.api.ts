@@ -52,6 +52,6 @@ export async function GetEditStudentDetails(id:string){
 
 
 export async function RegisterSelfIndividualRequest(token:string,payload:IIselfRegisterSchemaRequestPayload){
-    const res = await Axios.post(`/individuals/verify/registration/auto/${token}`,payload);
+    const res = await Axios.post(`/individuals/register/self/${token}`,payload);
     return res.data;
 }

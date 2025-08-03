@@ -15,7 +15,7 @@ class PayloadRegisterIndividualManual(BaseModel):
     roll_no: Optional[str] = None
     group:str
     
-class PayloadRegisterIndividualSelf(PayloadRegisterIndividualManual):
+class PayloadRegisterIndividualSelf(BaseModel):
     full_name: str
     father_name: str
     contact: Optional[str] = None

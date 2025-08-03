@@ -21,16 +21,16 @@ import { AxiosError } from "axios"
 
 export default function StudentRegistrationForm() {
   const {data,isPending,isError} = useVerifySelfIndividualRegistration()
-  const {mutate,isPending:isRegistering,error,isError:isRegisterError} = useRegisterSelfIndividualRequest()
   const {
     register,
     handleSubmit,
-    formState: { errors,  },
+    formState: { errors},
     reset,
     control,
   } = useForm<IselfRegisterSchema>({
     resolver: zodResolver(SelfRegisterIndividualSchema),
   });
+  const {mutate,isPending:isRegistering,error,isError:isRegisterError} = useRegisterSelfIndividualRequest(reset)
   const Error = error as AxiosError<{message:string}>
   const onSubmit = (data: IselfRegisterSchema) => {
     mutate({...data,dob:moment(data.dob).format("YYYY-MM-DD")})

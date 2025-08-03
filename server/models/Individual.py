@@ -15,17 +15,17 @@ class Individual(Document,TimeStamps):
     photo:str = None
     contact :Optional[str] = None
     cnic:Optional[int] =None
-    dob : Optional[datetime]
-    doa : Optional[datetime]
+    dob : Optional[datetime] = None
+    doa : Optional[datetime] = None
     gender : Literal["male","female","other"]
     email:Optional[EmailStr] = None
     
     # Class Identities
-    grno:Optional[str]
-    roll_no:Optional[str]  
+    grno:Optional[str] = None
+    roll_no:Optional[str] = None
     organization:Link[Organization] 
-    group : Optional[Link[Group]] 
-    approved_by : Optional[Link[User]] # type: ignore
+    group : Optional[Link[Group]] = None
+    approved_by : Optional[Link[User]] = None # type: ignore
     
     # id details 
     #* username = grno 

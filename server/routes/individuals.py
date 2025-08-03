@@ -1,4 +1,5 @@
 import traceback
+from utils.hash import Hash
 from fastapi import APIRouter, Depends
 from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload
 from middleware.authorization import authorize_user
@@ -83,25 +84,26 @@ async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):
     if not ObjectId.is_valid(organization_id):
         return Respond(message="Invalid ID in token", status_code=401)
 
-    org = await Organization.find_one(Organization.id==ObjectId(payload.organization),Organization.auto_registration_hash ==hash)
+    org = await Organization.find_one(Organization.id==ObjectId(organization_id),Organization.auto_registration_hash ==hash)
 
     if not org:
         return Respond(status_code=401, message="Invalid token", success=False)
 
     try:
-        student = await Individual(
+        student =  Individual(
             full_name=payload.full_name,
             father_name=payload.father_name,
             contact=payload.contact,
-            doa = datetime.strptime(payload.doa, "%Y-%m-%d").date(),
+            dob = datetime.strptime(payload.dob, "%Y-%m-%d").date(),
             email = payload.email or None,
             cnic = int(payload.cnic) ,
             gender=payload.gender,
             organization=org,
+            password=Hash("12345678"),
             is_approved=False
         )
         await student.insert()
-        return Respond(message="Your request has been sent to admin. wait for thier approval", data={"student_id": str(student.id)})
+        return Respond(message="Your request has been sent to admin. wait for thier approval")
     except Exception as e:
         traceback.print_exc()
         print(e)
