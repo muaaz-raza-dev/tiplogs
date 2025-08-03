@@ -21,7 +21,7 @@ export async function CreateNewIndividualsApi(payload:IRegisterIndividualForm){
 
 export async function EditNewIndividualApi(id:string,payload:IRegisterIndividualForm){
   const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.post(`/individuals/edit/${id}`,payload,{headers:{Authorization: `Bearer ${token}`}});
+  const res = await Axios.put(`/individuals/edit/${id}`,payload,{headers:{Authorization: `Bearer ${token}`}});
   return res.data
 }
 export interface IGetIndividualfilters {

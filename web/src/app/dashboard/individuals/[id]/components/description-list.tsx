@@ -16,8 +16,8 @@ export function DescriptionList({ items }: DescriptionListProps) {
           <dt  className=" font-medium text-muted-foreground border-r pr-4">{item[0]} </dt>
           {
             item[1]?
-             typeof item[1] == "string" ? 
-             <dd className="  text-foreground">{item[1] }</dd> :
+             typeof item[1] == "string" || typeof item[1] == "number" ? 
+             <dd className="  font-medium text-foreground">{item[1] }</dd> :
              <Link href={"#"} className="flex items-center gap-2">
              <dd className=" text-foreground">{item[1].name} </dd> 
              <ArrowUpRightFromSquare className="w-3 h-3"/>

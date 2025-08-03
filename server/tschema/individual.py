@@ -1,4 +1,4 @@
-from pydantic import BaseModel ,EmailStr 
+from pydantic import BaseModel 
 from typing import Optional 
 from models.group import Group
 from typing import Literal
@@ -6,10 +6,10 @@ class PayloadRegisterIndividualManual(BaseModel):
     full_name: str
     father_name: str
     contact: Optional[str] = None
-    dob: str  # Assuming date is in string format
-    email:Optional[EmailStr]=None 
-    gender: Literal["male","female","other"] # type: ignore
-    cnic:int
+    dob: str 
+    email:Optional[str]=None 
+    gender: Literal["male","female","other"]
+    cnic:str
     doa : str
     grno: str
     roll_no: Optional[str] = None

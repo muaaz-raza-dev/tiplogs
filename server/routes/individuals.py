@@ -79,10 +79,11 @@ async def RegisterStudentAuto(payload: PayloadRegisterIndividualAuto,):  # type:
             f_name=payload.f_name,
             contact=payload.contact,
             dob=payload.dob,
+            email = payload.email or None,
+            cnic = int(payload.cnic) or None,
             gender=payload.gender,
             grno=payload.grno,
             roll_no=payload.roll_no or None,
-            # Assuming grno is used as the password
             password=payload.password or payload.grno,
             organization=org.id,
             is_approved=False
@@ -116,9 +117,8 @@ async def EditStudent(id: str, payload: PayloadRegisterIndividualManual, user=De
             
         individual.full_name = payload.full_name or individual.full_name
         individual.father_name = payload.father_name or individual.father_name
-        individual.photo = payload.photo or individual.photo
         individual.contact = payload.contact or individual.contact
-        individual.cnic = payload.cnic or individual.cnic
+        individual.cnic = int(payload.cnic) or individual.cnic
         individual.email = payload.email or individual.email
         individual.dob = to_datetime(payload.dob, individual.dob)
         individual.doa =  to_datetime(payload.doa, individual.doa)
@@ -127,7 +127,7 @@ async def EditStudent(id: str, payload: PayloadRegisterIndividualManual, user=De
 
 
         await individual.save()
-        return Respond(message="Student details have been updated", data={"student_id": str(individual.id)})
+        return Respond(message="Student details have been updated")
            
     except Exception as e :
         print(e)
@@ -196,8 +196,8 @@ async def GetIndiviudalDetailed(id:str, user=Depends(authorize_user)):
                 },
                 "account_details" :{
                     "Username" : populatedIndividual[0].grno,
-                    "Created on ":populatedIndividual[0].created_at.date().isoformat(),
-                    "Approved by" :{"name":populatedIndividual[0].approved_by.full_name, "id" :str(populatedIndividual[0].approved_by.id)}
+                    "Created on":populatedIndividual[0].created_at.date().isoformat(),
+                    "Approved by" :{"name":populatedIndividual[0].approved_by.username, "id" :str(populatedIndividual[0].approved_by.id)}
                 }
                                                 })
         
@@ -224,8 +224,9 @@ async def GetIndividualEditData(id:str, user=Depends(authorize_user)):
 
         return Respond(
             payload= {
-                **individual.model_dump(include={"email","contact","photo","grno","roll_no","gender","cnic","full_name","father_name","photo"}) , "dob":individual.dob.date().isoformat()
-                ,"doa":individual.doa.date().isoformat() , "group":str(individual.group.ref.id)
+                **individual.model_dump(include={"email","contact","photo","grno","roll_no","gender","cnic","full_name","father_name","photo"}) , "dob":individual.dob.date().isoformat() or ""
+                ,"doa":individual.doa.date().isoformat() or "", "group":str(individual.group.ref.id) ,
+                "contact":individual.contact or "" , "cnic" :individual.cnic or "" ,  "email":individual.email or "" 
             })
         
     except Exception as e :

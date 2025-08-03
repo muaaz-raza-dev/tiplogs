@@ -6,19 +6,19 @@ from models.organization import Organization
 from models.group import Group
 from models.user import User
 from pymongo import TEXT
-
+from pydantic import EmailStr
 
 class Individual(Document,TimeStamps):
     # basic information
     full_name:str 
     father_name:Optional[str]
     photo:str = "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png"
-    contact :Optional[str]
-    cnic:Optional[str] =None
+    contact :Optional[str] = None
+    cnic:Optional[int] =None
     dob : Optional[datetime]
     doa : Optional[datetime]
     gender : Literal["male","female","other"]
-    
+    email:Optional[EmailStr] = None
     
     # Class Identities
     grno:Optional[str]

@@ -1,6 +1,6 @@
-import { registerOrganizationApi } from "@/app/api/organization.api";
+import { GetIndividualAutoRegistrationStatusApi, registerOrganizationApi, ToggleIndividualAutoRegistrationStatusApi } from "@/app/api/organization.api";
 import { AuthSession, userAccessTokenAtom } from "@/lib/atoms/auth-session.atom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -21,6 +21,33 @@ export function useRegisterOrganization() {
         },
         onError(error:AxiosError<{message: string}>) {
             toast.error(error?.response?.data.message || "Failed to register organization");
+        },
+    });
+
+}
+
+export function useGetIndividualAutoRegistrationStatus()
+{
+    return useQuery({
+        queryKey:["organization ","ind","registration ","status"] ,
+        queryFn:GetIndividualAutoRegistrationStatusApi,
+        staleTime:3600*10,
+        refetchOnMount:false,
+        refetchOnWindowFocus:false
+    })
+}
+
+
+
+export function useFetchIndividualAutoRegistrationStatus(refetch:()=>void) {
+    return useMutation({ 
+        mutationFn: (status:boolean)=> ToggleIndividualAutoRegistrationStatusApi(status),
+        onSuccess: (data) => {
+            toast.success(data.payload.status ? "Registration requests is turned on "  : "Registration requests is turned off")
+            refetch()
+        },
+        onError(error:AxiosError<{message: string}>) {
+            toast.error(error?.response?.data.message || "Failed to toggle registration requests");
         },
     });
 

@@ -45,7 +45,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
   });
   useEffect(() => {
   if (edit && defaultData?.payload) {
-    reset(defaultData.payload);
+    reset({...defaultData.payload,"email":defaultData.payload.email??"","cnic":defaultData.payload.cnic||""});
   }
 }, [edit, defaultData]);
 
@@ -170,8 +170,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
                 <Label htmlFor="cnic">CNIC/ID</Label>
                 <Input
                   id="cnic"
-                  type={"number"}
-                  maxLength={13}
+                  type="number"
                   {...register("cnic")}
                   placeholder="4xxxxxxxxxxxxx"
                   aria-invalid={!!errors.cnic}

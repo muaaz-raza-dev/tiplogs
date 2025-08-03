@@ -16,7 +16,11 @@ function IndividualListing() {
     mutate({count:0 , group:"",q:""})
     }, [])
 
-    
+    if (isPending){
+      return <div className="flex w-full items-center justify-center">
+            <ServerRequestLoader size={32} stroke={4}/>
+    </div>
+    }
   return (
     <Table>
               <TableHeader>

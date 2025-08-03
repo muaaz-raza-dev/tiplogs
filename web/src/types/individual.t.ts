@@ -10,12 +10,10 @@ export const RegisterIndividualSchema = z.object({
     .min(1, "Father name is required"),
 
 
-  email: z
-    .email()
-    .optional(),
+  email: z.string().email().or(z.literal("")).optional(),
 
   contact: z.string().optional(),
-  cnic: z.number().optional(),
+  cnic: z.string().optional(),
   dob: z
     .string()
     .min(1, "Date of birth is required"),
@@ -71,12 +69,12 @@ export interface IindividualListingAtom {
 
 export interface IindividualDetailedResponse {
   personal_details:{
-    full_name:string
+  full_name:string
   father_name:string 
   contact:string ;
   email:string ;
   id:string;
-  doa:string
+  "Date of birth":string
   gender :string ;
   cnic:string ;
   photo :string ;
@@ -85,11 +83,11 @@ acedemic_details : {
   roll_no:string ;
   group :{id:string,name:string}
   grno:string
-  doa:string
+  "Date of admission":string
   }
   account_details:{
     approved_by:{id:string,name:string}
     username:string;
-    created_at:string ;
+    "Created on":string ;
   }
 }
