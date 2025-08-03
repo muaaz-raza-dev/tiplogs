@@ -12,15 +12,15 @@ export function AuthNavbar() {
       <div className="max-w-7xl mx-auto mt-3  px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+          <div className="flex items-center space-x-2 group">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
               <span className="text-black font-bold text-lg">T</span>
             </div>
             <span className="text-white font-semibold text-xl group-hover: transition-colors">
               TipLogs
             </span>
-          </Link>
-            {!pathname.includes("/verify") ?
+          </div>
+            {!pathname.includes("/verify") && !pathname.includes("/org") ?
 
           <div className="flex gap-2">
 

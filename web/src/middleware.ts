@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const restrictedRoutesAfterLogin=["/auth/login","/auth/register/user","/auth/register/admin"]
+const restrictedRoutesAfterLogin=["/auth/login","/auth/singup/user","/auth/signup/admin"]
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get(process.env.NEXT_PUBLIC_REFRESH_TOKEN_COOKIE_KEY||"tl_refreshtoken")?.value;

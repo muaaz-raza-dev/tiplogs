@@ -12,7 +12,7 @@ class Individual(Document,TimeStamps):
     # basic information
     full_name:str 
     father_name:Optional[str]
-    photo:str = "https://res.cloudinary.com/dz8a9sztc/image/upload/v1711541749/students_dpw9qp.png"
+    photo:str = None
     contact :Optional[str] = None
     cnic:Optional[int] =None
     dob : Optional[datetime]
@@ -24,7 +24,7 @@ class Individual(Document,TimeStamps):
     grno:Optional[str]
     roll_no:Optional[str]  
     organization:Link[Organization] 
-    group : Link[Group]
+    group : Optional[Link[Group]] 
     approved_by : Optional[Link[User]] # type: ignore
     
     # id details 

@@ -38,3 +38,12 @@ export async function ToggleIndividualAutoRegistrationStatusApi(status:boolean  
     );
     return res.data;
 }
+
+
+
+export async function VerifyIndivdiualSelfRegistrationApi(token:string  ) {
+    const res = await Axios.get<{ payload:{organization:{name:string,id:string}} }>(`/org/verify/registration/auto/${token}`);
+    return res.data;
+}
+
+

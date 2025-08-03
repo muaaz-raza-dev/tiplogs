@@ -91,3 +91,35 @@ acedemic_details : {
     "Created on":string ;
   }
 }
+
+
+
+
+export const SelfRegisterIndividualSchema = z.object({
+  full_name: z
+    .string()
+    .min(1, "Full name is required"),
+
+  father_name: z
+    .string()
+    .min(1, "Father name is required"),
+
+
+  email: z.string().email().or(z.literal("")).optional(),
+
+  contact: z.string().optional(),
+  cnic: z.string().optional(),
+  dob: z.date({error:"date of birth is required"}) ,
+
+  gender: z.enum(["male", "female", "other"], {
+    error: () => ({ message: "Gender is required" }),
+  }),
+
+});
+
+
+export type IselfRegisterSchema = z.infer<typeof SelfRegisterIndividualSchema> 
+
+export interface IIselfRegisterSchemaRequestPayload extends Omit<IselfRegisterSchema,"dob">{
+dob:string
+}

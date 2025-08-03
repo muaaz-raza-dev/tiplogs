@@ -15,9 +15,16 @@ class PayloadRegisterIndividualManual(BaseModel):
     roll_no: Optional[str] = None
     group:str
     
+class PayloadRegisterIndividualSelf(PayloadRegisterIndividualManual):
+    full_name: str
+    father_name: str
+    contact: Optional[str] = None
+    dob: str 
+    email:Optional[str]=None 
+    gender: Literal["male","female","other"]
+    cnic:str
 
-class PayloadRegisterIndividualAuto(PayloadRegisterIndividualManual):
-    organization_name: str 
+    
 
 class PayloadIndividualFiltersPayload (BaseModel):
     group :str 

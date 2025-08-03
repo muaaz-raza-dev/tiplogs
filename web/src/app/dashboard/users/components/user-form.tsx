@@ -13,7 +13,6 @@ import { user_roles } from "@/types/users"
 import { useRegisterUserByAdmin, useUpdateUserByAdmin } from "@/hooks/query/useUserQ"
 import ServerRequestLoader from "@/components/loaders/server-request-loader"
 import { AxiosError } from "axios"
-import { useEffect } from "react"
 
 export default function UserForm({edit=false,defaultValues}:{edit:boolean,defaultValues?:IUpdateUserForm}) {
   const {

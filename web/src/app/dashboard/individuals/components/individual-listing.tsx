@@ -43,7 +43,7 @@ function IndividualListing() {
 
                       <TableCell className="py-3 px-4 text-muted-foreground">{student.grno}</TableCell>
                       <TableCell className="py-3 px-4">
-                        <div className="font-medium">{student.full_name}  {student.father_name}</div>
+                        <div className="font-medium">{student.full_name} -  {student.father_name}</div>
                         <div className="text-sm text-muted-foreground">{student.email}</div>
                       </TableCell>
                       <TableCell className="py-3 px-4">
@@ -61,7 +61,7 @@ function IndividualListing() {
                         }
                          {
                           student.email &&
-                          <a href={`https://mail.google.com/mail/u/0/?fs=1&to=${student.email}:&tf=cm`} target='_blank'  >
+                          <a href={`https://mail.google.com/mail/u/0/?fs=1&to=${student.email}&tf=cm`} target='_blank'  >
                         <Button variant="ghost" size="icon">
                           <Mail  className='w-4 h-4 ' />                          
                         </Button>

@@ -9,7 +9,7 @@ from middleware.authorization import authorize_user
 from models.user import UserRole ,User
 from bson import ObjectId
 from pydantic import BaseModel
-from jose import jwt
+from jose import JWTError, jwt, ExpiredSignatureError
 from config import JWT_SECRET, JWT_ALGORITHM
 router = APIRouter(prefix="/org")
 
@@ -101,3 +101,41 @@ async def ToggleAutoRegistrationStatus(payload:ItoggleAutoRegistrationStatusBody
         traceback.print_exc()
         print(e)
         return Respond(message="Internal server error",status_code=501)
+
+
+@router.get("/verify/registration/auto/{token}")
+async def ToggleAutoRegistrationStatus(token: str):
+    try:
+        token_content = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+
+        if not token_content or "id" not in token_content or "hash" not in token_content:
+            return Respond(message="Invalid token", status_code=401)
+
+        id = token_content["id"]
+        hash = token_content["hash"]
+
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid ID in token", status_code=401)
+
+        organization = await Organization.find_one(
+            Organization.id == ObjectId(id),
+            Organization.auto_registration_hash == hash
+        )
+
+        if not organization:
+            return Respond(message="Invalid credentials", status_code=401)
+
+        return Respond(payload={
+            "organization": {
+                "name": organization.name,
+                "id": str(organization.id)
+            }
+        })
+
+    except ExpiredSignatureError:
+        return Respond(message="Token expired", status_code=401)
+    except JWTError:
+        return Respond(message="Invalid token", status_code=401)
+    except Exception as e:
+        traceback.print_exc()
+        return Respond(message="Internal server error", status_code=501)

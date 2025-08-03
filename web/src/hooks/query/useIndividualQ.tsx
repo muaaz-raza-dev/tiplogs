@@ -1,7 +1,7 @@
 "use client"
-import {  CreateNewIndividualsApi,  EditNewIndividualApi,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters } from "@/app/api/individual.api";
+import {  CreateNewIndividualsApi,  EditNewIndividualApi,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
 import { individualListingAtom } from "@/lib/atoms/indiviudals.atom";
-import { IRegisterIndividualForm } from "@/types/individual.t";
+import { IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegisterSchema } from "@/types/individual.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useParams, useRouter } from "next/navigation";
@@ -75,4 +75,19 @@ export function useGetEditIndividualData(enabled?:boolean){
         ,enabled:!!id || enabled ,retry:2,refetchOnMount:false,refetchOnWindowFocus:false
     } 
     )
+}
+
+
+export function useRegisterSelfIndividualRequest(){
+    const params = useParams()
+    const token =( params.token || "") as string
+    return useMutation({mutationFn:(payload:IIselfRegisterSchemaRequestPayload)=>RegisterSelfIndividualRequest(token,payload)
+        , onSuccess(data) {
+            toast.success(data.payload.message)
+        },
+        onError(error){
+            console.log(error)
+            toast.error("Something went wrong. Try again later")
+        }
+    })
 }

@@ -1,7 +1,9 @@
 import traceback
 from fastapi import APIRouter, Depends
-from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualAuto, PayloadIndividualFiltersPayload
+from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload
 from middleware.authorization import authorize_user
+from jose import JWTError, jwt, ExpiredSignatureError
+from config import JWT_SECRET, JWT_ALGORITHM
 from models.user import User
 from datetime import datetime, timezone
 from models.Individual import Individual
@@ -67,30 +69,41 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user=D
         return Respond(status_code=501, message="Internal server error", success=False)
 
 
-@router.post("/register/auto")
-async def RegisterStudentAuto(payload: PayloadRegisterIndividualAuto,):  # type:ignore
-    org = await Organization.find_one(name=payload.organization_name)
+@router.post("/register/self/{token}")
+async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):  # type:ignore
+
+    token_content = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+
+    if not token_content or "id" not in token_content or "hash" not in token_content:
+        return Respond(message="Invalid token", status_code=401)
+
+    organization_id = token_content["id"]
+    hash = token_content["hash"]
+    
+    if not ObjectId.is_valid(organization_id):
+        return Respond(message="Invalid ID in token", status_code=401)
+
+    org = await Organization.find_one(Organization.id==ObjectId(payload.organization),Organization.auto_registration_hash ==hash)
+
     if not org:
-        return Respond(status_code=404, message="Organization name is incorrect", success=False)
+        return Respond(status_code=401, message="Invalid token", success=False)
 
     try:
         student = await Individual(
-            name=payload.name,
-            f_name=payload.f_name,
+            full_name=payload.full_name,
+            father_name=payload.father_name,
             contact=payload.contact,
-            dob=payload.dob,
+            doa = datetime.strptime(payload.doa, "%Y-%m-%d").date(),
             email = payload.email or None,
-            cnic = int(payload.cnic) or None,
+            cnic = int(payload.cnic) ,
             gender=payload.gender,
-            grno=payload.grno,
-            roll_no=payload.roll_no or None,
-            password=payload.password or payload.grno,
-            organization=org.id,
+            organization=org,
             is_approved=False
         )
-        await student.save()
+        await student.insert()
         return Respond(message="Your request has been sent to admin. wait for thier approval", data={"student_id": str(student.id)})
     except Exception as e:
+        traceback.print_exc()
         print(e)
         return Respond(status_code=501, message="Internal server error", success=False)
 
@@ -159,7 +172,7 @@ async def GetIndiviudals(filters: PayloadIndividualFiltersPayload, user=Depends(
         total = await Individual.find(*query_list).count()
 
         payload = {"count": filters.count, "total": total, "results":
-                   [{**i.model_dump(include={"full_name", "email", "contact", "grno"}), "id": str(
+                   [{**i.model_dump(include={"full_name", "email", "contact", "grno","father_name"}), "id": str(
                        i.id), "group": group_info.name if group_info else i.group.name if i.group.name else ""  , "doa": i.doa.date().isoformat()} for i in populated_Individuals]
                    }
         return Respond(payload=payload)
