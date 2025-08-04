@@ -59,12 +59,12 @@ export default function StudentRegistrationForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
-              <Input {...register("full_name")} id="fullName" placeholder="Enter full name" required />
+              <Input {...register("full_name")} id="fullName" placeholder="Enter full name"  />
               {errors.full_name && <p className="text-red-500 text-sm">{errors.full_name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="fatherName">Father's Name</Label>
-              <Input {...register("father_name")} id="fatherName" placeholder="Enter father's name" required />
+              <Input {...register("father_name")} id="fatherName" placeholder="Enter father's name"  />
               {errors.father_name && <p className="text-red-500 text-sm">{errors.father_name.message}</p>}
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function StudentRegistrationForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="cnic">CNIC</Label>
-              <Input {...register("cnic")} type="number" id="cnic" placeholder="e.g., 12345-6789012-3" required />
+              <Input {...register("cnic")} type="number" id="cnic" placeholder="e.g., 12345-6789012-3"  />
               {errors.cnic && <p className="text-red-500 text-sm">{errors.cnic.message}</p>}
             </div>
             <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function StudentRegistrationForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="contactNumber">Contact Number</Label>
-              <Input id="contactNumber" {...register("contact")} placeholder="e.g., +923001234567" required />
+              <Input id="contactNumber"   inputMode="numeric"  {...register("contact")} placeholder="e.g., +923001234567"  />
               {errors.contact && <p className="text-red-500 text-sm">{errors.contact.message}</p>}
             </div>
             <div className="space-y-2">

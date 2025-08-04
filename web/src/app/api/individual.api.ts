@@ -1,4 +1,4 @@
-import { IindividualDetailedResponse, IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm } from "@/types/individual.t";
+import { IindividualDetailedResponse, IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegistrationRequestsIndividuals } from "@/types/individual.t";
 import { Axios } from "./axios";
 
 
@@ -53,5 +53,17 @@ export async function GetEditStudentDetails(id:string){
 
 export async function RegisterSelfIndividualRequest(token:string,payload:IIselfRegisterSchemaRequestPayload){
     const res = await Axios.post(`/individuals/register/self/${token}`,payload);
+    return res.data;
+}
+
+
+export interface FetchSelfRegistrationRequestsRequestPayload{
+  q:string ;
+  count :number ;
+  status : "pending" | "all" | "rejected" ; 
+}
+export async function FetchRegisterSelfIndividualRequests(payload:FetchSelfRegistrationRequestsRequestPayload){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+    const res = await Axios.post(`/individuals/self/registration/requests`,payload,{headers:{Authorization: `Bearer ${token}`}});
     return res.data;
 }

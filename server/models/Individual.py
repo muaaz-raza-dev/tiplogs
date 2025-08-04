@@ -24,16 +24,20 @@ class Individual(Document,TimeStamps):
     grno:Optional[str] = None
     roll_no:Optional[str] = None
     organization:Link[Organization] 
+
     group : Optional[Link[Group]] = None
-    approved_by : Optional[Link[User]] = None # type: ignore
-    
+
     # id details 
     #* username = grno 
     password : str 
 
+    is_approved : bool = False
+    is_rejected:bool = False
+    approved_by : Optional[Link[User]] = None # type: ignore This field is to identify which user either reject or accept
+    approved_on : Optional[datetime] = None
+
     # Attendance status 
     is_terminated : bool = False 
-    is_approved : bool = False
     is_blocked : bool = False
 
     class Settings :

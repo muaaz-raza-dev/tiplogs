@@ -32,3 +32,14 @@ class PayloadIndividualFiltersPayload (BaseModel):
     count:int
 
 
+class VerificationSelfRegistrationRequestPayload(BaseModel):
+    group:str 
+    grno : str 
+    roll_no : Optional[str]
+    doa: Optional[str]
+
+
+class FetchSelfRegistrationRequestsPayload(BaseModel):
+    count:int
+    q:str 
+    status:Literal["all","pending","rejected"]

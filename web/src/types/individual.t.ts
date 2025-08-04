@@ -107,8 +107,13 @@ export const SelfRegisterIndividualSchema = z.object({
 
   email: z.string().email().or(z.literal("")).optional(),
 
-  contact: z.string().optional(),
-  cnic: z.string().optional(),
+  contact: z.string({error:"phone number is required"}),
+  cnic: z.string("cnic is required")
+  .min(13, "CNIC must be 13 digits")
+  .max(13, "CNIC must be 13 digits")
+  .regex(/^\d+$/, "CNIC must contain only digits")
+  ,
+
   dob: z.date({error:"date of birth is required"}) ,
 
   gender: z.enum(["male", "female", "other"], {
@@ -122,4 +127,23 @@ export type IselfRegisterSchema = z.infer<typeof SelfRegisterIndividualSchema>
 
 export interface IIselfRegisterSchemaRequestPayload extends Omit<IselfRegisterSchema,"dob">{
 dob:string
+}
+
+
+export interface IselfRegistrationRequestsIndividuals{
+  full_name:string ;
+  father_name:string ;
+  cnic: string ;
+  contact :string ;
+  status : "rejected" | "pending"
+  created_at : string 
+  id:string
+}
+
+
+export interface IinvidualRegistrationRequestsListingAtom{
+  results: { [key: string]: IselfRegistrationRequestsIndividuals[] }; 
+  filters: {  q: string;  status: "pending"|"all" |"rejected";};
+  count: number;
+  total: number;
 }

@@ -1,7 +1,9 @@
-import traceback
+from pydantic import BaseModel ; import traceback
 from utils.hash import Hash
+from pydantic import Field
+from typing import Optional
 from fastapi import APIRouter, Depends
-from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload
+from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload,VerificationSelfRegistrationRequestPayload,FetchSelfRegistrationRequestsPayload
 from middleware.authorization import authorize_user
 from jose import JWTError, jwt, ExpiredSignatureError
 from config import JWT_SECRET, JWT_ALGORITHM
@@ -45,7 +47,7 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user=D
             full_name=payload.full_name,
             father_name=payload.father_name,
             group=group,
-            cnic=payload.cnic,
+            cnic=int(payload.cnic),
             contact=payload.contact,
             email=payload.email,
             dob=dob,
@@ -85,10 +87,10 @@ async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):
         return Respond(message="Invalid ID in token", status_code=401)
 
     org = await Organization.find_one(Organization.id==ObjectId(organization_id),Organization.auto_registration_hash ==hash)
-
+    
     if not org:
         return Respond(status_code=401, message="Invalid token", success=False)
-
+    cnic_exists = await Individual.find_one(Individual.cnic==int(payload.cnic))
     try:
         student =  Individual(
             full_name=payload.full_name,
@@ -254,4 +256,97 @@ async def GetIndividualEditData(id:str, user=Depends(authorize_user)):
 
 
 
+
+@router.put("/approve/registration/self/{id}")
+async def ApproveSelfRegistrationRequest(id:str,payload:VerificationSelfRegistrationRequestPayload,user=Depends(authorize_user)):
+    try : 
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Id",status_code=401)
+        ind = await Individual.find_one(Individual.id == ObjectId(id),Individual.organization.id == ObjectId(user["organization"]))
+        if not ind :
+            return Respond(message="Invalid Id",status_code=401)
+        
+        grno_occupied = await Individual.find_one(Individual.grno==payload.grno)
+        if grno_occupied : 
+            return Respond(message="GRNO is not available",status_code=403)
+        
+        ind.grno = payload.grno 
+        group_obj = await Group.get(ObjectId(payload.group))
+
+        if not group_obj:
+            return Respond(message="Invalid Group selected", status_code=403)
+        
+        ind.group = group_obj
+        ind.doa = datetime.strptime(payload.dob, "%Y-%m-%d").date() or None
+        ind.roll_no = payload.roll_no or None
+        ind.is_approved = True
+        approved_by_user = await User.get(user["id"])
+        ind.approved_by = approved_by_user
+        ind.approved_on = datetime.now(timezone.utc)
+        await ind.save()
+        return Respond(message="Request is accepted successfully now")
+    except Exception as e :
+        traceback.print_exc()
+        return Respond(message="Internal server error",status_code=501)
+        
+
+
+
+
+@router.put("/reject/registration/self/{id}")
+async def RejectSelfRegistrationRequest(id:str,payload:VerificationSelfRegistrationRequestPayload,user=Depends(authorize_user)):
+    try : 
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Id",status_code=401)
+        ind = await Individual.find_one(Individual.id == ObjectId(id),Individual.organization.id == ObjectId(user["organization"]))
+        if not ind :
+            return Respond(message="Invalid Id",status_code=401)
+        if id.is_approved : 
+            return Respond(message="The student is already approved . You cannot disapprove it right now ",status_code=401)
+
+        approved_by_user = await User.get(user["id"])
+        ind.approved_by = approved_by_user
+        ind.is_approved = False
+        ind.approved_on = datetime.now(timezone.utc)
+        await ind.save()
+        return Respond(message="Request is rejected successfully now")
+    except Exception as e :
+        traceback.print_exc()
+        return Respond(message="Internal server error",status_code=501)
+        
+
+
+class IndividualProjection(BaseModel):
+    id: ObjectId = Field(alias="_id")
+    full_name: str
+    father_name:str 
+    contact :Optional[str] = None
+    cnic:Optional[int] =None
+    created_at:datetime
+    is_approved: bool
+    is_rejected: bool
+
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+
+@router.post("/self/registration/requests")
+async def FetchSelfRegistrationRequests(payload:FetchSelfRegistrationRequestsPayload, user=Depends(authorize_user)):
+    try :
+        query = {
+        "organization": DBRef("Organization", ObjectId(user["organization"])),
+        "is_approved": False ,
+        "is_rejected" : payload.status == "rejected"
+        }
+        if payload.q:
+            query["$text"] = {"$search": payload.q}
+        requests = await Individual.find(query,projection_model=IndividualProjection,sort=["-created_at"]).limit(20).skip(20*payload.count).to_list()
+        total = await Individual.find(query).limit(20).skip(20*payload.count).count()
+
+        return Respond(payload={
+            "requests":[{**g.model_dump(exclude={"id","created_at"}),"id":str(g.id),"created_at":g.created_at.date().isoformat(),"status":"rejected" if g.is_rejected else "pending" } for g in requests],"total":total,"count":payload.count})
+    except Exception as e :
+        traceback.print_exc()
+        # print(e)
+        return Respond(message="Internal server error")
 

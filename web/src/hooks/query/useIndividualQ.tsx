@@ -1,6 +1,6 @@
 "use client"
-import {  CreateNewIndividualsApi,  EditNewIndividualApi,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
-import { individualListingAtom } from "@/lib/atoms/indiviudals.atom";
+import {  CreateNewIndividualsApi,  EditNewIndividualApi,  FetchRegisterSelfIndividualRequests,  FetchSelfRegistrationRequestsRequestPayload,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
+import { individualListingAtom, invidualRegistrationRequestsListingAtom } from "@/lib/atoms/indiviudals.atom";
 import { IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegisterSchema } from "@/types/individual.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
@@ -89,6 +89,27 @@ export function useRegisterSelfIndividualRequest(reset:()=>void){
         onError(error){
             console.log(error)
             toast.error("Something went wrong. Try again later")
+        }
+    })
+}
+
+
+
+
+
+
+
+
+
+export function useFetchSelfRegistrationRequests(){
+    const [state,setState] = useAtom(invidualRegistrationRequestsListingAtom)
+    return useMutation({mutationFn:(payload:FetchSelfRegistrationRequestsRequestPayload)=>FetchRegisterSelfIndividualRequests(payload)
+        , onSuccess(data) {
+            setState({...state,results:{...state.results,[data.payload.count]:data.payload.requests,},total:data.payload.total,count:data.payload.count})
+        },
+        onError(error){
+            console.log(error)
+            toast.error("Requests could not be fetched . Try again later")
         }
     })
 }
