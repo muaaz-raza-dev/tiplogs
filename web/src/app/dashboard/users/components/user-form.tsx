@@ -18,7 +18,7 @@ export default function UserForm({edit=false,defaultValues}:{edit:boolean,defaul
   const {
     register,
     handleSubmit,
-    formState: { errors ,isDirty},
+    formState: { errors },
     reset,
     control,
   } = useForm<IRegisterUserForm| IUpdateUserForm>({

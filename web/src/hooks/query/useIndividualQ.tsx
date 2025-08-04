@@ -1,5 +1,5 @@
 "use client"
-import {  CreateNewIndividualsApi,  EditNewIndividualApi,  FetchRegisterSelfIndividualRequests,  FetchSelfRegistrationRequestsRequestPayload,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
+import {  CreateNewIndividualsApi,  EditNewIndividualApi,  FetchRegisterSelfIndividualRequests,  FetchSelfRegistrationRequestsRequestPayload,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, GetSelfRegistrationRequestDetailed, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
 import { individualListingAtom, invidualRegistrationRequestsListingAtom } from "@/lib/atoms/indiviudals.atom";
 import { IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegisterSchema } from "@/types/individual.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -112,4 +112,17 @@ export function useFetchSelfRegistrationRequests(){
             toast.error("Requests could not be fetched . Try again later")
         }
     })
+}
+
+
+
+
+export function useGetSelfRegistrationRequestDetails(enabled?:boolean){
+    const params = useParams()
+    const id =( params.id || "") as string
+    return useQuery({queryKey:["self","registration","request",id], 
+        queryFn:()=>GetSelfRegistrationRequestDetailed(id)
+        ,enabled:!!id || enabled ,retry:2,refetchOnMount:false,refetchOnWindowFocus:false
+    } 
+    )
 }

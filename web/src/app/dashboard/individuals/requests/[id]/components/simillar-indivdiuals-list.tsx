@@ -1,42 +1,49 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shadcn/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/components/ui/table"
+import { useGetSelfRegistrationRequestDetails } from '@/hooks/query/useIndividualQ'
 
-  const similarStudents = [
-    { id: "S001", name: "Jane Doe", email: "jane.doe@example.com", program: "Computer Science", status: "Active" },
-    { id: "S002", name: "Peter Jones", email: "peter.j@example.com", program: "Computer Science", status: "Active" },
-    { id: "S003", name: "Alice Smith", email: "alice.s@example.com", program: "Data Science", status: "Inactive" },
-  ]
 function SimilarIndividualList() {
+    const {data,isFetched} = useGetSelfRegistrationRequestDetails(false)
+    const list = data?.payload.simillars
+  
   return (
  <Card className="w-full">
       <CardHeader>
-        <CardTitle>Similar Registered Students</CardTitle>
-        <CardDescription>Students already registered with similar profiles or interests.</CardDescription>
+        <CardTitle>Similar Registered Individuals</CardTitle>
+        <CardDescription>Individuals already registered with similar names.</CardDescription>
+        
       </CardHeader>
       <CardContent>
+        {isFetched && list?.length === 0 ? (
+  <p className="text-muted-foreground text-sm text-center mt-4">
+    We couldn't find any students with similar details.
+  </p>
+)
+        :
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
+              <TableHead>GRNO</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Program</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>CNIC</TableHead>
+              <TableHead>Group</TableHead>
+              <TableHead>Contact</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {similarStudents.map((student) => (
+            {list?.map((student) => (
               <TableRow key={student.id}>
-                <TableCell className="font-medium">{student.id}</TableCell>
-                <TableCell>{student.name}</TableCell>
-                <TableCell>{student.email}</TableCell>
-                <TableCell>{student.program}</TableCell>
-                <TableCell>{student.status}</TableCell>
+                <TableCell className="font-medium">{student.grno}</TableCell>
+                <TableCell>{student.full_name} - {student.father_name}</TableCell>
+                <TableCell>{student.cnic}</TableCell>
+                <TableCell>{student.group.name}</TableCell>
+                <TableCell>{student.phone}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+    }
       </CardContent>
     </Card>
   )

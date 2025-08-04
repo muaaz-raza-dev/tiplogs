@@ -67,3 +67,36 @@ export async function FetchRegisterSelfIndividualRequests(payload:FetchSelfRegis
     const res = await Axios.post(`/individuals/self/registration/requests`,payload,{headers:{Authorization: `Bearer ${token}`}});
     return res.data;
 }
+
+interface IselfRegistrationRequestsDetailedResponse{
+  details: {
+    full_name: string;
+    father_name: string;
+    cnic: string;
+    dob: string; // ISO string date
+    email: string;
+    gender: "male" | "female" | "other";
+    contact:string;
+    is_rejected: boolean;
+    is_approved: boolean;
+  };
+  simillars: Array<{
+    full_name: string;
+    father_name: string;
+    cnic: string;
+    phone: string;
+    grno: string;
+    created_at: string; // ISO string date
+    id: string;
+    group: {
+      name: string;
+      id: string;
+    };
+  }>;
+}
+export async function GetSelfRegistrationRequestDetailed(id:string){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<{payload:IselfRegistrationRequestsDetailedResponse}>(`/individuals/self/registration/detail/${id}`,{headers:{Authorization: `Bearer ${token}`}});
+  return res.data;
+
+}
