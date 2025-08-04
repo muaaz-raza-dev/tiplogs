@@ -2,6 +2,7 @@ import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shadcn/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shadcn/components/ui/table"
 import { useGetSelfRegistrationRequestDetails } from '@/hooks/query/useIndividualQ'
+import moment from 'moment'
 
 function SimilarIndividualList() {
     const {data,isFetched} = useGetSelfRegistrationRequestDetails(false)
@@ -28,7 +29,7 @@ function SimilarIndividualList() {
               <TableHead>Name</TableHead>
               <TableHead>CNIC</TableHead>
               <TableHead>Group</TableHead>
-              <TableHead>Contact</TableHead>
+              <TableHead>Registered since</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -38,7 +39,7 @@ function SimilarIndividualList() {
                 <TableCell>{student.full_name} - {student.father_name}</TableCell>
                 <TableCell>{student.cnic}</TableCell>
                 <TableCell>{student.group.name}</TableCell>
-                <TableCell>{student.phone}</TableCell>
+                <TableCell>{moment(student.created_at).fromNow()}</TableCell>
               </TableRow>
             ))}
           </TableBody>

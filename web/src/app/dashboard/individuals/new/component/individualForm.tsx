@@ -121,7 +121,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth * </Label>
+                <Label htmlFor="dateOfBirth">Date of Birth </Label>
                 <Input
                   type="date"
                   {...register("dob")}
@@ -167,7 +167,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
                 )}
               </div>
    <div className="space-y-2">
-                <Label htmlFor="cnic">CNIC/ID</Label>
+                <Label htmlFor="cnic">CNIC/ID *</Label>
                 <Input
                   id="cnic"
                   type="number"
@@ -184,7 +184,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gender">Gender</Label>
+                <Label htmlFor="gender">Gender *</Label>
                 <Controller
                   name="gender"
                   control={control}
@@ -245,7 +245,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="rollNo">Roll No *</Label>
+                <Label htmlFor="rollNo">Roll No </Label>
                 <Input
                   id="rollNo"
                   {...register("roll_no")}
@@ -306,7 +306,7 @@ export default function IndividualForm({edit}:{edit:boolean}) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dateOfAdmission">Date of Admission *</Label>
+                <Label htmlFor="dateOfAdmission">Date of Admission </Label>
                 <Input
                   type="date"
                   {...register("doa")}

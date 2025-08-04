@@ -12,9 +12,9 @@ class Individual(Document,TimeStamps):
     # basic information
     full_name:str 
     father_name:Optional[str]
-    photo:str = None
+    photo:Optional[str] = None
     contact :Optional[str] = None
-    cnic:Optional[int] =None
+    cnic:int 
     dob : Optional[datetime] = None
     doa : Optional[datetime] = None
     gender : Literal["male","female","other"]

@@ -6,11 +6,11 @@ class PayloadRegisterIndividualManual(BaseModel):
     full_name: str
     father_name: str
     contact: Optional[str] = None
-    dob: str 
+    dob:Optional[str] =None
     email:Optional[str]=None 
     gender: Literal["male","female","other"]
     cnic:str
-    doa : str
+    doa : Optional[str] =None
     grno: str
     roll_no: Optional[str] = None
     group:str

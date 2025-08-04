@@ -13,14 +13,12 @@ export const RegisterIndividualSchema = z.object({
   email: z.string().email().or(z.literal("")).optional(),
 
   contact: z.string().optional(),
-  cnic: z.string().optional(),
-  dob: z
-    .string()
-    .min(1, "Date of birth is required"),
-
-  doa: z
-    .string()
-    .min(1, "Date of admission is required"),
+  cnic: z.string("cnic is required")
+  .min(13, "CNIC must be 13 digits")
+  .max(13, "CNIC must be 13 digits"),
+  dob: z.string().optional(),
+  doa: z.string().optional()
+    ,
 
   gender: z.enum(["male", "female", "other"], {
     error: () => ({ message: "Gender is required" }),
@@ -28,15 +26,11 @@ export const RegisterIndividualSchema = z.object({
 
   grno: z
     .string()
-    .min(1, "GR No is required"),
+    .min(1, "GRNO is required"),
 
-  roll_no: z
-    .string()
-    .min(1, "Roll No is required"),
+  roll_no: z.string().optional(),
 
-  group: z
-    .string()
-    .min(1, "Group is required"),
+  group: z.string().min(1, "Group is required"),
 });
 
 
@@ -146,4 +140,10 @@ export interface IinvidualRegistrationRequestsListingAtom{
   filters: {  q: string;  status: "pending"|"all" |"rejected";};
   count: number;
   total: number;
+}
+
+
+
+export interface IapproveSelfRegistrationRequestForm{
+  grno:string,roll_no:string,doa:string,group:string
 }

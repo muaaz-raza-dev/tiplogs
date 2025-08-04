@@ -1,4 +1,4 @@
-import { IindividualDetailedResponse, IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegistrationRequestsIndividuals } from "@/types/individual.t";
+import { IapproveSelfRegistrationRequestForm, IindividualDetailedResponse, IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegistrationRequestsIndividuals } from "@/types/individual.t";
 import { Axios } from "./axios";
 
 
@@ -99,4 +99,19 @@ export async function GetSelfRegistrationRequestDetailed(id:string){
   const res = await Axios.get<{payload:IselfRegistrationRequestsDetailedResponse}>(`/individuals/self/registration/detail/${id}`,{headers:{Authorization: `Bearer ${token}`}});
   return res.data;
 
+}
+
+
+
+export async function ApproveSelfRegistrationRequestApi(payload:IapproveSelfRegistrationRequestForm,id:string){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.put(`/individuals/approve/registration/self/${id}`,payload,{headers:{Authorization: `Bearer ${token}`}});
+  return res.data;
+}
+
+
+export async function RejectSelfRegistrationRequestApi(dlt:boolean,id:string){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.put(`/individuals/reject/registration/self/${id}/?delete=${dlt}`,{},{headers:{Authorization: `Bearer ${token}`}});
+  return res.data;
 }

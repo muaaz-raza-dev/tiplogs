@@ -1,7 +1,7 @@
 "use client"
-import {  CreateNewIndividualsApi,  EditNewIndividualApi,  FetchRegisterSelfIndividualRequests,  FetchSelfRegistrationRequestsRequestPayload,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, GetSelfRegistrationRequestDetailed, IGetIndividualfilters, RegisterSelfIndividualRequest } from "@/app/api/individual.api";
+import {  ApproveSelfRegistrationRequestApi, CreateNewIndividualsApi,  EditNewIndividualApi,  FetchRegisterSelfIndividualRequests,  FetchSelfRegistrationRequestsRequestPayload,  GetDetailedIndividualApi,  GetEditStudentDetails,  GetIndividualsApi, GetMetaRegistrationPayload, GetSelfRegistrationRequestDetailed, IGetIndividualfilters, RegisterSelfIndividualRequest, RejectSelfRegistrationRequestApi } from "@/app/api/individual.api";
 import { individualListingAtom, invidualRegistrationRequestsListingAtom } from "@/lib/atoms/indiviudals.atom";
-import { IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegisterSchema } from "@/types/individual.t";
+import { IapproveSelfRegistrationRequestForm, IIselfRegisterSchemaRequestPayload, IRegisterIndividualForm, IselfRegisterSchema } from "@/types/individual.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { useParams, useRouter } from "next/navigation";
@@ -125,4 +125,37 @@ export function useGetSelfRegistrationRequestDetails(enabled?:boolean){
         ,enabled:!!id || enabled ,retry:2,refetchOnMount:false,refetchOnWindowFocus:false
     } 
     )
+}
+
+
+
+export function useApproveSelfRegistrationRequest(){
+    const params = useParams()
+    const id =( params.id || "") as string
+    return useMutation({mutationFn:(payload:IapproveSelfRegistrationRequestForm)=>ApproveSelfRegistrationRequestApi(payload,id)
+        , onSuccess(data){
+           data.message&& toast.success(data.message)
+        }
+        , onError(err : any){ 
+            toast.error(err.response.data.message)
+
+        }
+    })
+
+}
+
+
+export function useRejectSelfRegistrationRequest(){
+    const params = useParams()
+    const id =( params.id || "") as string
+    return useMutation({mutationFn:(dlt:boolean)=>RejectSelfRegistrationRequestApi(dlt,id)
+        , onSuccess(data){
+           data.message&& toast.success(data.message)
+        }
+        , onError(err : any){ 
+            toast.error(err.response.data.message)
+
+        }
+    })
+
 }

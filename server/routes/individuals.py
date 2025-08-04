@@ -1,9 +1,10 @@
-from pydantic import BaseModel ; import traceback
+from pydantic import BaseModel
+import traceback
 from utils.hash import Hash
 from pydantic import Field
 from typing import Optional
 from fastapi import APIRouter, Depends
-from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload,VerificationSelfRegistrationRequestPayload,FetchSelfRegistrationRequestsPayload
+from tschema.individual import PayloadRegisterIndividualManual, PayloadRegisterIndividualSelf, PayloadIndividualFiltersPayload, VerificationSelfRegistrationRequestPayload, FetchSelfRegistrationRequestsPayload
 from middleware.authorization import authorize_user
 from jose import JWTError, jwt, ExpiredSignatureError
 from config import JWT_SECRET, JWT_ALGORITHM
@@ -41,15 +42,15 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user=D
         if not group:
             return Respond(message="Invalid Group selected", status_code=403)
 
-        dob = datetime.strptime(payload.dob, "%Y-%m-%d").date()
-        doa = datetime.strptime(payload.doa, "%Y-%m-%d").date()
+        dob = datetime.strptime(payload.dob, "%Y-%m-%d").date() if payload.dob else None
+        doa = datetime.strptime(payload.doa, "%Y-%m-%d").date() if payload.doa else None
         ind = Individual(
             full_name=payload.full_name,
             father_name=payload.father_name,
             group=group,
             cnic=int(payload.cnic),
-            contact=payload.contact,
-            email=payload.email,
+            contact=payload.contact or None,
+            email=payload.email or None,
             dob=dob,
             doa=doa,
             gender=payload.gender,
@@ -73,7 +74,7 @@ async def RegisterStudentManual(payload: PayloadRegisterIndividualManual, user=D
 
 
 @router.post("/register/self/{token}")
-async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):  # type:ignore
+async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf, token: str):
 
     token_content = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
 
@@ -82,23 +83,35 @@ async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):
 
     organization_id = token_content["id"]
     hash = token_content["hash"]
-    
+
     if not ObjectId.is_valid(organization_id):
         return Respond(message="Invalid ID in token", status_code=401)
 
-    org = await Organization.find_one(Organization.id==ObjectId(organization_id),Organization.auto_registration_hash ==hash)
-    
+    org = await Organization.find_one(Organization.id == ObjectId(organization_id), Organization.auto_registration_hash == hash)
+
     if not org:
         return Respond(status_code=401, message="Invalid token", success=False)
-    cnic_exists = await Individual.find_one(Individual.cnic==int(payload.cnic))
+    
+    cnic_exists = await Individual.find_one(Individual.cnic == int(payload.cnic))
+
+    if cnic_exists  :
+        if cnic_exists.is_approved : 
+            return Respond(message="You are already registered in our system",status_code=409)
+        elif cnic_exists.is_rejected :
+            return Respond(message="You are not allowed to make this request ",status_code=403)
+        else :
+            return Respond(message="Your request has already been recieved .  ",status_code=202)
+
+    
+
     try:
-        student =  Individual(
+        student = Individual(
             full_name=payload.full_name,
             father_name=payload.father_name,
             contact=payload.contact,
-            dob = datetime.strptime(payload.dob, "%Y-%m-%d").date(),
-            email = payload.email or None,
-            cnic = int(payload.cnic) ,
+            dob=datetime.strptime(payload.dob, "%Y-%m-%d").date(),
+            email=payload.email or None,
+            cnic=int(payload.cnic),
             gender=payload.gender,
             organization=org,
             password=Hash("12345678"),
@@ -112,44 +125,43 @@ async def RegisterStudentSelf(payload: PayloadRegisterIndividualSelf,token:str):
         return Respond(status_code=501, message="Internal server error", success=False)
 
 
-
 def to_datetime(date_str, fallback):
     try:
         return datetime.strptime(date_str, "%Y-%m-%d") if date_str else fallback
     except (ValueError, TypeError):
         return fallback
-    
+
+
 @router.put("/edit/{id}")
 async def EditStudent(id: str, payload: PayloadRegisterIndividualManual, user=Depends(authorize_user)):  # type:ignore
-    try : 
-        if not ObjectId.is_valid(id) :
-            return Respond(message="Invalid Individual Id" , status_code=400)
+    try:
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Individual Id", status_code=400)
         individual = await Individual.get(id)
         if not individual:
             return Respond(status_code=404, message="Invalid individual id", success=False)
-        if payload.grno != individual.grno :
-            student_exist = await Individual.find({"_id":{"$ne":ObjectId(id)},"grno":payload.grno}).first_or_none()
-            if student_exist :
-                return Respond(message="GRNO is already assigned ",status_code=402)
-            
+        if payload.grno != individual.grno:
+            student_exist = await Individual.find({"_id": {"$ne": ObjectId(id)}, "grno": payload.grno}).first_or_none()
+            if student_exist:
+                return Respond(message="GRNO is already assigned ", status_code=402)
+
         individual.full_name = payload.full_name or individual.full_name
         individual.father_name = payload.father_name or individual.father_name
         individual.contact = payload.contact or individual.contact
         individual.cnic = int(payload.cnic) or individual.cnic
         individual.email = payload.email or individual.email
         individual.dob = to_datetime(payload.dob, individual.dob)
-        individual.doa =  to_datetime(payload.doa, individual.doa)
+        individual.doa = to_datetime(payload.doa, individual.doa)
         individual.roll_no = payload.roll_no or individual.roll_no
         individual.grno = payload.grno or individual.grno
 
-
         await individual.save()
         return Respond(message="Student details have been updated")
-           
-    except Exception as e :
+
+    except Exception as e:
         print(e)
         traceback.print_exc()
-        return Respond(message="Internal server error",status_code=501)
+        return Respond(message="Internal server error", status_code=501)
 
 
 @router.post("/get")
@@ -171,13 +183,13 @@ async def GetIndiviudals(filters: PayloadIndividualFiltersPayload, user=Depends(
                 ))
         group_info = await Group.get(ObjectId(filters.group)) if filters.group else None
         Individuals = await Individual.find(*query_list).to_list()
-        populated_Individuals = await PopulateDocs(Individuals, ["group"]) if  not filters.group else Individuals
+        populated_Individuals = await PopulateDocs(Individuals, ["group"]) if not filters.group else Individuals
 
         total = await Individual.find(*query_list).count()
 
         payload = {"count": filters.count, "total": total, "results":
-                   [{**i.model_dump(include={"full_name", "email", "contact", "grno","father_name"}), "id": str(
-                       i.id), "group": group_info.name if group_info else i.group.name if i.group.name else ""  , "doa": i.doa.date().isoformat()} for i in populated_Individuals]
+                   [{**i.model_dump(include={"full_name", "email", "contact", "grno", "father_name"}), "id": str(
+                       i.id), "group": group_info.name if group_info else i.group.name if i.group.name else "", "doa": i.doa.date().isoformat() if i.doa else ""} for i in populated_Individuals]
                    }
         return Respond(payload=payload)
     except Exception as e:
@@ -186,143 +198,134 @@ async def GetIndiviudals(filters: PayloadIndividualFiltersPayload, user=Depends(
         return Respond(message="Internal server error", status_code=501)
 
 
-@router.get("/get/{id}") 
-async def GetIndiviudalDetailed(id:str, user=Depends(authorize_user)):
-    try :
+@router.get("/get/{id}")
+async def GetIndiviudalDetailed(id: str, user=Depends(authorize_user)):
+    try:
         if not ObjectId.is_valid(id):
-            return Respond(message="Invalid Object id",status_code=402)
-        
-        individual = await Individual.find_one(Individual.id==ObjectId(id),Individual.organization.id == ObjectId(user["organization"]) )
+            return Respond(message="Invalid Object id", status_code=402)
+
+        individual = await Individual.find_one(Individual.id == ObjectId(id), Individual.organization.id == ObjectId(user["organization"]))
 
         if not individual:
-            return Respond(message="Invalid Object id",status_code=402)
-        populatedIndividual = await PopulateDocs([individual],["group","approved_by"])
-
+            return Respond(message="Invalid Object id", status_code=402)
+        populatedIndividual = await PopulateDocs([individual], ["group", "approved_by"])
 
         return Respond(
-            payload= {
-                "personal_details" : {
-                **populatedIndividual[0].model_dump(include={"full_name","father_name","contact","cnic","email","photo","gender"}),"id":str(populatedIndividual[0].id), 
-                "Date of birth":populatedIndividual[0].dob.date().isoformat()
+            payload={
+                "personal_details": {
+                    **populatedIndividual[0].model_dump(include={"full_name", "father_name", "contact", "cnic", "email", "photo", "gender"}), "id": str(populatedIndividual[0].id),
+                    "Date of birth": populatedIndividual[0].dob.date().isoformat() if populatedIndividual[0].dob else None
                 },
-                "acedemic_details":{
-                    "Date of admission":populatedIndividual[0].doa.date().isoformat(),
-                    "Group":{"name":populatedIndividual[0].group.name,"id":str(populatedIndividual[0].group.id)},
-                    "GRNO":populatedIndividual[0].grno,
-                    "Roll no":populatedIndividual[0].roll_no
+                "acedemic_details": {
+                    "Date of admission": populatedIndividual[0].doa.date().isoformat() if populatedIndividual[0].doa else None,
+                    "Group": {"name": populatedIndividual[0].group.name, "id": str(populatedIndividual[0].group.id)},
+                    "GRNO": populatedIndividual[0].grno,
+                    "Roll no": populatedIndividual[0].roll_no
                 },
-                "account_details" :{
-                    "Username" : populatedIndividual[0].grno,
-                    "Created on":populatedIndividual[0].created_at.date().isoformat(),
-                    "Approved by" :{"name":populatedIndividual[0].approved_by.username, "id" :str(populatedIndividual[0].approved_by.id)}
+                "account_details": {
+                    "Username": populatedIndividual[0].grno,
+                    "Created on": populatedIndividual[0].created_at.date().isoformat(),
+                    "Approved by": {"name": populatedIndividual[0].approved_by.username, "id": str(populatedIndividual[0].approved_by.id)}
                 }
-                                                })
-        
-    except Exception as e :
+            })
+
+    except Exception as e:
         print(e)
         traceback.print_exc()
-        return Respond(message="Internal server error",status_code=501)
-    
+        return Respond(message="Internal server error", status_code=501)
 
 
-
-
-@router.get("/get/edit/{id}") 
-async def GetIndividualEditData(id:str, user=Depends(authorize_user)):
-    try :
+@router.get("/get/edit/{id}")
+async def GetIndividualEditData(id: str, user=Depends(authorize_user)):
+    try:
         if not ObjectId.is_valid(id):
-            return Respond(message="Invalid Object id",status_code=402)
-        
-        individual = await Individual.find_one(Individual.id==ObjectId(id),Individual.organization.id == ObjectId(user["organization"]) )
+            return Respond(message="Invalid Object id", status_code=402)
+
+        individual = await Individual.find_one(Individual.id == ObjectId(id), Individual.organization.id == ObjectId(user["organization"]))
 
         if not individual:
-            return Respond(message="Invalid Object id",status_code=402)
-
+            return Respond(message="Invalid Object id", status_code=402)
 
         return Respond(
-            payload= {
-                **individual.model_dump(include={"email","contact","photo","grno","roll_no","gender","cnic","full_name","father_name","photo"}) , "dob":individual.dob.date().isoformat() or ""
-                ,"doa":individual.doa.date().isoformat() or "", "group":str(individual.group.ref.id) ,
-                "contact":individual.contact or "" , "cnic" :individual.cnic or "" ,  "email":individual.email or "" 
+            payload={
+                **individual.model_dump(include={"email", "contact", "photo", "grno", "roll_no", "gender", "cnic", "full_name", "father_name", "photo"}), 
+                "dob": individual.dob.date().isoformat() if individual.dob else "", "doa": individual.doa.date().isoformat() if individual.doa else "", "group": str(individual.group.ref.id),
+                "contact": individual.contact or "", "cnic": individual.cnic or "",  "email": individual.email or ""
             })
-        
-    except Exception as e :
+
+    except Exception as e:
         print(e)
         traceback.print_exc()
-        return Respond(message="Internal server error",status_code=501)
-    
-
-
-
-
+        return Respond(message="Internal server error", status_code=501)
 
 
 @router.put("/approve/registration/self/{id}")
-async def ApproveSelfRegistrationRequest(id:str,payload:VerificationSelfRegistrationRequestPayload,user=Depends(authorize_user)):
-    try : 
+async def ApproveSelfRegistrationRequest(id: str, payload: VerificationSelfRegistrationRequestPayload, user=Depends(authorize_user)):
+    try:
         if not ObjectId.is_valid(id):
-            return Respond(message="Invalid Id",status_code=401)
-        ind = await Individual.find_one(Individual.id == ObjectId(id),Individual.organization.id == ObjectId(user["organization"]))
-        if not ind :
-            return Respond(message="Invalid Id",status_code=401)
-        
-        grno_occupied = await Individual.find_one(Individual.grno==payload.grno)
-        if grno_occupied : 
-            return Respond(message="GRNO is not available",status_code=403)
-        
-        ind.grno = payload.grno 
+            return Respond(message="Invalid Id", status_code=401)
+        ind = await Individual.find_one(Individual.id == ObjectId(id), Individual.organization.id == ObjectId(user["organization"]))
+        if not ind:
+            return Respond(message="Invalid Id", status_code=401)
+
+        grno_occupied = await Individual.find_one(Individual.grno == payload.grno)
+        if grno_occupied:
+            return Respond(message="GRNO is not available", status_code=403)
+
+        ind.grno = payload.grno
         group_obj = await Group.get(ObjectId(payload.group))
 
         if not group_obj:
             return Respond(message="Invalid Group selected", status_code=403)
-        
+
         ind.group = group_obj
-        ind.doa = datetime.strptime(payload.dob, "%Y-%m-%d").date() or None
+        ind.doa = datetime.strptime(payload.doa, "%Y-%m-%d").date() if payload.doa else None
         ind.roll_no = payload.roll_no or None
         ind.is_approved = True
         approved_by_user = await User.get(user["id"])
         ind.approved_by = approved_by_user
         ind.approved_on = datetime.now(timezone.utc)
         await ind.save()
-        return Respond(message="Request is accepted successfully now")
-    except Exception as e :
+        return Respond(message="Request is accepted successfully")
+    except Exception as e:
         traceback.print_exc()
-        return Respond(message="Internal server error",status_code=501)
-        
-
-
+        return Respond(message="Internal server error", status_code=501)
 
 
 @router.put("/reject/registration/self/{id}")
-async def RejectSelfRegistrationRequest(id:str,payload:VerificationSelfRegistrationRequestPayload,user=Depends(authorize_user)):
-    try : 
+async def RejectSelfRegistrationRequest(id: str,delete:bool, user=Depends(authorize_user)):
+    try:
         if not ObjectId.is_valid(id):
-            return Respond(message="Invalid Id",status_code=401)
-        ind = await Individual.find_one(Individual.id == ObjectId(id),Individual.organization.id == ObjectId(user["organization"]))
-        if not ind :
-            return Respond(message="Invalid Id",status_code=401)
-        if id.is_approved : 
-            return Respond(message="The student is already approved . You cannot disapprove it right now ",status_code=401)
+            return Respond(message="Invalid Id", status_code=401)
+        ind = await Individual.find_one(Individual.id == ObjectId(id), Individual.organization.id == ObjectId(user["organization"]))
+        if not ind:
+            return Respond(message="Invalid Id", status_code=401)
+        if ind.is_approved:
+            return Respond(message="The student is already approved . You cannot disapprove it right now ", status_code=401)
+        
+        if delete : 
+            await ind.delete()
+            return Respond(message="The request is deleted successfuly")
 
         approved_by_user = await User.get(user["id"])
         ind.approved_by = approved_by_user
         ind.is_approved = False
+        ind.is_rejected=True
         ind.approved_on = datetime.now(timezone.utc)
         await ind.save()
-        return Respond(message="Request is rejected successfully now")
-    except Exception as e :
+        return Respond(message="Request is rejected successfuly ")
+    except Exception as e:
         traceback.print_exc()
-        return Respond(message="Internal server error",status_code=501)
-        
+        return Respond(message="Internal server error", status_code=501)
 
 
 class IndividualProjection(BaseModel):
     id: ObjectId = Field(alias="_id")
     full_name: str
-    father_name:str 
-    contact :Optional[str] = None
-    cnic:Optional[int] =None
-    created_at:datetime
+    father_name: str
+    contact: Optional[str] = None
+    cnic: Optional[int] = None
+    created_at: datetime
     is_approved: bool
     is_rejected: bool
 
@@ -330,23 +333,80 @@ class IndividualProjection(BaseModel):
         "arbitrary_types_allowed": True
     }
 
+
 @router.post("/self/registration/requests")
-async def FetchSelfRegistrationRequests(payload:FetchSelfRegistrationRequestsPayload, user=Depends(authorize_user)):
-    try :
+async def FetchSelfRegistrationRequests(payload: FetchSelfRegistrationRequestsPayload, user=Depends(authorize_user)):
+    try:
         query = {
-        "organization": DBRef("Organization", ObjectId(user["organization"])),
-        "is_approved": False ,
-        "is_rejected" : payload.status == "rejected"
+            "organization": DBRef("Organization", ObjectId(user["organization"])),
+            "is_approved": False,
+            "is_rejected": payload.status == "rejected"
         }
         if payload.q:
             query["$text"] = {"$search": payload.q}
-        requests = await Individual.find(query,projection_model=IndividualProjection,sort=["-created_at"]).limit(20).skip(20*payload.count).to_list()
+        requests = await Individual.find(query, projection_model=IndividualProjection, sort=["-created_at"]).limit(20).skip(20*payload.count).to_list()
         total = await Individual.find(query).limit(20).skip(20*payload.count).count()
 
         return Respond(payload={
-            "requests":[{**g.model_dump(exclude={"id","created_at"}),"id":str(g.id),"created_at":g.created_at.date().isoformat(),"status":"rejected" if g.is_rejected else "pending" } for g in requests],"total":total,"count":payload.count})
-    except Exception as e :
+            "requests": [{**g.model_dump(exclude={"id", "created_at"}), "id": str(g.id), "created_at": g.created_at.date().isoformat(), "status": "rejected" if g.is_rejected else "pending"} for g in requests], "total": total, "count": payload.count})
+    except Exception:
         traceback.print_exc()
-        # print(e)
         return Respond(message="Internal server error")
+
+
+
+@router.get('/self/registration/detail/{id}')
+async def FetchSelfRegistrationRequestDetail(id: str, user=Depends(authorize_user)):
+    try:
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid Id", status_code=401)
+
+        payload = {"simillars": [], "details": {}}
+
+        individual = await Individual.find_one(
+            Individual.id == ObjectId(id),
+            Individual.organization.id == ObjectId(user["organization"])
+        )
+
+        if not individual:
+            return Respond(message="Invalid Id", status_code=401)
+
+        if individual.is_approved:
+            return Respond(message="Individual is already approved", status_code=200)
+     
+        simillars = await Individual.find({
+            "_id":{"$ne":ObjectId(id)},
+            "organization": DBRef("Organization", ObjectId(user["organization"])),
+            "$text": {
+            "$search": f"{individual.full_name} {individual.father_name}"
+            },
+            "is_approved": True
+        }).limit(10).to_list()
+
+        simillars_populated = await PopulateDocs(simillars, ["group"])
+
+        payload["simillars"] = [{
+            **g.model_dump(include={"full_name", "father_name", "cnic", "phone", "grno"}),
+            "id": str(g.id),
+            "group": {
+                "name": str(getattr(g.group, "name", "N/A")),
+                "id": str(getattr(g.group, "id", "N/A"))
+            }
+        } for g in simillars_populated]
+
+        payload["details"] = {
+            **individual.model_dump(include={
+                "full_name", "father_name", "cnic", "phone", 
+                "email", "gender", "is_rejected", "is_approved"
+            }),
+            "dob": individual.dob.date().isoformat() if individual.dob else ""
+        }
+
+        return Respond(payload=payload)
+
+    except Exception as e:
+        traceback.print_exc()
+        return Respond(message="Internal server error", status_code=501)
+
+
 

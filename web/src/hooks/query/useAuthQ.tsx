@@ -84,9 +84,7 @@ export default function useAuthenticate() {
           setState({
             isLoggedIn: false,
           });    
-          toast.error("Authentication failed. Please log in again.");
           Cookie.remove(process.env.NEXT_PUBLIC_REFRESH_TOKEN_COOKIE_KEY||"tl_refresh_token");
-          router.push("/auth/login");
         }
     }
   }, [query.status, query.data, setState]);

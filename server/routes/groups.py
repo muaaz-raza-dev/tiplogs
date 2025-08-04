@@ -107,10 +107,10 @@ async def GetMetaRegistrationData(user=Depends(authorize_user)):
         organization = await Organization.get(ObjectId(user["organization"]))
         if organization.GRNO_auto_assign : 
                 ind = await Individual.find(Individual.organization==user["organization"],sort=[("created_at", -1)]).first_or_none()
-                if ind and ind.GRNO:
-                    payload["GRNO"] = int(ind.GRNO) + 1
+                if ind and ind.grno:
+                    payload["grno"] = int(ind.grno) + 1
                 else :
-                    payload["GRNO"] =1
+                    payload["grno"] =1
 
         groups = await Group.find(Group.organization.id==ObjectId(user["organization"]),Group.is_active==True).to_list();
         payload = {**payload,"groups":[{"id":str(g.id),"name":g.name} for g in groups]}

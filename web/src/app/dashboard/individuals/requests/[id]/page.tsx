@@ -18,7 +18,6 @@ export default function StudentRequestCard() {
   return (
       <main className="flex flex-1 flex-col gap-6">
         <SimilarIndividualList />
-      
         <RequestDetails/>
  
       </main>

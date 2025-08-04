@@ -132,6 +132,9 @@ export default function StudentRegistrationForm() {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
+                        captionLayout="dropdown" 
+                        fromYear={1950}
+                        toYear={2025}
                         selected={field.value}
                         onSelect={field.onChange}
                       />

@@ -13,6 +13,7 @@ function AuthenticateMiddleware({children}: {children: React.ReactNode}) {
       
       if( data?.payload?.user?.role == "admin") {
         if(!data?.payload?.user?.is_verified) {
+          
           router.push("/auth/verify");
         }
         if (!data.payload.user.organization){

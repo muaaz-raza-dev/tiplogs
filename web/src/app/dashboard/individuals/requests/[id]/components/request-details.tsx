@@ -6,6 +6,10 @@ import { useGetSelfRegistrationRequestDetails } from '@/hooks/query/useIndividua
 import { Badge } from '@/shadcn/components/ui/badge'
 import clsx from 'clsx'
 import RequestAcedmicDetailsForm from './request-details-form'
+import { Separator } from '@/shadcn/components/ui/separator'
+import { Button } from '@/shadcn/components/ui/button'
+import { Trash, X } from 'lucide-react'
+import RejectButtons from './reject-buttons'
 
 function RequestDetails() {
   const {data:Data} = useGetSelfRegistrationRequestDetails(false)
@@ -19,9 +23,14 @@ function RequestDetails() {
         <CardTitle>Individual Registration Request</CardTitle>
         <CardDescription>Review the details of the student's registration application.</CardDescription>
             </div>
+            <div className="flex gap-2 items-center justify-center">
             <Badge className={clsx('rounded-md ',!d?.is_approved && (d?.is_rejected ? "bg-red-400 text-black": "bg-gray-300 ") )}>
               {  d?.is_rejected ? "Rejected":"Pending"}
             </Badge>
+            <Separator orientation='vertical'/>
+
+            <RejectButtons/>
+            </div>
 
         </div>
       </CardHeader>
@@ -37,19 +46,19 @@ function RequestDetails() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="name">CNIC</Label>
-            <Input id="name" type='number' value={d?.cnic}    readOnly />
+            <Input id="name" type='number' value={d?.cnic ?? ""}    readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="contact">Contact</Label>
-            <Input id="contact " type="number" value={d?.contact} defaultValue="john.doe@example.com" readOnly />
+            <Input id="contact " type="number" value={d?.contact ?? ""} defaultValue="john.doe@example.com" readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={d?.email} defaultValue="john.doe@example.com" readOnly />
+            <Input id="email" type="email" value={d?.email ?? ""} defaultValue="john.doe@example.com" readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
-            <Input id="dob" type="date" value={d?.dob} defaultValue="2000-01-15" readOnly />
+            <Input id="dob" type="date" value={d?.dob ?? ""} defaultValue="2000-01-15" readOnly />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Gender</Label>
