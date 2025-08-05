@@ -1,74 +1,101 @@
 "use client"
 
+import ErrorPage from "@/components/error-page"
+import ServerRequestLoader from "@/components/loaders/server-request-loader"
+import { useGetGroupIndiviudals } from "@/hooks/query/useGroupQ"
 import { Button } from "@/shadcn/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/shadcn/components/ui/card" // Added CardFooter
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/shadcn/components/ui/card" // Added CardFooter
+import { ArrowRight, Edit } from "lucide-react"
 import Link from "next/link"
 
-// Mock student data
-const students = [
-  { id: "1", name: "Alice Johnson", rollNumber: "001" },
-  { id: "2", name: "Bob Smith", rollNumber: "002" },
-  { id: "3", name: "Charlie Brown", rollNumber: "003" },
-  { id: "4", name: "Diana Prince", rollNumber: "004" },
-  { id: "5", name: "Eve Adams", rollNumber: "005" },
-]
 
 export default function StudentsListing() {
-  const handleViewDetails = (studentId: string) => {
-    console.log(`Viewing details for student ID: ${studentId}`)
-    // In a real app, you would navigate to a student detail page
-    // e.g., router.push(`/students/${studentId}`)
+  const{data,isPending,isError,isFetched}= useGetGroupIndiviudals()
+  if (isPending){
+    return <div className="flex items-center justify-center w-full ">
+      <ServerRequestLoader size={40} stroke={5}/>
+    </div>
   }
-
-  const handleAssignNewRollNo = (studentId: string) => {
-    console.log(`Assigning new roll number for student ID: ${studentId}`)
-    // In a real app, you would open a dialog or form to assign a new roll number
+  if(isError){
+    return <ErrorPage message="Oops! We couldn't find the group. It might be missing or there's a server issue." />
   }
-
+  const individuals = data.payload.individuals
   return (
     <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Class Student Listing</CardTitle>
-          <CardDescription>View and manage students in this class.</CardDescription>
+          <div className="border-b pb-2 mb-2 flex justify-between items-center">
+            <div className="">
+
+          <CardTitle className="text-center text-3xl ">Individuals List</CardTitle>
+          <p className="text-muted-foreground  text-sm">Enrolled individuals : {individuals.length}</p>
+            </div>
+
+          <div className="">
+            <h1 className=" font-bold text-3xl">{data.payload.group.name}</h1>
+            <p className="text-muted-foreground   text-right text-sm">{data.payload.group.created_at}</p>
+          </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {" "}
-            {/* Changed to grid layout */}
-            {students.map((student) => (
-              <Card key={student.id} className="flex flex-col justify-between">
-                {" "}
-                {/* Each student is a Card */}
-                <CardHeader>
-                  <CardTitle>{student.name}</CardTitle>
-                  <CardDescription>Roll No: {student.rollNumber}</CardDescription>
-                </CardHeader>
-                <CardFooter className="flex flex-col sm:flex-row gap-2">
-                  {" "}
-                  <Link href={`/dashboard/individuals/${student.id}`}>
+          
+    
+            {
+              isFetched ? individuals.length==0 ?
+              <div className="text-center text-muted-foreground py-6">
+    No individuals have registered for this class yet.
+    </div>
+              :
+          
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">  
+            {individuals.map((Individual) => (
+              <Card key={Individual.id} className="flex flex-col justify-between">
+                <CardContent>
+                  <div className="flex gap-2 flex-wrap">
+                  <div className="   text-sm rounded-md p-2  flex gap-2 font-medium border w-max">
+                    <div className="text-muted-foreground pr-2 border-r"> GRNO </div>
+                    <div className=" font-medium px-4"> {Individual.grno} </div>
+                    </div>
+                    <div className="   text-sm rounded-md p-2  flex gap-2 font-medium border w-max">
+                    <div className="text-muted-foreground pr-2 border-r"> Full Name  </div>
+                    <div className=" font-medium px-4"> {Individual.full_name} </div>
+                    </div>
+                    <div className="   text-sm rounded-md p-2  flex gap-2 font-medium border w-max">
+                    <div className="text-muted-foreground pr-2 border-r"> Father Name  </div>
+                    <div className=" font-medium px-4"> {Individual.father_name} </div>
+                    </div>
+                    <div className="   text-sm rounded-md p-2  flex gap-2 font-medium border w-max">
+                    <div className="text-muted-foreground pr-2 border-r"> Group Roll No  </div>
+                    <div className=" font-medium px-4"> {Individual.roll_no || "-"} </div>
+                    </div>
+                  </div>
+
+                </CardContent>
+
+                <CardFooter className="flex flex-col sm:flex-row gap-2  border-t">
+                  <Button
+                    size="sm"
+                    aria-label={`Assign new roll number for ${Individual.full_name}`}
+                    className=""
+                  >
+                    <Edit/> Roll Number
+                  </Button>
+                  <Link href={`/dashboard/individuals/${Individual.id}`}>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleViewDetails(student.id)}
-                    aria-label={`View full details for ${student.name}`}
+                    aria-label={`View full details for ${Individual.full_name}`}
                     className=""
                     >
-                    View Individual Details
+                     Details <ArrowRight/>
                   </Button>
                       </Link>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAssignNewRollNo(student.id)}
-                    aria-label={`Assign new roll number for ${student.name}`}
-                    className=""
-                  >
-                    Assign New Roll Number
-                  </Button>
                 </CardFooter>
               </Card>
-            ))}
-          </div>
+            )) }
+          </div> 
+            : null 
+            }
         </CardContent>
       </Card>
     </div>

@@ -36,3 +36,13 @@ export async function GetGroupIdPairs (){
     const res = await Axios.get<{payload:{id:string,name:string}[],message:string}>(`/groups/pair`,{ headers: { Authorization: `Bearer ${t}`,}} );
     return res.data
 }
+
+interface IgroupIndividual{
+    group:{name:string,created_at:string}
+    individuals:{full_name:string,father_name:string,roll_no:string,grno:string,id:string}[]
+}
+export async function GetGroupIndividualListsApi(id:string){
+    const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+    const res = await Axios.get<{payload:IgroupIndividual}>(`/groups/individuals/${id}`,{ headers: { Authorization: `Bearer ${t}`,}} );
+    return res.data
+}

@@ -22,7 +22,7 @@ export default function ErrorPage({message}:{message:string}) {
           <Button onClick={() => router.back()} variant="outline">
             Go Back
           </Button>
-          <Link href="/" passHref>
+          <Link href="/dashboard" passHref>
             <Button className="w-full">Go Home</Button>
           </Link>
         </CardContent>

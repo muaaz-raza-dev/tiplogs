@@ -6,6 +6,7 @@ from models.user import User
 from models.group import Group
 from utils.response import Respond
 import traceback
+from typing import Optional
 from config import CLASSES_PER_PAGE
 from models.organization import Organization 
 from models.Individual import Individual
@@ -162,11 +163,14 @@ async def GetGroupMaps(user=Depends(authorize_user)):
 
 
 class GroupIndividualsDetailsModel (BaseModel) :
-    id:str= Field(alias="_id")
+    id:ObjectId= Field(...,alias="_id")
     full_name:str 
     father_name:str 
-    grno:str 
-    roll_no:str 
+    grno:Optional[str] 
+    roll_no:Optional[str] 
+    class Config:
+            arbitrary_types_allowed = True
+
 
 
 @router.get("/individuals/{id}")
@@ -181,8 +185,9 @@ async def GetGroupIndividualList(id:str,user=Depends(authorize_user)):
         individuals = await Individual.find(Individual.organization.id==ObjectId(user["organization"]),Individual.group.id==ObjectId(id),sort="-created_at",projection_model=GroupIndividualsDetailsModel).to_list()
 
 
-        return Respond(payload={"group":{**group.model_dump(include={"name"}),"id":str(group.id),"created_at":group.id.date().to},
+        return Respond(payload={"group":{**group.model_dump(include={"name"}),"id":str(group.id),"created_at":group.created_at.date().strftime("%Y-%m-%d")},
                                 "individuals":[{**ind.model_dump(exclude={"id"}),"id":str(ind.id)} for ind in  individuals]})
 
   except Exception as e : 
+      traceback.print_exc()
       return Respond(message="Internal server error",status_code=501)

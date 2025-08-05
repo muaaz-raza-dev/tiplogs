@@ -1,7 +1,8 @@
-import { CreateGroupApi, EditGroupApi, FetchGroupActicationHistory, GetGroupIdPairs, GetGroupsApi } from "@/app/api/group.api";
+import { CreateGroupApi, EditGroupApi, FetchGroupActicationHistory, GetGroupIdPairs, GetGroupIndividualListsApi, GetGroupsApi } from "@/app/api/group.api";
 import { GroupsListingAtom } from "@/lib/atoms/groups.atom";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
+import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 export function useCreateGroup(cb?:()=>void){
@@ -64,7 +65,24 @@ export function useGetGroupPairs(){
         queryFn : GetGroupIdPairs ,
         queryKey : ["Groups Pairs","id"],
         refetchOnMount:false,
+        retry:2,
         refetchOnWindowFocus:false
+    })
+
+}
+
+
+
+export function useGetGroupIndiviudals(){
+    const params = useParams()
+    const group_id = params.id as string
+    return useQuery({
+        queryFn :()=> GetGroupIndividualListsApi(group_id),
+        queryKey : ["Groups","individuals",group_id],
+        refetchOnMount:false,
+        retry:2,
+        refetchOnWindowFocus:false,
+        staleTime:3600*10 
     })
 
 }
