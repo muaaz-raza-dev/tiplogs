@@ -5,10 +5,11 @@ from middleware.authorization import authorize_user
 from models.user import User
 from models.group import Group
 from utils.response import Respond
+import traceback
 from config import CLASSES_PER_PAGE
 from models.organization import Organization 
 from models.Individual import Individual
-
+from pydantic import Field ,BaseModel
 router = APIRouter(prefix="/groups")
 
 
@@ -64,19 +65,46 @@ async def GetGroups(count:int=0,q:str="",user=Depends(authorize_user)) :
         query = {"organization": DBRef("Organization", ObjectId(user["organization"])) ,  **({"$text": {"$search": q} }if q else {}), }
         groups = await Group.find(query).limit(CLASSES_PER_PAGE).skip(CLASSES_PER_PAGE*count).sort("-created_at").to_list()
         total = await Group.find(query).count()
-        return Respond(payload={
-        "groups": [
+
+
+        pipeline = [
             {
-                **g.model_dump(exclude={"created_at", "updated_at", "id", "organization"}),
-                "id": str(g.id)
+                "$match": {
+                    "organization.$id": ObjectId(user["organization"]),
+                    "is_approved":True
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$group.$id",
+                    "count": {"$sum": 1}
+                }
             }
-            for g in groups
-        ],
+        ]
+
+        collection = Individual.get_pymongo_collection()
+        cursor = collection.aggregate(pipeline)
+        results = await cursor.to_list(None)
+        group_counts = {str(r["_id"]): r["count"] for r in results}
+
+        enriched_groups = []
+        for g in groups:
+            enriched_groups.append({
+                **g.model_dump(exclude={"created_at", "updated_at", "id", "organization","history"}),
+                "id":str(g.id),
+                "individuals": group_counts.get(str(g.id), 0)
+            })
+
+
+        return Respond(payload={
+        "groups": enriched_groups,
         "filters": q == "",
         "total": total ,
         "count":count
     })
     except Exception as e : 
+        traceback.print_exc()
+        print(e)
         return Respond(message="Internal server error",status_code=501)
 
 
@@ -130,3 +158,31 @@ async def GetGroupMaps(user=Depends(authorize_user)):
     except Exception as e :
         print(e)
         return Respond(message="Internal server error",status_code=501)
+    
+
+
+class GroupIndividualsDetailsModel (BaseModel) :
+    id:str= Field(alias="_id")
+    full_name:str 
+    father_name:str 
+    grno:str 
+    roll_no:str 
+
+
+@router.get("/individuals/{id}")
+async def GetGroupIndividualList(id:str,user=Depends(authorize_user)):
+  try :  
+        if not ObjectId.is_valid(id):
+            return Respond(message="Invalid group ID", status_code=400)
+        group = await Group.find_one(Group.id==ObjectId(id),Group.organization.id == ObjectId(user["organization"]))
+        if not group:
+            return Respond(message="Invalid group ID", status_code=400)
+        
+        individuals = await Individual.find(Individual.organization.id==ObjectId(user["organization"]),Individual.group.id==ObjectId(id),sort="-created_at",projection_model=GroupIndividualsDetailsModel).to_list()
+
+
+        return Respond(payload={"group":{**group.model_dump(include={"name"}),"id":str(group.id),"created_at":group.id.date().to},
+                                "individuals":[{**ind.model_dump(exclude={"id"}),"id":str(ind.id)} for ind in  individuals]})
+
+  except Exception as e : 
+      return Respond(message="Internal server error",status_code=501)

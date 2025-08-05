@@ -5,7 +5,7 @@ interface Igroup{
 }
 
 export interface IgroupList extends Igroup{
- individual : number ;
+ individuals : number ;
 
 }
 

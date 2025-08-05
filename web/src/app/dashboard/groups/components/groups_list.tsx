@@ -2,7 +2,7 @@
 import { Card, CardContent, CardFooter } from "@/shadcn/components/ui/card";
 import { Badge } from "@/shadcn/components/ui/badge";
 import { Button } from "@/shadcn/components/ui/button";
-import { Edit, MoreHorizontal } from "lucide-react";
+import { Edit, MoreHorizontal, Users } from "lucide-react";
 import {  DropdownMenu, DropdownMenuContent, DropdownMenuItem,DropdownMenuTrigger,} from "@/shadcn/components/ui/dropdown-menu";
 import { useAtomValue } from "jotai";
 import { GroupsListingAtom } from "@/lib/atoms/groups.atom";
@@ -13,6 +13,7 @@ import clsx from "clsx";
 import EditGroupDialog from "./edit_group_dialog";
 import { IgroupList } from "@/types/group";
 import GroupHistoryDialog from "./group_history_dailog";
+import Link from "next/link";
 
 function GroupsList() {
   const [OpenHistory, setOpenHistory] = useState(false)
@@ -80,15 +81,23 @@ function EachGroup({c,index,RequestFetchHistory}:{c:IgroupList,index:number,Requ
               </div>
 
               <div className="flex items-center gap-3">
-                <Badge variant="secondary">{101} students</Badge>
+                <Badge variant="secondary">{c.individuals} individuals</Badge>
                 <Badge variant="default" className={clsx(c.is_active?"bg-green-800 text-white":"bg-orange-900")}>{c.is_active?"Active":"Not Active"}</Badge>
                 <div className="flex gap-1">
+                  <Link href={`groups/${c.id}`}>
+                  <Button size="sm" variant="ghost">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                  </Link>
                 <EditGroupDialog id={c.id} prev_name={c.name} >
                   <Button size="sm" variant="ghost">
                     <Edit className="h-4 w-4" />
                   </Button>
 
                 </EditGroupDialog>
+
+                 
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="sm" variant="ghost">
@@ -97,7 +106,7 @@ function EachGroup({c,index,RequestFetchHistory}:{c:IgroupList,index:number,Requ
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       
-                      <DropdownMenuItem onClick={()=>RequestFetchHistory(c.id)}>View Details</DropdownMenuItem> 
+                      <DropdownMenuItem onClick={()=>RequestFetchHistory(c.id)}>View History details</DropdownMenuItem> 
 
                       <DropdownMenuItem className="text-destructive">
                         Deactivate
