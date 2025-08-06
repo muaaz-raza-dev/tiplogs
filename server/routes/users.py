@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends
+import traceback
 from fastapi.responses import JSONResponse 
 from pydantic import BaseModel, Field 
 from typing import Optional
@@ -278,3 +279,22 @@ async def UpdateUserDetails(user_id: str, user_payload:PayloadUpdateUser , user=
     except Exception as e:
         print(f"Error: {e}")
         return Respond(status_code=500, message="Internal server error", success=False)
+    
+class UsersPairsProjectModel(BaseModel): 
+    full_name:str
+    username:str 
+    id : ObjectId = Field(...,alias="_id")
+    class Config :
+        arbitrary_types_allowed=True
+
+@router.get("/pairs")
+async def GetUserPairs(user=Depends(authorize_user)):
+    try :
+        users = await User.find(User.organization.id==ObjectId(user["organization"]),User.is_blocked==False ,User.is_deleted==False,projection_model=UsersPairsProjectModel).to_list()
+        return Respond(payload=[{"name":user.full_name + " "+ user.username , "id":str(user.id)}for user in users])
+    except Exception as e :
+        traceback.print_exc()
+        print(e)
+        return Respond(message="Internal server error",status_code=501)
+
+    

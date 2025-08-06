@@ -60,12 +60,13 @@ export function useFetchGroupHistory(){
 }
 
 
-export function useGetGroupPairs(){
+export function useGetGroupPairs(enabled?:boolean){
     return useQuery({
         queryFn : GetGroupIdPairs ,
         queryKey : ["Groups Pairs","id"],
         refetchOnMount:false,
         retry:2,
+        enabled : enabled == undefined ? true : enabled,
         refetchOnWindowFocus:false
     })
 

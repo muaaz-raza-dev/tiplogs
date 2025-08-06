@@ -1,10 +1,8 @@
-from beanie import Document , Indexed ,Link 
+from beanie import Document ,Link 
 from enum import Enum
 from models.generals import TimeStamps
 from models.user import User
-from typing import TYPE_CHECKING,Optional 
-if TYPE_CHECKING:  # type: ignore
-    from models.user import User
+
 class Plans (str,Enum):
     basic="basic"
     premium="premium"

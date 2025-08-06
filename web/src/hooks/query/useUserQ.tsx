@@ -1,5 +1,5 @@
 "use client"
-import { FetchUserBasicDetailsApi, getAllUsersApi, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi, updateUserByAdminApi } from "@/app/api/user.api";
+import { FetchUserBasicDetailsApi, getAllUsersApi, GetUserPairs, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi, updateUserByAdminApi } from "@/app/api/user.api";
 import { UsersListingAtom } from "@/lib/atoms/users.atom";
 import { IRegisterUserForm, IUpdateUserForm } from "@/types/users";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -107,6 +107,19 @@ export function useFetchBasicDetailsUser(){
         staleTime: 1000 * 60 * 5, // 5 minutes
         refetchOnMount:false,
         refetchOnWindowFocus: false,
+        retry:2
+    })
+}
 
+
+
+export function useGetUserPairs(){
+    return useQuery({
+        queryKey:["users","pairs"],
+        queryFn: GetUserPairs,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnMount:false,
+        refetchOnWindowFocus: false,
+        retry:2
     })
 }

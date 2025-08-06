@@ -59,3 +59,12 @@ export async function FetchUserBasicDetailsApi(user_id:string, ) {
   return res.data;
 
 }
+
+
+
+export async function GetUserPairs( ) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get(`/user/pairs`,{headers: { Authorization: `Bearer ${t}` } })
+  return res.data;
+
+}

@@ -1,13 +1,14 @@
 "use client"
 import { Input } from "@/shadcn/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shadcn/components/ui/card"
-import { Button } from "@/shadcn/components/ui/button"
 import { Search } from 'lucide-react'
 import { useGetAttModule } from "@/hooks/query/useAttModuleQ"
 import ServerRequestLoader from "@/components/loaders/server-request-loader"
 import { useEffect, useState } from "react"
+import ModuleListing from "./components/module-listing"
 
 export default function AttendanceModulesPage() {
+  
+
   const {data,isPending,isFetched} = useGetAttModule()
   const attendanceModules = data?.payload
   const [modules,setModules] = useState(attendanceModules)
@@ -39,21 +40,10 @@ export default function AttendanceModulesPage() {
           <div className="w-full flex items-center justify-center py-10 ">
             <ServerRequestLoader/>
         </div>
-        :
-        modules?.map((module,ind) => (
-          <Card key={module.id} className="flex flex-col min-w-[40%]">
-            <CardContent className="justify-between flex items-center">
-              <div >
-              <CardTitle className="text-lg">{module.name}</CardTitle>
-              <CardDescription >{module.description||"No description"}</CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-              <Button  variant={"outline"}>Edit</Button>
-              <Button variant={"outline"}>Manage users </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        : 
+        <ModuleListing modules={modules}/>
+      }
+
       </div>
     </div>
   )
