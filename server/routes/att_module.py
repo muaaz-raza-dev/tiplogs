@@ -36,5 +36,16 @@ async def CreateAttendanceModule(payload :CreateAttendanceModulePayloadBody,user
         return Respond(status_code=501,message="Internal server error")
     
 
+@router.get("/")
+async def GetModules(user=Depends(authorize_user)):
+    try :
+        res = AuthorizeRole(user_role=user["role"],role_to_allow="admin")
+        if isinstance(res,Response):
+            return res ;
+        modules = await AttendanceModule.find(AttendanceModule.organization.id==ObjectId(user["organization"]),sort="-created_at").to_list()
+        return Respond(payload=[{**module.model_dump(include={"name","description"}),"id":str(module.id)} for module in modules])
+    except Exception as e :
+        print(e)
+        return Respond(status_code=501,message="Internal server error")
     
     

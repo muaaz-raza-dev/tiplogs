@@ -100,7 +100,7 @@ const data = {
       navs:[
        {
         title: "Attendance Modules",
-        url: "/dashboard/attendance/modules",
+        url: "/dashboard/attendance/module",
         exact:false,
         exact_exclude_urls: ["/dashboard/attendance/module/new"],
         icon: ListCheck ,

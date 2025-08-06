@@ -80,7 +80,7 @@ export default function AttendanceRegistrationPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="custom">Weekly</SelectItem>
+                  <SelectItem value="custom">Custom </SelectItem>
                 </SelectContent>
               </Select>
               {errors.frequency && <p className="text-sm text-red-500">{errors.frequency.message}</p>}

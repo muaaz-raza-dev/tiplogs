@@ -12,7 +12,7 @@ function layout({children}: { children: React.ReactNode }) {
           <p className="text-muted-foreground">Manage and view all attendance modules in your organization</p>
         </div>
         <div className="flex items-center gap-3">
-        <Link href="/dashboard/users/new">
+        <Link href="/dashboard/attendance/module/new">
 
         <Button >
           <Plus className="w-4 h-4 " />
