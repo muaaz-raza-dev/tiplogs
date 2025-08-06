@@ -1,11 +1,14 @@
 "use client"
 
 import {
+  Bell,
   Box,
   CircleUser,
   FileText,
   Home,
+  ListCheck,
   LogOut,
+  Plus,
   Users,
 } from "lucide-react"
 
@@ -14,7 +17,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -31,6 +33,7 @@ import {
 } from "@/shadcn/components/ui/dropdown-menu"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { Separator } from "@/shadcn/components/ui/separator"
 
 // Navigation data
 const data = {
@@ -39,36 +42,78 @@ const data = {
     email: "john@example.com",
     avatar: "/placeholder.svg?height=32&width=32",
   },
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-      exact:true,
-      icon: Home,
+  nav: [
+   {
+      title : "Individuals",
+      navs :[
+        {
+        title:"Individuals" ,
+        url:"/dashboard/individuals",
+        exact:false,
+        exact_exclude_urls:["/dashboard/individuals/new","/dashboard/individuals/requests"],
+        icon : Users
+      }
+      ,{
+        title:"Register new Individual" ,
+        url:"/dashboard/individuals/new",
+        exact:true,
+        icon : Plus
+      } ,
+       {
+        title:"Registeration requests" ,
+        url:"/dashboard/individuals/requests",
+        exact:true,
+        icon : Bell
+      }
+    ]
     },
+
     {
-      title: "Users",
-      url: "/dashboard/users",
-      exact:false,
-      icon: CircleUser,
-    },
-    {
+      title : "Groups",
+      navs :[
+        {
       title: "Groups",
       url: "/dashboard/groups",
       exact:false,
       icon: Box ,
-    },
+    }]
+  },
+   ,  {
+      title : "Users",
+      navs :[
+        {
+        title: "Users",
+        url: "/dashboard/users",
+        exact:false,
+        exact_exclude_urls:["/dashboard/users/new"],
+        icon: CircleUser,
+      },
+      {
+        title: "Register user",
+        url: "/dashboard/users/new",
+        exact:true,
+        icon: Plus,
+      },
+    ]} ,
     {
-      title:"Individuals" ,
-      url:"/dashboard/individuals",
-      exact:false,
-      icon : Users
-
+      title:"Attendance" ,
+      navs:[
+       {
+        title: "Attendance Modules",
+        url: "/dashboard/attendance/modules",
+        exact:false,
+        exact_exclude_urls: ["/dashboard/attendance/module/new"],
+        icon: ListCheck ,
+      } ,
+        {
+        title: "Create Attendance Module",
+        url: "/dashboard/attendance/module/new",
+        exact:true,
+        icon: Plus,
+      } 
+      ]
     }
-  
-  ],
-
- 
+  ]
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -78,9 +123,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu >
           <SidebarMenuItem >
-          <SidebarMenuButton size={"default"} asChild >
+          <SidebarMenuButton size={"lg"} asChild  >
             <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-secondary text-sidebar-secondary-foreground">
                   <FileText className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -95,24 +140,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         {/* Main Navigation */}
+              {data.nav.map((item) => (
+                <>
         <SidebarGroup>
-          <SidebarGroupLabel>Basics</SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupLabel>{item?.title}</SidebarGroupLabel>
             <SidebarMenu>
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.exact ? pathname == item.url : pathname.includes(item.url)}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                {
+                  item?.navs.map(e=>(
+                    <SidebarMenuItem key={e.title}>
+                  <SidebarMenuButton asChild isActive={
+                    e.exact ? pathname == e.url :( pathname.includes(e.url) ?  (e.exact_exclude_urls ? ( !e.exact_exclude_urls.includes(pathname) ) : pathname.includes(e.url)):false)
+                    }>
+                    <Link href={e.url}>
+                      <e.icon />
+                      <span>{e.title}</span>
                     </Link>
                   </SidebarMenuButton>
-             
                 </SidebarMenuItem>
+                ))
+              }
+              </SidebarMenu>
+            </SidebarGroup>
+              </>
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
 
 

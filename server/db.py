@@ -6,6 +6,7 @@ from models.organization import Organization
 from models.group import Group
 from models.Individual import Individual
 from models.individual_group_history import IndividualGroupHistory
+from models.att_module import AttendanceModule
 
 
 
@@ -14,5 +15,5 @@ async def init():
     client = AsyncIOMotorClient(DATABASE_URL)
 
     # Initialize beanie with the Sample document class and a database
-    await init_beanie(database=client["tiplogs"], document_models=[User, Organization, Group, Individual,IndividualGroupHistory])
+    await init_beanie(database=client["tiplogs"], document_models=[User, Organization, Group, Individual,IndividualGroupHistory,AttendanceModule])
     print("Database initialized successfully")

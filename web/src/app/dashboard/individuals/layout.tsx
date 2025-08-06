@@ -1,5 +1,5 @@
 import { Button } from "@/shadcn/components/ui/button"
-import {  UserPlus } from "lucide-react"
+import {  Bell, UserPlus } from "lucide-react"
 import { ReactNode } from "react"
 import Link from "next/link"
 
@@ -15,7 +15,7 @@ export default function Layout({children}:{children:ReactNode}) {
         <div className="flex items-center gap-3">
         <Link href={"/dashboard/individuals/requests"}>
         <Button variant={"secondary"} className="px-6 py-3 rounded-md flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
+          <Bell className="h-5 w-5" />
           Registration Requests
         </Button>
         </Link>
