@@ -39,7 +39,7 @@ interface GroupPayload {
 }
 
 interface ResponsePayload {
-  payload: GroupPayload[];
+  payload:{groups_to_users: GroupPayload[],module:{name:string,description:string,created_at:string}};
 }
 
 
@@ -51,13 +51,14 @@ export async function GetModuleGroupUsersApi(id:string) {
 
 
 
-export interface IAddGroupAttendanceModulePayload{
+
+
+export interface IUpdateAssignedGroupUsersAttModulePayload{
   group:string;
   users:string[]
 }
-
-export async function AddGroupToAttendanceModuleApi(id:string,payload:IAddGroupAttendanceModulePayload) {
+export async function UpdateAssignedGroupUsersAttModuleApi(id:string,payload:IUpdateAssignedGroupUsersAttModulePayload) {
   const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.put(`/att/module/add/group/${id}`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
+  const res = await Axios.put(`/att/module/assign/group/user/${id}`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }

@@ -141,8 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* Main Navigation */}
               {data.nav.map((item) => (
-                <>
-        <SidebarGroup>
+        <SidebarGroup key={item?.title}>
           <SidebarGroupLabel>{item?.title}</SidebarGroupLabel>
             <SidebarMenu>
                 {
@@ -161,7 +160,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               }
               </SidebarMenu>
             </SidebarGroup>
-              </>
               ))}
 
 

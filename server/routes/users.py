@@ -291,7 +291,10 @@ class UsersPairsProjectModel(BaseModel):
 async def GetUserPairs(user=Depends(authorize_user)):
     try :
         users = await User.find(User.organization.id==ObjectId(user["organization"]),User.is_blocked==False ,User.is_deleted==False,projection_model=UsersPairsProjectModel).to_list()
-        return Respond(payload=[{"name":user.full_name + " "+ user.username , "id":str(user.id)}for user in users])
+
+        return Respond(payload={"list":[{"name":f"{user.full_name}  {user.username}", "id":str(user.id)}for user in users],"pairs":{
+            str(user.id) : f"{user.full_name}  {user.username}" for user in users
+        }})
     except Exception as e :
         traceback.print_exc()
         print(e)

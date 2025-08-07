@@ -1,4 +1,4 @@
-import { AddGroupToAttendanceModuleApi, CreateAttModuleformApi, EditAttModuleDetailsApi, GetAttModulesApi, GetModuleGroupUsersApi, IAddGroupAttendanceModulePayload } from "@/app/api/att_module.api";
+import { CreateAttModuleformApi, EditAttModuleDetailsApi, GetAttModulesApi, GetModuleGroupUsersApi,  IUpdateAssignedGroupUsersAttModulePayload, UpdateAssignedGroupUsersAttModuleApi } from "@/app/api/att_module.api";
 import { ICreateAttModuleform } from "@/types/att_module";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -63,13 +63,16 @@ export function useGetAttModuleGroupUsers(){
 }
 
 
-export function useAddGroupAttendanceModule(){
+export function useUpdateGroupUserAttendanceModule(cb:()=>void){
+    const {refetch} = useGetAttModuleGroupUsers()
     const params = useParams()
     const id = (params.id || "") as string
     return useMutation({
-        mutationFn:(data:IAddGroupAttendanceModulePayload)=>AddGroupToAttendanceModuleApi(id,data),
+        mutationFn:(data:IUpdateAssignedGroupUsersAttModulePayload)=>UpdateAssignedGroupUsersAttModuleApi(id,data),
         onSuccess(){
             toast.success("Attendance module is updated successfully")
+            cb?.();
+            refetch()
         },
         onError(error:any) {
             toast.error(error.response.data.message||"Action could not be performed")

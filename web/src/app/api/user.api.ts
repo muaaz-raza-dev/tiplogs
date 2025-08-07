@@ -61,10 +61,15 @@ export async function FetchUserBasicDetailsApi(user_id:string, ) {
 }
 
 
-
+interface IUserPairResponsePayload{
+  payload: {list:
+    {name:string;id:string}[] ,
+    pairs:{[key:string]:string} // id : name
+  }
+}
 export async function GetUserPairs( ) {
   const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.get(`/user/pairs`,{headers: { Authorization: `Bearer ${t}` } })
+  const res = await Axios.get<IUserPairResponsePayload>(`/user/pairs`,{headers: { Authorization: `Bearer ${t}` } })
   return res.data;
 
 }

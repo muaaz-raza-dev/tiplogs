@@ -1,12 +1,12 @@
-import { useGetGroupPairs } from '@/hooks/query/useGroupQ'
+import { AttModuleGroupUserAssignmentAtom } from '@/lib/atoms/att-module.atom'
 import { Button } from '@/shadcn/components/ui/button'
 import { Input } from '@/shadcn/components/ui/input'
+import { useSetAtom } from 'jotai'
 import { Plus, Search } from 'lucide-react'
 import React from 'react'
-import AddGroupDialog from './add-group-dialog'
 
 function ModuleGroupUserSettingsFilterbar() {
-    const {data,isPending} = useGetGroupPairs()
+  const setAtomState = useSetAtom(AttModuleGroupUserAssignmentAtom)    
   return (
     <div className="mb-6 flex gap-4 items-center">
           <div className="relative flex-1 max-w-full">
@@ -16,12 +16,10 @@ function ModuleGroupUserSettingsFilterbar() {
               className="pl-10"
             />
           </div>
-          <AddGroupDialog>
-          <Button variant={"secondary"}>
+          <Button variant={"secondary"} onClick={()=>setAtomState({group_selection_disabled:false,selected_group:"",selected_users:[],open_dialog:true})}>
             <Plus className="h-4 w-4 mr-2" />
             Add more Group
           </Button>
-          </AddGroupDialog>
         </div>
   )
 }

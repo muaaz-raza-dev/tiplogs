@@ -1,5 +1,5 @@
 import ServerRequestLoader from "@/components/loaders/server-request-loader"
-import { useEditAttModuleDetails } from "@/hooks/query/useAttModuleQ"
+import { useEditAttModuleDetails, useUpdateGroupUserAttendanceModule } from "@/hooks/query/useAttModuleQ"
 import { Button } from "@/shadcn/components/ui/button"
 import {
   Dialog,

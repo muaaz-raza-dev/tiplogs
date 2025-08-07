@@ -1,3 +1,4 @@
+import traceback;
 from fastapi import APIRouter ,Response ,Depends 
 from middleware.authorization import authorize_user
 from middleware.authorize_role import AuthorizeRole
@@ -7,6 +8,7 @@ from models.organization import Organization
 from utils.response import Respond
 from models.group import Group
 from bson import ObjectId
+from models.att_module import Group_to_User
 import asyncio
 from models.user import User
 router = APIRouter(prefix="/att/module")
@@ -89,12 +91,12 @@ async def GetModuleGroupUsers(id:str ,user=Depends(authorize_user)):
         users_pairs = { str(user.id): user for user in fetched_users if user is not None}
 
         payload = [ {  "group":str(doc.group), "users": [{**users_pairs[str(user)].model_dump(include={"full_name", "username"}),"id": str(user)}for user in doc.users if str(user) in users_pairs]} for doc in module.groups_to_users]
-        return Respond(payload=payload)
+        return Respond(payload={"groups_to_users":payload,"module":{"name":module.name , "description":module.description , "created_at":module.created_at.date().isoformat()}})
     except Exception as e :
         print(e)
         return Respond(status_code=501,message="Internal server error")
 
-@router.put("/add/group/{id}")
+@router.put("/assign/group/user/{id}")
 async def GetModuleGroupUsers(id:str,payload:AddGroupToAttendanceModulePayloadBody,user=Depends(authorize_user)):
     try :
         res = AuthorizeRole(user_role=user["role"],role_to_allow="admin")
@@ -109,10 +111,24 @@ async def GetModuleGroupUsers(id:str,payload:AddGroupToAttendanceModulePayloadBo
         if not group : 
             return Respond(status_code=401,message="Invalid group selected")
         
-        module.groups_to_users.append({"group":ObjectId(payload.group),"users":[ObjectId(user) for user in payload.users]})
+        group_to_user  = []
+        is_new_group = True
+        for each_module in module.groups_to_users : 
+            if str(each_module.group) == payload.group :
+                is_new_group = False
+                group_to_user.append(Group_to_User(group=each_module.group,users=[ObjectId(user) for user in payload.users] ))
+                continue;
+            group_to_user.append(Group_to_User(group=each_module.group,users=each_module.users))
+            
+        if is_new_group :
+            group_to_user.append(Group_to_User(group=ObjectId(payload.group),users=[ObjectId(user) for user in payload.users] ))
+            module.groups.append(group)
+
+        module.groups_to_users = group_to_user
         await module.save()
         return Respond(message="New group is added successfully")
     except Exception as e :
+        traceback.print_exc()
         print(e)
         return Respond(message="Internal server error",status_code=501)
 

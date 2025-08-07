@@ -4,6 +4,7 @@ import { Button } from '@/shadcn/components/ui/button'
 import { Users, Plus } from 'lucide-react'
 import ModuleGroupUserSettingsFilterbar from './components/filterbar'
 import ModuleGroupUsersLising from './components/module-group-users-lising'
+import AssignGroupUsersDialog from './components/att-module-assign-group-users-dialog'
 
 
 
@@ -16,8 +17,7 @@ export default function AttendanceModule() {
       <div className=" mx-auto">
         <ModuleGroupUserSettingsFilterbar/>
         <ModuleGroupUsersLising/>
-        
-        
+        <AssignGroupUsersDialog />
 
  
 

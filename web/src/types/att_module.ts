@@ -8,3 +8,13 @@ export const CreateAttModuleformSchema = z.object({
 })
 
 export type ICreateAttModuleform = z.infer<typeof CreateAttModuleformSchema>
+
+
+
+
+export interface IgroupUserAssignmentDialogAtomState{
+  selected_group:string;
+  group_selection_disabled:boolean;
+  selected_users:string[];
+  open_dialog:boolean
+}
