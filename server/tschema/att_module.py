@@ -15,3 +15,6 @@ class EditAttendanceModulePayloadBody(BaseModel):
 class AddGroupToAttendanceModulePayloadBody(BaseModel):
     group:str;
     users:List[str]
+
+class ValidateAttendanceDatePayloadBody(BaseModel):
+    date:str  # Date should be in this format => YYYY-MM-DD

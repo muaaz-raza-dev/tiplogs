@@ -8,7 +8,7 @@ from utils.response import Respond
 from jose import jwt
 from models.user import User, UserRole
 from utils.mail import conf
-from smtplib import SMTPRecipientsRefused, SMTPException
+from smtplib import SMTPException
 
 async def SendVerificationMail(user_details : User):
     try : 

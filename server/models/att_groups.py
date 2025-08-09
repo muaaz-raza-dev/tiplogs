@@ -1,17 +1,16 @@
-from beanie import Document,Link ,Field
-from models.att_module import attendance_frequency
+from beanie import Document,Link 
+from pydantic import Field
 from models.generals import TimeStamps
-from typing import TYPE_CHECKING,List
 from enum import Enum
-from typing import TYPE_CHECKING,Optional
+from typing import Optional,List
 from datetime import datetime
 from models.Individual import Individual 
 from pydantic import BaseModel
-if TYPE_CHECKING:  # type: ignore
-    from models.group import Group  
-    from models.user import User
-    from models.att_daily_base import AttendanceDailyBase
-    from models.att_custom_base import AttendanceCustomBase
+from models.att_base import AttendanceEventStatus
+from datetime import timezone
+from models.att_base import AttendanceBase
+from models.group import Group  
+from models.user import User
 
 class Attendance_Status(str,Enum):
     present = "present"
@@ -23,21 +22,24 @@ class AttendanceRecord (BaseModel):
     individual:Link["Individual"]
     status: Attendance_Status 
 
-    att_taken_at :  datetime = Field(default_factory=datetime.utcnow) 
+    att_taken_at :  datetime = Field(default_factory=lambda: datetime.now(timezone.utc)) 
 
     reporting_time : datetime
-    leave_reason: Optional[str] | None = None
+    att_note:Optional[str] = None
 
-class AttendanceGroups(Document , TimeStamps): 
-    att_base_id : Link["AttendanceDailyBase"|"AttendanceCustomBase"] 
-    type : attendance_frequency 
+class AttendanceGroup(Document , TimeStamps): 
+    att_base : Link["AttendanceBase"] 
 
-    group_id : Link["Group"] 
-    taken_by: Link["User"] 
-    
+    group : Link["Group"] 
+    taken_by: Link["User"]
+    attendance_status : AttendanceEventStatus
+
     attendance : List[AttendanceRecord] 
     
     class Settings :
+        name = "attendance_group"
         indexes = [[("att_base_id", 1), ("group_id", 1)],
                    "group_id","att_base_id"
                    ]
+        
+AttendanceGroup.model_rebuild()

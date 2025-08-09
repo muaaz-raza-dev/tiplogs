@@ -9,8 +9,8 @@ export default function ErrorPage({message}:{message:string}) {
   const router = useRouter()
 
   return (
-    <div className="flex  items-center justify-center bg-background px-4 py-12">
-      <Card className="w-full max-w-md text-center">
+    <div className="flex w-full items-center justify-center  px-4 py-12">
+      <Card className=" w-lg max-md:w-full text-center">
         <CardHeader>
           <CardTitle className="text-3xl font-bold">Not found</CardTitle>
           <CardDescription>

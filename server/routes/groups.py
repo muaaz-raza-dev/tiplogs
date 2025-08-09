@@ -154,7 +154,9 @@ async def GetMetaRegistrationData(user=Depends(authorize_user)):
 async def GetGroupMaps(user=Depends(authorize_user)):
     try : 
         groups = await Group.find(Group.organization.id == ObjectId(user["organization"])).to_list()
-        pairs = [{"id":str(g.id),"name":g.name} for g in groups]
+        pairs = [{
+            
+            "id":str(g.id),"name":g.name} for g in groups]
         return Respond(payload=pairs)
     except Exception as e :
         print(e)

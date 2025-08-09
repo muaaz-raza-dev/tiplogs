@@ -1,4 +1,3 @@
-"use client"
 import { ICreateAttModuleform } from "@/types/att_module";
 import { Axios } from "./axios";
 

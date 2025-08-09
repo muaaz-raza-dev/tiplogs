@@ -30,14 +30,15 @@ class Individual(Document,TimeStamps):
     # id details 
     #* username = grno 
     password : str 
-
+    # Individual Id in the organization
     is_approved : bool = False
     is_rejected:bool = False
     approved_by : Optional[Link[User]] = None # type: ignore This field is to identify which user either reject or accept
     approved_on : Optional[datetime] = None
 
-    # Attendance status 
     is_terminated : bool = False 
+
+    # Individual Portal context 
     is_blocked : bool = False
 
     class Settings :
