@@ -31,7 +31,7 @@ class AttendanceGroup(Document , TimeStamps):
     att_base : Link["AttendanceBase"] 
 
     group : Link["Group"] 
-    taken_by: Link["User"]
+    taken_by: Optional[Link["User"]] = None
     attendance_status : AttendanceEventStatus
 
     attendance : List[AttendanceRecord] 

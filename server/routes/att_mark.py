@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from tschema.att_module import MarkAttendanceBodyPayload
 from middleware.authorization import authorize_user
 from models.user import User
 from bson import ObjectId
@@ -10,7 +11,7 @@ from models.Individual import Individual
 from models.att_groups import AttendanceGroup
 from pydantic import BaseModel , Field
 import traceback
-from models.att_base import AttendanceBase,attendance_frequency,AttendanceEventStatus
+from models.att_base import AttendanceBase,AttendanceEventStatus
 from typing import Optional
 from datetime import datetime
 from utils.date import GetAttendanceDate
@@ -84,7 +85,7 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
             if not attendance_base : 
                 attendance_base = AttendanceBase(att_module=module_doc,att_date=att_date,created_by=user_doc,status=AttendanceEventStatus.progess,frequency=module_doc.frequency)
                 await attendance_base.insert();
-                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,taken_by=user_doc,attendance=[],attendance_status=AttendanceEventStatus.progess)
+                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[],attendance_status=AttendanceEventStatus.progess)
                 await attendance_group.insert()
                 return Respond(message="Start your attendance",payload={"attendance_group":str(attendance_group.id),"status":"pending","date":attendance_base.att_date.date().isoformat()})
             
@@ -94,7 +95,7 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
             attendance_group =await AttendanceGroup.find_one(AttendanceGroup.att_base.id==attendance_base.id,AttendanceGroup.group.id==group_doc.id)
 
             if not attendance_group :
-                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,taken_by=user_doc,attendance=[])
+                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[])
                 await attendance_group.insert()
                 return Respond(message="Start your attendance",payload={"attendance_group":str(attendance_group.id),"status":"pending","date":attendance_base.att_date.date().isoformat()})
 
@@ -107,3 +108,52 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
             traceback.print_exc()
             print(e)
             return Respond(message="Internal server error",status_code=501)
+        
+
+
+
+
+
+
+
+
+
+
+
+@router.post("/mark/{id}")
+async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(authorize_user)):
+        try :
+            if not ObjectId.is_valid(id) :
+                return Respond(message="Invalid Id", status_code=402)
+            att_group = await AttendanceGroup.get(ObjectId(id))
+            if not att_group:
+                return Respond(message="Invalid Id", status_code=402)
+            att_base =await att_group.att_base.fetch()
+            att_module = await att_group.att_module.fetch()
+            is_group_exist = any(True for doc in att_module.groups_to_users if str(doc.group) == str(att_base.group.ref.id))
+            if not is_group_exist : 
+                return Respond(message="Invalid Id", status_code=402)
+            
+            is_user_allowed   = next(
+                    (True for group_to_user in att_module.groups_to_users
+                    if str(group_to_user.group) == str(att_group.group.ref.id)
+                    and any(user["id"] == str(user_i) for user_i in group_to_user.users)
+                    ), False)
+            
+            if not is_user_allowed : 
+                return Respond(message="Invalid Id", status_code=402)
+            
+            total_individuals=await Individual.find(Individual.organization.id==ObjectId(user["organization"]),Individual.group.id==ObjectId(att_group.group.ref.id)).count()
+
+            if not payload.attendance.count() == total_individuals :
+                return Respond(message="Invalid attendance data",status_code=403)
+            user_doc = await User.get(ObjectId(user["id"]))         
+            att_group.attendance = payload.attendance
+            att_group.taken_by = user_doc
+            att_group.attendance_status = AttendanceEventStatus.complete
+
+            return Respond(message="Attendance is registered successfully")
+
+        except Exception as e :
+            traceback.print_exc()
+            return Respond(message="Internal server error",status_code=501)    

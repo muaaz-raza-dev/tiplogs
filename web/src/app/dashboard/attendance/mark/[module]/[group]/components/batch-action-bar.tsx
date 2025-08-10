@@ -1,4 +1,4 @@
-import { MarkAttendanceListAtom } from '@/lib/atoms/mark-att.atom'
+import { MarkAttendanceAtom, MarkAttendanceListAtom } from '@/lib/atoms/mark-att.atom'
 import { Badge } from '@/shadcn/components/ui/badge'
 import { Button } from '@/shadcn/components/ui/button'
 import { Card, CardContent } from '@/shadcn/components/ui/card'
@@ -9,8 +9,15 @@ import React from 'react'
 
 function BatchActionBar() {
   const [Attendance,setAttendace] = useAtom(MarkAttendanceListAtom)
+  const [attendanceState,setAttendanceState] = useAtom(MarkAttendanceAtom)
   function MarkAll(status:AttendanceStatus){
     setAttendace(Attendance.map(e=>({...e,status:status})))
+    if (status==""){
+      setAttendanceState({...attendanceState,general:{...attendanceState.general,unmarked:attendanceState.general.total_individuals}})
+    }
+    else{
+      setAttendanceState({...attendanceState,general:{...attendanceState.general,unmarked:0}})
+    }
   }
   
   return (

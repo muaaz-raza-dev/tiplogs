@@ -116,3 +116,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* For WebKit browsers (Chrome, Edge, Safari) */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-clock" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 1 .5.5v4h3a.5.5 0 0 1 0 1H8a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm0-1A7 7 0 1 1 8 1a7 7 0 0 1 0 14z"/></svg>') no-repeat center;
+  background-size: 16px 16px;
+  color: white;
+  opacity: 1;
+  cursor: pointer;
+  padding-right: 8px;
+
+}
+
+/* Hide default icon background in Firefox */
+input[type="time"]::-moz-focus-inner {
+  border: 0;
+}

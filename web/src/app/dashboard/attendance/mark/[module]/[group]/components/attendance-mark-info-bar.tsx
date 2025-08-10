@@ -10,7 +10,6 @@ import { MarkAttendanceAtom, MarkAttendanceListAtom } from '@/lib/atoms/mark-att
 
 function AttendanceMarkInfoBar() {
   const state = useAtomValue(MarkAttendanceAtom)
-  console.log(state)
   return (
     <>
     <div className="mb-4 flex items-center justify-between gap-3">
@@ -41,7 +40,7 @@ function AttendanceMarkInfoBar() {
             </CardTitle>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span>
-                {state.general.total_individuals} individuals • {<UnmarkedIndividuals/>} unmarked
+                {state.general.total_individuals} individuals • {state.general.unmarked} unmarked
               </span>
             </div>
           </div>
@@ -59,8 +58,3 @@ function AttendanceMarkInfoBar() {
 }
 export default AttendanceMarkInfoBar
 
-function UnmarkedIndividuals(){
-  const state = useAtomValue(MarkAttendanceListAtom)
-  const unmarked =state.reduce((count, item) => count + (item.status == "" ? 1 : 0), 0)
-  return <>{unmarked}</>
-}

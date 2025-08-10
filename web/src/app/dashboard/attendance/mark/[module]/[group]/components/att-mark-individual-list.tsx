@@ -6,6 +6,7 @@ import {
   AvatarImage,
 } from "@/shadcn/components/ui/avatar";
 import { Card } from "@/shadcn/components/ui/card";
+import { Input } from "@/shadcn/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,7 +21,7 @@ import {
 } from "@/shadcn/components/ui/toggle-group";
 import { AttendanceStatus } from "@/types/atoms/mark-attendance";
 import clsx from "clsx";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import React from "react";
 const status_colors:{[key:string]:string} = {
   "present":"bg-green-800",
@@ -42,15 +43,17 @@ const Readable_Statuses={
 }
 function AttMarkIndividualList() {
   const [Attendances,setAttendances] = useAtom(MarkAttendanceListAtom)
-
+  const [attendanceState,setAttendanceState] = useAtom(MarkAttendanceAtom)
   function handleStatusChange(key:number,status:AttendanceStatus){
-      const attendance= Attendances.map((s,index)=>{        
-        if (index==key){
-          return {...s, status : s.status==status?"":status}
-        }
-        return s
-            })
-      setAttendances(attendance)
+    const attendance= Attendances.map((s,index)=>{        
+      if (index==key){
+        return {...s, status : s.status==status?"":status}
+      }
+      return s
+    })
+    setAttendances(attendance)
+
+    setAttendanceState({...attendanceState,general:{...attendanceState.general,unmarked:attendance.reduce((count,item)=>(count+(item.status==""?1:0)),0)}})
   }
 
   return (
@@ -62,6 +65,7 @@ function AttMarkIndividualList() {
               <TableHead className="text-center">GRNO</TableHead>
               <TableHead className="text-center">Roll No</TableHead>
               <TableHead>Individual information</TableHead>
+              <TableHead>Reporting time</TableHead>
               <TableHead className="">Mark Attendance</TableHead>
               <TableHead className="">Selected Attendance</TableHead>
             </TableRow>
@@ -92,6 +96,9 @@ function AttMarkIndividualList() {
                     </div>
                   </div>
                 </div>
+              </TableCell>
+              <TableCell>
+                <Input type="time" className="w-full " value={s.reporting_time}/>
               </TableCell>
               <TableCell>
                 <ToggleGroup type="single" className="flex flex-wrap gap-2" value={s.status} onValueChange={(v:AttendanceStatus)=>handleStatusChange(index,v)} >

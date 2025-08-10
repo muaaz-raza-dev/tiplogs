@@ -7,6 +7,7 @@ import { useGetMarkAttMetaData } from "@/hooks/query/useMarkAttQ";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
 import ErrorPage from "@/components/error-page";
 import AttMarkSubmit from "./components/att-mark-submit";
+import BatchActionInputBar from "./components/batch-action-input-bar";
 
 export default function AttendancePage() {
   const {isPending,isError} = useGetMarkAttMetaData()
@@ -26,6 +27,7 @@ export default function AttendancePage() {
         <>
         <AttendanceMarkInfoBar />
         <BatchActionBar />
+        <BatchActionInputBar/>
         <AttMarkIndividualList />
         <AttMarkSubmit/>
         </>
