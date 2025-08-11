@@ -2,7 +2,7 @@ import { GetMetaAttendanceInfo, MarkAttendanceApi, ValidateDateAndIdApi } from "
 import { MarkAttendanceAtom, MarkAttendanceListAtom } from "@/lib/atoms/mark-att.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -23,7 +23,7 @@ export function useGetMarkAttMetaData() {
   useEffect(() => {
   if(query.isSuccess){
     setState({...state,module:query.data.payload.module,group:query.data.payload.group,general:{...state.general,total_individuals:query.data.payload.total_individuals,unmarked:query.data.payload.total_individuals}})
-    setAttendances(query.data.payload.individuals.map(e=>({individual:e,status:"",reporting_time:""})))
+    setAttendances(query.data.payload.individuals.map(e=>({individual:e,status:"",reporting_time:"",att_note:""})))
   }
   }, [query.data,query.isSuccess])
   return query
@@ -57,14 +57,15 @@ export function useFetchMarkAttDateAndDocId() {
 export function useMarkAttendance() {
   const attendance = useAtomValue(MarkAttendanceListAtom)  
   const {general} = useAtomValue(MarkAttendanceAtom)  
-
+  const router = useRouter()
   return useMutation(
     {
       mutationFn:()=>MarkAttendanceApi(general.attendance_group_id,
         attendance.map(e=>({...e,individual:e.individual.id}))
       ),
-      onSuccess({payload}){
-
+      onSuccess(){
+        toast.success("Attendance is registered successfully")
+        router.push("/dashboard/attendance")
       },
       onError(err :any){
           toast.error(err.response.data.message)

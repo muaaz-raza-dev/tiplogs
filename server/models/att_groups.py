@@ -22,9 +22,9 @@ class AttendanceRecord (BaseModel):
     individual:Link["Individual"]
     status: Attendance_Status 
 
-    att_taken_at :  datetime = Field(default_factory=lambda: datetime.now(timezone.utc)) 
+    att_taken_at :  str = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%H:%M"))
 
-    reporting_time : datetime
+    reporting_time :  str
     att_note:Optional[str] = None
 
 class AttendanceGroup(Document , TimeStamps): 

@@ -31,6 +31,6 @@ type Payload = Override<ImarkAttendanceblock, { individual: string }>;
 
 export async function MarkAttendanceApi(id:string,payload:Payload[]) {
   const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.post(`/att/mark/${id}`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
+  const res = await Axios.post(`/att/mark/${id}`,{attendance:payload}, {headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }

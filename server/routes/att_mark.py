@@ -95,7 +95,7 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
             attendance_group =await AttendanceGroup.find_one(AttendanceGroup.att_base.id==attendance_base.id,AttendanceGroup.group.id==group_doc.id)
 
             if not attendance_group :
-                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[])
+                attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[],attendance_status=AttendanceEventStatus.progess)
                 await attendance_group.insert()
                 return Respond(message="Start your attendance",payload={"attendance_group":str(attendance_group.id),"status":"pending","date":attendance_base.att_date.date().isoformat()})
 
@@ -128,9 +128,14 @@ async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(a
             att_group = await AttendanceGroup.get(ObjectId(id))
             if not att_group:
                 return Respond(message="Invalid Id", status_code=402)
+
+            print(att_group.attendance_status)
+            if att_group.attendance_status == "complete":
+                return Respond(message="Attendance is already taken ", status_code=402)
+            
             att_base =await att_group.att_base.fetch()
-            att_module = await att_group.att_module.fetch()
-            is_group_exist = any(True for doc in att_module.groups_to_users if str(doc.group) == str(att_base.group.ref.id))
+            att_module = await att_base.att_module.fetch()
+            is_group_exist = any(True for doc in att_module.groups_to_users if str(doc.group) == str(att_group.group.ref.id))
             if not is_group_exist : 
                 return Respond(message="Invalid Id", status_code=402)
             
@@ -145,12 +150,15 @@ async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(a
             
             total_individuals=await Individual.find(Individual.organization.id==ObjectId(user["organization"]),Individual.group.id==ObjectId(att_group.group.ref.id)).count()
 
-            if not payload.attendance.count() == total_individuals :
+            if not len(payload.attendance) == total_individuals :
                 return Respond(message="Invalid attendance data",status_code=403)
             user_doc = await User.get(ObjectId(user["id"]))         
+            
+
             att_group.attendance = payload.attendance
             att_group.taken_by = user_doc
             att_group.attendance_status = AttendanceEventStatus.complete
+            await att_group.save()
 
             return Respond(message="Attendance is registered successfully")
 

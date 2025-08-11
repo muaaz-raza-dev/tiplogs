@@ -23,8 +23,8 @@ class ValidateAttendanceDatePayloadBody(BaseModel):
 
 class AttendanceRecordPayload(BaseModel):
     individual: str
-    status: Attendance_Status
-    reporting_time: datetime
+    status: str
+    reporting_time:Optional[str]=None
     att_note: Optional[str] = None
 
 class MarkAttendanceBodyPayload(BaseModel):

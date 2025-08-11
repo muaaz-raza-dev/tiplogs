@@ -17,9 +17,9 @@ function AttMarkSubmit() {
     }
   }
   return (
-    <div className='w-full flex justify-end items-center'>
+    <div className={`w-full flex ${!isError?"justify-end":"justify-between"} items-center gap-2 `}>
       {isError&& <p className='text-sm text-destructive'>{Error?.response?.data.message}</p>}
-      <p className='text-sm text-destructive'>{Error?.response?.data.message}</p>
+
         <Button onClick={MarkAttendance} disabled={attendance.general.unmarked!=0}>
           {
             isPending ? <ServerRequestLoader/> : <><Save/> Submit Attendance  </>

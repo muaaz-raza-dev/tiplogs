@@ -27,8 +27,8 @@ export default function AttendancePage() {
         <>
         <AttendanceMarkInfoBar />
         <BatchActionBar />
-        <BatchActionInputBar/>
         <AttMarkIndividualList />
+        <BatchActionInputBar/>
         <AttMarkSubmit/>
         </>
       }

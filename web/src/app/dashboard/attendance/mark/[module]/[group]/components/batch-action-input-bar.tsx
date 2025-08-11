@@ -11,15 +11,16 @@ function BatchActionInputBar() {
     const[time,setTime] = useState((new Date().toLocaleTimeString()).split(":").slice(0,2).join(":"))
     function UpdateReportingTime(){
         setIndividuals(individuals.map(e=>({...e,reporting_time:time})))
+        setTime("")
     }
   return (
 
           <Card className="mb-4">
         <CardContent className="">
-            <div className="flex gap-3 items-end">
+            <div className="flex gap-3 w-full items-end">
 
-            <div className="min-w-1/4">
-            <Label className='pb-2'>Update Reporting time </Label>
+            <div className="w-full">
+            <Label className='pb-2'>Update Reporting time (all) </Label>
             <Input type='time' value={time} onChange={({target:{value}})=>setTime(value)} />
             </div>
             <Button disabled={time==""} variant={"outline"} onClick={UpdateReportingTime}>Update all</Button>
