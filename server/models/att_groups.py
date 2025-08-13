@@ -3,6 +3,7 @@ from pydantic import Field
 from models.generals import TimeStamps
 from enum import Enum
 from typing import Optional,List
+from bson import ObjectId
 from datetime import datetime
 from models.Individual import Individual 
 from pydantic import BaseModel
@@ -19,13 +20,15 @@ class Attendance_Status(str,Enum):
     leave = "leave" # It is absent but won't count as absent in the record
 
 class AttendanceRecord (BaseModel):
-    individual:Link["Individual"]
+    individual: ObjectId
     status: Attendance_Status 
 
     att_taken_at :  str = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%H:%M"))
 
     reporting_time :  str
     att_note:Optional[str] = None
+    class Config :
+        arbitrary_types_allowed=True
 
 class AttendanceGroup(Document , TimeStamps): 
     att_base : Link["AttendanceBase"] 

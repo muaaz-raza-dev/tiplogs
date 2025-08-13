@@ -205,11 +205,11 @@ async def RenewAccessToken(RefreshToken:str|None = Cookie(default=None,alias=APP
     if not user :
         return Respond(status_code=401,message="Invalid credentials",payload={"events":{"logout":True}})
     
-    accessToken = jwt.encode( {"id":str(user.id),"is_verified":user.is_verified,"username":user.username,"organization":str(user.organization.ref.id),"role":user.role },JWT_SECRET,algorithm=JWT_ALGORITHM)
+    accessToken = jwt.encode( {"id":str(user.id),"is_verified":user.is_verified,"username":user.username,"organization":str(user.organization.ref.id),"role":user.role,},JWT_SECRET,algorithm=JWT_ALGORITHM)
 
     return Respond(payload={"accessToken":accessToken,
                                "user": {
-        **user.model_dump(include={"is_verified", "email", "username", "full_name", "role"}),
+        **user.model_dump(include={"is_verified", "email", "username", "full_name", "role","photo"}),
         "organization": str(user.organization.ref.id) if user.organization else None
     }
                             })
@@ -218,8 +218,8 @@ async def RenewAccessToken(RefreshToken:str|None = Cookie(default=None,alias=APP
 
 @router.post("/logout")
 async def LogOut(res:Response):
-    res.delete_cookie(APP_REFRESH_COOKIE_KEY)
-    return Respond(message="logged out successfully")
+    RespondCookie(res=res,key=APP_REFRESH_COOKIE_KEY,value="",expiry=0)
+    return Respond(message="logged out successfully",headers=res.headers)
 
 
 

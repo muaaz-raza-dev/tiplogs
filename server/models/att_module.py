@@ -10,15 +10,6 @@ from models.organization import Organization
 from models.user import User
 from models.group import Group
 
-class days (str,Enum):
-    mon = "mon"
-    tue = "tue" 
-    wed = "wed" 
-    thu = "thu"
-    fri = "fri" 
-    sat = "sat" 
-    sun = "sun" 
-
 class attendance_frequency (str,Enum): 
     daily = "daily" 
     custom = "custom"
@@ -35,6 +26,7 @@ class AttendanceModule(Document,TimeStamps):
     description:Optional[str] = None 
 
     groups: List[Link[Group]]
+    users:Optional[List[ObjectId]] =None
     
     frequency: attendance_frequency 
 
@@ -49,5 +41,7 @@ class AttendanceModule(Document,TimeStamps):
     class Settings:
         name = "attendance_modules"
         indexes = ["name","organization"]
-
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
 

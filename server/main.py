@@ -6,6 +6,7 @@ from routes.groups import router as GroupRouter
 from routes.individuals import router as Individualrouter
 from routes.att_module import router as AttendanceModuleRouter
 from routes.att_mark import router as AttendanceMarkingRouter
+from routes.att import router as AttendanceRouter
 from db import init 
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +37,7 @@ app.include_router(GroupRouter,prefix="/api")
 app.include_router(GeneralRouter,prefix="/api")
 app.include_router(AttendanceModuleRouter,prefix="/api")
 app.include_router(AttendanceMarkingRouter,prefix="/api")
+app.include_router(AttendanceRouter,prefix="/api")
 
 
 

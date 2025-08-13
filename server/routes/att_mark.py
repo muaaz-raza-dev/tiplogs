@@ -90,7 +90,7 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
                 return Respond(message="Start your attendance",payload={"attendance_group":str(attendance_group.id),"status":"pending","date":attendance_base.att_date.date().isoformat()})
             
             if attendance_base.is_holiday:
-                return Respond(message="Admin assigned today as holiday",status_code=403)
+                return Respond(message="Admin assigned today as holiday",status_code=403,payload={"status":"complete","is_holiday":True,"attendance_group":str(attendance_group.id),"date":attendance_base.att_date.date().isoformat()})
             
             attendance_group =await AttendanceGroup.find_one(AttendanceGroup.att_base.id==attendance_base.id,AttendanceGroup.group.id==group_doc.id)
 
@@ -154,7 +154,9 @@ async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(a
                 return Respond(message="Invalid attendance data",status_code=403)
             user_doc = await User.get(ObjectId(user["id"]))         
             
-
+            for att in payload.attendance:
+                att.__setattr__("individual",ObjectId(att.individual))
+                
             att_group.attendance = payload.attendance
             att_group.taken_by = user_doc
             att_group.attendance_status = AttendanceEventStatus.complete

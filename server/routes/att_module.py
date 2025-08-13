@@ -113,7 +113,12 @@ async def GetModuleGroupUsers(id:str,payload:AddGroupToAttendanceModulePayloadBo
         
         group_to_user  = []
         is_new_group = True
+        unique_users_list = set() 
         for each_module in module.groups_to_users : 
+
+            for users_module in each_module.users:
+                unique_users_list.add(users_module)
+
             if str(each_module.group) == payload.group :
                 is_new_group = False
                 group_to_user.append(Group_to_User(group=each_module.group,users=[ObjectId(user) for user in payload.users] ))
@@ -125,6 +130,7 @@ async def GetModuleGroupUsers(id:str,payload:AddGroupToAttendanceModulePayloadBo
             module.groups.append(group)
 
         module.groups_to_users = group_to_user
+        module.users = unique_users_list
         await module.save()
         return Respond(message="New group is added successfully")
     except Exception as e :
