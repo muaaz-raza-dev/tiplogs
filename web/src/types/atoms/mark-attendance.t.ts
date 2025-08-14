@@ -4,7 +4,8 @@ export interface ImarkAttendaneAtom {
       unmarked: number;
       att_date: Date;
       attendance_group_id:string
-      status:"pending"|"complete"
+      status:"pending"|"complete",
+      is_holiday:boolean;
     } ,
   module: {id:string,
     name: string;

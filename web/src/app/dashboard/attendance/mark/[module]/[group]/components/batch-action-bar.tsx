@@ -2,7 +2,7 @@ import { MarkAttendanceAtom, MarkAttendanceListAtom } from '@/lib/atoms/mark-att
 import { Badge } from '@/shadcn/components/ui/badge'
 import { Button } from '@/shadcn/components/ui/button'
 import { Card, CardContent } from '@/shadcn/components/ui/card'
-import { AttendanceStatus } from '@/types/atoms/mark-attendance'
+import { AttendanceStatus } from '@/types/atoms/mark-attendance.t'
 import { useAtom, useAtomValue } from 'jotai'
 import { CheckCircle2, Circle, RotateCcw } from 'lucide-react'
 import React from 'react'

@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shadcn/components/ui/dialog";
-import { IgroupHistory } from "@/types/group";
+import { IgroupHistory } from "@/types/group.t";
 import { SetStateAction } from "jotai";
 import moment from "moment";
 import { Dispatch } from "react";

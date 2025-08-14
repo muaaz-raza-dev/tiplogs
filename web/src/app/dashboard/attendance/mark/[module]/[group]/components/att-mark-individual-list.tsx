@@ -20,7 +20,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/shadcn/components/ui/toggle-group";
-import { AttendanceStatus } from "@/types/atoms/mark-attendance";
+import { AttendanceStatus } from "@/types/atoms/mark-attendance.t";
 import clsx from "clsx";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Notebook, Paperclip } from "lucide-react";

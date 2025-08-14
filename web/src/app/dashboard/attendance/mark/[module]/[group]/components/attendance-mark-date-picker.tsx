@@ -7,23 +7,24 @@ import { Calendar } from '@/shadcn/components/ui/calendar'
 import { Label } from '@/shadcn/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover'
 import { AxiosError } from 'axios'
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { CalendarIcon } from 'lucide-react'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 
 function AttendanceMarkDatePicker() {
   const [open,setOpen] = useState(false)
-  const {general:{att_date}} = useAtomValue(MarkAttendanceAtom)
-  const {isError,error,isPending,mutate} = useFetchMarkAttDateAndDocId()
-  const Error = error as AxiosError<{message:string}>
+  const [state ,setState]= useAtom(MarkAttendanceAtom)
+  const {general:{att_date}} = state
+  const {isPending,mutate} = useFetchMarkAttDateAndDocId()
   const [date,setDate] = useState(new Date())
-
   function ChangeDate(){
     if(att_date.toLocaleDateString()!=date.toLocaleDateString()){
         mutate(moment(date).format("YYYY-MM-DD") )
     }
+    setState({...state,general:{...state.general,att_date:date}})
   }
+
   useEffect(() => {
       mutate(moment().format("YYYY-MM-DD"))
   }, [])
@@ -47,9 +48,6 @@ function AttendanceMarkDatePicker() {
     </Popover>
     <Button onClick={ChangeDate} variant={"secondary"}>{isPending ? <ServerRequestLoader/>:  "Change Date"} </Button>
     </div>
-    {
-      isError ? <p className='py-4 text-destructive'>{Error.response?.data.message}</p> : null
-    }
     </div>
   )
 }

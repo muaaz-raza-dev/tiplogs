@@ -8,6 +8,10 @@ import ServerRequestLoader from "@/components/loaders/server-request-loader";
 import ErrorPage from "@/components/error-page";
 import AttMarkSubmit from "./components/att-mark-submit";
 import BatchActionInputBar from "./components/batch-action-input-bar";
+import AttStateNotifier from "./components/att-state-notifier";
+import { Button } from "@/shadcn/components/ui/button";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 export default function AttendancePage() {
   const {isPending,isError} = useGetMarkAttMetaData()
@@ -25,6 +29,19 @@ export default function AttendancePage() {
         </div>
         :
         <>
+            <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm" className="-ml-2">
+            <Link href="/groups" aria-label="Back to Groups Overview">
+              <ChevronLeft className="h-4 w-4" />
+              <span className="sr-only">{'Back'}</span>
+            </Link>
+          </Button>
+            <h1 className='font-semibold'>Mark Attendance</h1>
+          
+        </div>
+      </div>
+        <AttStateNotifier/>
         <AttendanceMarkInfoBar />
         <BatchActionBar />
         <AttMarkIndividualList />

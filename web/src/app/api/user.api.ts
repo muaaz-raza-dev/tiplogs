@@ -1,4 +1,4 @@
-import { IRegisterUserForm, IUpdateUserForm } from "@/types/users";
+import { IRegisterUserForm, IUpdateUserForm } from "@/types/users.t";
 import { Axios } from "./axios";
 import { IgeneralAuthResponse } from "@/types/auth.t";
 

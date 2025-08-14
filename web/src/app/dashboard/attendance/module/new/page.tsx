@@ -12,7 +12,7 @@ import { Label } from "@/shadcn/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shadcn/components/ui/select"
 import { Textarea } from "@/shadcn/components/ui/textarea"
 import { MultiSelectGroups } from "./components/multi-select-group"
-import { CreateAttModuleformSchema, ICreateAttModuleform } from '@/types/att_module'
+import { CreateAttModuleformSchema, ICreateAttModuleform } from '@/types/att_module.t'
 import { useCreateAttModule } from '@/hooks/query/useAttModuleQ'
 import ServerRequestLoader from '@/components/loaders/server-request-loader'
 

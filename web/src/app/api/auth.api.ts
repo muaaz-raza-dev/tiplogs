@@ -29,3 +29,10 @@ export async function RequestEmailVerificationApi(payload: {email: string}) {
   const res = await Axios.post(`/auth/request/verification`,payload,{headers:{Authorization: `Bearer ${token}`}});
   return res.data;
 }
+
+
+export async function logOutApi(){
+  const token = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.post(`/auth/logout`,{},{headers:{Authorization: `Bearer ${token}`}});
+  return res.data;
+}

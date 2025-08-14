@@ -1,16 +1,16 @@
 "use client"
 
-import { authenticateApi,  loginApi,  registerAdminApi, RequestEmailVerificationApi } from "@/app/api/auth.api";
+import { authenticateApi,  loginApi,  logOutApi,  registerAdminApi, RequestEmailVerificationApi } from "@/app/api/auth.api";
 import { AuthSession, userAccessTokenAtom, UserVerificationAttempts } from "@/lib/atoms/auth-session.atom";
 import { ILoginForm, ISignupAdminForm } from "@/types/auth.t";
 import { useMutation, useQuery  } from "@tanstack/react-query" 
 import toast from "react-hot-toast";
-import { useSetAtom,useAtomValue} from "jotai";
-import { usePathname, useRouter } from "next/navigation";
+import { useSetAtom} from "jotai";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Cookie from "js-cookie";
 import { AxiosError } from "axios";
-import { UserRole } from "@/types/users";
+import { UserRole } from "@/types/users.t";
 export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
     const setState = useSetAtom(AuthSession);
     const setAccessToken = useSetAtom(userAccessTokenAtom)
@@ -95,7 +95,6 @@ export default function useAuthenticate() {
 
 
 export function useRequestVerification() {
-  const state = useAtomValue(AuthSession);
   const setVerificationAttempts = useSetAtom(UserVerificationAttempts);
   return useMutation({
     mutationFn:(email:string)=>RequestEmailVerificationApi({email}),
@@ -109,4 +108,24 @@ export function useRequestVerification() {
 
     
   })
+}
+
+
+export function useLogOut(){
+  const setAccessToken = useSetAtom(userAccessTokenAtom)
+  const setAuthState = useSetAtom(AuthSession)
+  const router = useRouter()
+  return useMutation({mutationFn:logOutApi,onSuccess(){
+    router.prefetch("/auth/login")
+    setAccessToken("")
+    setAuthState({isLoggedIn:false})
+    toast.success("You are logged out succesfully")
+    router.push("/auth/login")
+  },
+  onError(){
+    toast.error("Failed to logout ")
+      }
+  }
+)
+
 }

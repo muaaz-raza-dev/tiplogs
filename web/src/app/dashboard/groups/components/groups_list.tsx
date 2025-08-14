@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import ServerRequestLoader from "@/components/loaders/server-request-loader";
 import clsx from "clsx";
 import EditGroupDialog from "./edit_group_dialog";
-import { IgroupList } from "@/types/group";
+import { IgroupList } from "@/types/group.t";
 import GroupHistoryDialog from "./group_history_dailog";
 import Link from "next/link";
 

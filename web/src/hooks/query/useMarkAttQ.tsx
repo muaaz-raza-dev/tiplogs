@@ -38,10 +38,13 @@ export function useFetchMarkAttDateAndDocId() {
     {
       mutationFn:(date:string)=>ValidateDateAndIdApi(module,group,{date}),
       onSuccess({payload}){
-        setTimeout(() => {setState({...state,general:{...state.general,attendance_group_id:payload.attendance_group,att_date:new Date(payload.date)}})}, 100);
+        setTimeout(() => {setState({...state,general:{...state.general,attendance_group_id:payload.attendance_group,att_date:new Date(payload.date),status:payload.status}})}, 100);
       },
       onError(err :any){
-          toast.error(err.response.data.message)
+        const payload = err?.response?.data?.payload
+        if(payload){
+          setTimeout(() => {setState({...state,general:{...state.general,status:payload.status,is_holiday:payload?.is_holiday??false,attendance_group_id:payload.attendance_group}})}, 100);
+        }
       }
   }
 

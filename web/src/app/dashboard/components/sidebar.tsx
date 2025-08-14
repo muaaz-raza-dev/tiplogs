@@ -6,6 +6,7 @@ import {
   CircleUser,
   FileText,
   Home,
+  LibraryBig,
   ListCheck,
   LogOut,
   Plus,
@@ -23,17 +24,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shadcn/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/shadcn/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shadcn/components/ui/dropdown-menu"
+
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Separator } from "@/shadcn/components/ui/separator"
+import SideBarUserInfo from "./side-bar-user-info"
 
 // Navigation data
 const data = {
@@ -98,11 +93,18 @@ const data = {
     {
       title:"Attendance" ,
       navs:[
+        {
+        title: "Attendance",
+        url: "/dashboard/attendance",
+        exact:false,
+        exact_exclude_urls: ["/dashboard/attendance/groups/","/dashboard/attendance/groups/attendance","/dashboard/attendance/module","/dashboard/attendance/module/new"],
+        icon: LibraryBig  ,
+      } 
+      ,
        {
         title: "Attendance Modules",
         url: "/dashboard/attendance/module",
-        exact:false,
-        exact_exclude_urls: ["/dashboard/attendance/module/new"],
+        exact:true,
         icon: ListCheck ,
       } ,
         {
@@ -165,46 +167,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 
         {/* Admin Section */}
-    
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={data.user.avatar || "/placeholder.svg"} alt={data.user.name} />
-                    <AvatarFallback className="rounded-lg">JD</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{data.user.name}</span>
-                    <span className="truncate text-xs">{data.user.email}</span>
-                  </div>
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem>
-                  <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem className="group">
-                    <LogOut className="group-hover:text-secondary"/>
-                  <span> Log out</span>
-                  
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <SideBarUserInfo/>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

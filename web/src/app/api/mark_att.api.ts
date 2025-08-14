@@ -1,4 +1,4 @@
-import { ImarkAttendanceblock } from "@/types/atoms/mark-attendance";
+import { ImarkAttendanceblock } from "@/types/atoms/mark-attendance.t";
 import { Axios } from "./axios";
 interface IMetaMarkAttendaceResponse{
     payload:{

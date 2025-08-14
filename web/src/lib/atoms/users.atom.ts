@@ -1,4 +1,4 @@
-import { IusersListAtom } from '@/types/users';
+import { IusersListAtom } from '@/types/users.t';
 import {atom} from "jotai"
 
 export const UsersListingAtom = atom<IusersListAtom>(

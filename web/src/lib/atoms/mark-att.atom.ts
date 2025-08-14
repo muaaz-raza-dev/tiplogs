@@ -1,4 +1,4 @@
-import { ImarkAttendanceblock, ImarkAttendaneAtom } from "@/types/atoms/mark-attendance";
+import { ImarkAttendanceblock, ImarkAttendaneAtom } from "@/types/atoms/mark-attendance.t";
 import {atom} from "jotai"
 
 export const MarkAttendanceAtom = atom<ImarkAttendaneAtom>(
@@ -8,7 +8,8 @@ export const MarkAttendanceAtom = atom<ImarkAttendaneAtom>(
         total_individuals: 0,
         unmarked: 0,
         att_date: new Date(),
-        status:"pending"
+        status:"pending",
+        is_holiday:false,
     },
     module: {
         id:"",

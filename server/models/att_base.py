@@ -28,5 +28,6 @@ class AttendanceBase(Document,TimeStamps):
     class Settings:
         name = "attendance_base"
         indexes = [[("att_module", 1), ("att_date", 1)]]
+        
 
 AttendanceBase.model_rebuild()

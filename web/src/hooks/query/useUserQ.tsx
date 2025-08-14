@@ -1,7 +1,7 @@
 "use client"
 import { FetchUserBasicDetailsApi, getAllUsersApi, GetUserPairs, IGetAllUsersPayload, registerUserbyAdminApi, ToggleBlockUserApi, updateUserByAdminApi } from "@/app/api/user.api";
 import { UsersListingAtom } from "@/lib/atoms/users.atom";
-import { IRegisterUserForm, IUpdateUserForm } from "@/types/users";
+import { IRegisterUserForm, IUpdateUserForm } from "@/types/users.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useAtom } from "jotai";

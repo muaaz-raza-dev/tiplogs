@@ -1,4 +1,4 @@
-import { IgroupUserAssignmentDialogAtomState } from "@/types/att_module";
+import { IgroupUserAssignmentDialogAtomState } from "@/types/att_module.t";
 import {atom} from "jotai"
 
 export const AttModuleGroupUserAssignmentAtom = atom<IgroupUserAssignmentDialogAtomState>(

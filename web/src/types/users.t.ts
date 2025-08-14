@@ -9,6 +9,7 @@ export enum UserRole {
 export const user_roles = [ "admin", "user", "manager" ] as const;
 export interface Iuser{
     full_name:string
+    photo:string;
     email:string
     username:string
     is_verified:boolean

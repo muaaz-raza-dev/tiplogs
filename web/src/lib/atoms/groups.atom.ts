@@ -1,4 +1,4 @@
-import { IGroupListingAtom } from '@/types/group';
+import { IGroupListingAtom } from '@/types/group.t';
 import {atom} from "jotai"
 
 export const GroupsListingAtom = atom<IGroupListingAtom>(

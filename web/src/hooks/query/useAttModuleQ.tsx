@@ -1,5 +1,5 @@
 import { CreateAttModuleformApi, EditAttModuleDetailsApi, GetAttModulesApi, GetModuleGroupUsersApi,  IUpdateAssignedGroupUsersAttModulePayload, UpdateAssignedGroupUsersAttModuleApi } from "@/app/api/att_module.api";
-import { ICreateAttModuleform } from "@/types/att_module";
+import { ICreateAttModuleform } from "@/types/att_module.t";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";

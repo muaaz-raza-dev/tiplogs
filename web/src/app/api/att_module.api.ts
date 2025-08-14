@@ -1,4 +1,4 @@
-import { ICreateAttModuleform } from "@/types/att_module";
+import { ICreateAttModuleform } from "@/types/att_module.t";
 import { Axios } from "./axios";
 
 export async function CreateAttModuleformApi(data:ICreateAttModuleform) {

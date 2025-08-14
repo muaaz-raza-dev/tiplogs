@@ -41,8 +41,6 @@ class AttendanceGroup(Document , TimeStamps):
     
     class Settings :
         name = "attendance_group"
-        indexes = [[("att_base_id", 1), ("group_id", 1)],
-                   "group_id","att_base_id"
-                   ]
+        indexes = [[("att_base", 1), ("group", 1)],"group","att_base"]
         
 AttendanceGroup.model_rebuild()

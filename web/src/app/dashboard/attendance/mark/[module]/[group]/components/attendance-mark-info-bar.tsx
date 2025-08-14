@@ -12,18 +12,7 @@ function AttendanceMarkInfoBar() {
   const state = useAtomValue(MarkAttendanceAtom)
   return (
     <>
-    <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="-ml-2">
-            <Link href="/groups" aria-label="Back to Groups Overview">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">{'Back'}</span>
-            </Link>
-          </Button>
-            <h1 className='font-semibold'>Mark Attendance</h1>
-          
-        </div>
-      </div>
+
 
     <Card className="mb-4 w-full">
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

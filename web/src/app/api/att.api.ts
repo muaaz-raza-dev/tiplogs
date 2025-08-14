@@ -1,0 +1,62 @@
+import { Axios } from "./axios";
+interface IGetAttModulesUserSpecificPayload{
+    payload:{
+        modules:{name:string,description:string,frequency:"daily"|"custom",id:string}[]
+    }
+}
+export async function GetAttendanceModulesUserSpecific() {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<IGetAttModulesUserSpecificPayload>("/attendance/user/modules", {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+interface IGetAttGroupUserSpecificPayload{
+    payload:{
+        groups:{name:string,total:number,id:string}[]
+    }
+}
+export async function GetAttendanceModuleSpecificGroupsApi(module:string) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<IGetAttGroupUserSpecificPayload>(`/attendance/user/groups/${module}`, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+interface IattendanceModuleGroupPairsApi{
+  groups:{[key:string]:{name:"string","id":string}[]};
+  modules:{id:string,name:string,frequency:"custom"|"daily"}[]
+}
+
+export async function GetAttendanceModuleGroupPairsApi() {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<{payload:IattendanceModuleGroupPairsApi}>(`/attendance/user/module-groups/pairs`, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+interface IgetAttendanceWeeklyOverviewApiResponse{
+payload:{
+    att_date:string;
+    is_taken: boolean;
+    is_base_exists: boolean;
+
+    att_group?: {
+      att_base: string;  // ObjectId as string
+      attendance_status?: string; // probably an enum in your DB
+      created_at?: string; // "YYYY-MM-DD"
+  }[]
+
+}
+}
+
+export interface IweeklyAttendanceRequestPayload {
+  module: string;       // MongoDB ObjectId as string
+  group: string;        // MongoDB ObjectId as string
+  start_date: string;   // "YYYY-MM-DD"
+  end_date?: string;    // Optional if you compute on backend
+}
+
+export async function GetAttendanceWeeklyOverviewApi(payload:IweeklyAttendanceRequestPayload) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.post<IgetAttendanceWeeklyOverviewApiResponse>(`/attendance/user/week/record`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
