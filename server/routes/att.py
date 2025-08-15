@@ -26,7 +26,7 @@ router = APIRouter(prefix="/attendance")
 @router.get("/user/modules")
 async def GetUserModules(user=Depends(authorize_user)):
     try:
-        response_payload = {"modules": [], }
+        payload = {"modules": [], }
         if user["role"] == "admin" or user["role"] == "manager":
             modules = await AttendanceModule.find(AttendanceModule.organization.id == ObjectId(user["organization"])).to_list()
             payload["modules"] = [

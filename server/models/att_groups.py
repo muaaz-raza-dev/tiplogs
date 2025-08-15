@@ -12,32 +12,24 @@ from datetime import timezone
 from models.att_base import AttendanceBase
 from models.group import Group  
 from models.user import User
+from pydantic import BaseModel
 
-class Attendance_Status(str,Enum):
-    present = "present"
-    absent = "absent"
-    late = "late"
-    leave = "leave" # It is absent but won't count as absent in the record
+class StatusCounts(BaseModel):
+    present: int
+    absent: int
+    leave: int
+    late: int
+    half: int
 
-class AttendanceRecord (BaseModel):
-    individual: ObjectId
-    status: Attendance_Status 
-
-    att_taken_at :  str = Field(default_factory=lambda: datetime.now(timezone.utc).strftime("%H:%M"))
-
-    reporting_time :  str
-    att_note:Optional[str] = None
-    class Config :
-        arbitrary_types_allowed=True
 
 class AttendanceGroup(Document , TimeStamps): 
     att_base : Link["AttendanceBase"] 
-
     group : Link["Group"] 
     taken_by: Optional[Link["User"]] = None
-    attendance_status : AttendanceEventStatus
 
-    attendance : List[AttendanceRecord] 
+    attendance_status : AttendanceEventStatus
+    
+    status_counts:Optional[StatusCounts] =None
     
     class Settings :
         name = "attendance_group"

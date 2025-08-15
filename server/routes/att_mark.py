@@ -12,8 +12,8 @@ from models.att_groups import AttendanceGroup
 from pydantic import BaseModel , Field
 import traceback
 from models.att_base import AttendanceBase,AttendanceEventStatus
+from models.att_main import Attendance
 from typing import Optional
-from datetime import datetime
 from utils.date import GetAttendanceDate
 router = APIRouter(prefix="/att")
 
@@ -154,12 +154,21 @@ async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(a
                 return Respond(message="Invalid attendance data",status_code=403)
             user_doc = await User.get(ObjectId(user["id"]))         
             
+            status_counts = {"present":0,"absent":0,"late":0,"leave":0,"half":0}
+
+            attendance_docs =[]
             for att in payload.attendance:
-                att.__setattr__("individual",ObjectId(att.individual))
-                
-            att_group.attendance = payload.attendance
+              attendance_docs.append(Attendance(**att.model_dump(exclude={"individual"}),individual=ObjectId(att.individual),att_group=att_group,att_date=att_base.att_date,))
+              status_counts[att.status] += 1 
+
+            await Attendance.insert_many(attendance_docs)
+            
+
             att_group.taken_by = user_doc
             att_group.attendance_status = AttendanceEventStatus.complete
+            att_group.status_counts=status_counts
+            att_base.status = AttendanceEventStatus.complete
+            await att_base.save()
             await att_group.save()
 
             return Respond(message="Attendance is registered successfully")
