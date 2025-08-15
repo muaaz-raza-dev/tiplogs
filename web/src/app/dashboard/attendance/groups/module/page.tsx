@@ -82,8 +82,10 @@ export default function GroupsPage() {
               <CardContent>
                 <div className="flex items-center justify-end">
                   <div className="flex gap-2 items-center">
+                  <Link href={`/dashboard/attendance/groups/records/daily?group=${group.id}&module=${module}`}>
                   <Button variant={"secondary"}>View Attendance <List/></Button>
-                  <Link href={"/dashboard/attendance/groups/records"}>
+                  </Link>
+                  <Link href={`/dashboard/attendance/mark/${module}/${group.id}`}>
                   <Button >Take Attendance <ArrowRight/></Button>
                   </Link>
                   </div>

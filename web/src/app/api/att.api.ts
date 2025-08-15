@@ -1,3 +1,4 @@
+import { IattDetailsOverviewDoc } from "@/types/atoms/att-details-group-module.t";
 import { Axios } from "./axios";
 interface IGetAttModulesUserSpecificPayload{
     payload:{
@@ -32,20 +33,6 @@ export async function GetAttendanceModuleGroupPairsApi() {
   return res.data
 }
 
-interface IgetAttendanceWeeklyOverviewApiResponse{
-payload:{
-    att_date:string;
-    is_taken: boolean;
-    is_base_exists: boolean;
-
-    att_group?: {
-      att_base: string;  // ObjectId as string
-      attendance_status?: string; // probably an enum in your DB
-      created_at?: string; // "YYYY-MM-DD"
-  }[]
-
-}
-}
 
 export interface IweeklyAttendanceRequestPayload {
   module: string;       // MongoDB ObjectId as string
@@ -56,7 +43,7 @@ export interface IweeklyAttendanceRequestPayload {
 
 export async function GetAttendanceWeeklyOverviewApi(payload:IweeklyAttendanceRequestPayload) {
   const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.post<IgetAttendanceWeeklyOverviewApiResponse>(`/attendance/user/week/record`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
+  const res = await Axios.post<{payload:IattDetailsOverviewDoc[]}>(`/attendance/user/week/record`,payload, {headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }
 

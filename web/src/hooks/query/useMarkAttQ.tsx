@@ -23,7 +23,8 @@ export function useGetMarkAttMetaData() {
   useEffect(() => {
   if(query.isSuccess){
     setState({...state,module:query.data.payload.module,group:query.data.payload.group,general:{...state.general,total_individuals:query.data.payload.total_individuals,unmarked:query.data.payload.total_individuals}})
-    setAttendances(query.data.payload.individuals.map(e=>({individual:e,status:"",reporting_time:"",att_note:""})))
+    const reporting_time =(new Date().toLocaleTimeString()).split(":").slice(0,2).join(":")
+    setAttendances(query.data.payload.individuals.map(e=>({individual:e,status:"",reporting_time:reporting_time,att_note:""})))
   }
   }, [query.data,query.isSuccess])
   return query

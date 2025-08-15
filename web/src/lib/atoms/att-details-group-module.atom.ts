@@ -1,11 +1,13 @@
-import { IattDetailsGroupModuleDailyAtom } from "@/types/atoms/att-details-group-module.t";
+import { IattDetailsOverviewDoc, IattDetailsOverviewFilters } from "@/types/atoms/att-details-group-module.t";
 import {atom} from "jotai"
 
-export const AttModuleGroupDetailsDailyAtom = atom<IattDetailsGroupModuleDailyAtom>(
+export const AttOverviewDailyFiltersAtom = atom<IattDetailsOverviewFilters>(
     {
             group : "",
             module: "",
-            date: "",
+            start_date: "",
 
     }
 );
+
+export const AttOverviewDailyDocsAtom = atom<IattDetailsOverviewDoc[]>([]);

@@ -103,17 +103,17 @@ async def GetUserGroupModuleWeekRecord(
     user=Depends(authorize_user)
 ):
     try:
-        module =payload.module 
+        module_id =payload.module 
         group = payload.group
         start_date = payload.start_date
-        response_payload = {}
+        response_payload = []
     #   * Validations
-        if not ObjectId.is_valid(module):
+        if not ObjectId.is_valid(module_id):
             return Respond(status_code=400,message="Invalid module ID")
         if not ObjectId.is_valid(group):
             return Respond(status_code=400,message="Invalid group ID")
 
-        module = await AttendanceModule.find_one(AttendanceModule.id==ObjectId(module),AttendanceModule.organization.id==ObjectId(user["organization"]))
+        module = await AttendanceModule.find_one(AttendanceModule.id==ObjectId(module_id),AttendanceModule.organization.id==ObjectId(user["organization"]))
         if not module :
             return Respond(status_code=400,message="Invalid IDs")
         group = await Group.find_one(Group.id==ObjectId(group),Group.organization.id==ObjectId(user["organization"]))
@@ -127,15 +127,14 @@ async def GetUserGroupModuleWeekRecord(
 
         if start_date_d > today :
             return Respond(status_code=400,message="Invalid dates selected")
+        att_bases = await AttendanceBase.find(AttendanceBase.att_module.id==ObjectId(module_id),AttendanceBase.att_date >= start_date_d ,AttendanceBase.att_date <= end_date_d  ).to_list()
 
-        att_bases = await AttendanceBase.find(AttendanceBase.module.id==ObjectId(module),AttendanceBase.att_date >= start_date_d ,AttendanceBase.att_date <= end_date_d  ).to_list()
-
-        att_groups = await asyncio.gather(*(AttendanceGroup.find_one(AttendanceGroup.id== ObjectId(att_base.id),AttendanceGroup.group.id==ObjectId(group)) for att_base in att_bases))
+        att_groups = await asyncio.gather(*(AttendanceGroup.find_one(AttendanceGroup.att_base.id== ObjectId(att_base.id),AttendanceGroup.group.id==group.id) for att_base in att_bases))
 
         att_groups = [g for g in att_groups if g is not None]
 
         dates = [(start_date_d + timedelta(days=i)).date() for i in range(7)]
-
+        print(att_groups)
         for date in dates :
             date_str = date.strftime("%Y-%m-%d") 
             att_base = next((att_base for att_base in att_bases if att_base.att_date.date() == date),False)
@@ -144,7 +143,10 @@ async def GetUserGroupModuleWeekRecord(
             else :
                 att_group = next((att_group for att_group in att_groups if str(att_group.att_base.ref.id) == str(att_base.id)),None)
                 if att_group :
-                    response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":False,"att_group":{"att_base":str(att_base.id),"attendance_status":att_base.attendance_status,"created_at":att_base.created_at.date().isoformat()}})
+                    response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":True,"att_group":{"att_base":str(att_base.id),
+                    "attendance_status":att_base.status,"created_at":att_base.created_at.date().isoformat(),
+                    "status_counts":att_group.status_counts.model_dump()
+                    }})
                 else:
                     response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":False,"att_group":{"att_base":str(att_base.id)}})
 
@@ -155,5 +157,6 @@ async def GetUserGroupModuleWeekRecord(
     except PyMongoError as e:
         return Respond(status_code=500,message=f"Database error: {str(e)}")
     except Exception as e:
+        traceback.print_exc()
         return Respond(status_code=500,message=f"An unexpected error occurred: {str(e)}")
 
