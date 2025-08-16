@@ -6,3 +6,6 @@ class IweeklyAttendanceRequestPayload(BaseModel):
     module:str;
     start_date:str;
     end_date:Optional[str] = None;
+
+class IScheduleCustomAttendancePayload(BaseModel):
+    att_date:str

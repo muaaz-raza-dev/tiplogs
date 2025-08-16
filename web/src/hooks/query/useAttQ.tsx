@@ -1,18 +1,19 @@
 "use client";
-import { GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, IweeklyAttendanceRequestPayload } from "@/app/api/att.api";
+import { GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
 import { AttOverviewDailyDocsAtom } from "@/lib/atoms/att-details-group-module.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
-export function useGetAttModulesUserSpecific(){
-    return useQuery({queryFn:GetAttendanceModulesUserSpecific,queryKey:["user","modules","specific"],staleTime:3600*10,refetchOnMount:false,retry:2,refetchOnWindowFocus:false})
+export function useGetAttModulesUserSpecific(disabled?:boolean){
+    return useQuery({queryFn:GetAttendanceModulesUserSpecific,queryKey:["user","modules","specific"],staleTime:3600*10,refetchOnMount:false,retry:2,refetchOnWindowFocus:false,enabled:!disabled})
 }
 
 export function useGetAttGroupsSpecificModule(){
+    const {data} = useGetAttModulesUserSpecific(true)
     const searchParams = useSearchParams()
-    const module = (searchParams.get("module") || "")as string
+    const module = (searchParams.get("module") || data?.payload.modules[0].id )as string
     return useQuery({queryFn:()=>GetAttendanceModuleSpecificGroupsApi(module),enabled:!!module,queryKey:["user","group","specific"],staleTime:3600*10,refetchOnMount:false,retry:2,refetchOnWindowFocus:false})
 }
 
@@ -27,6 +28,30 @@ return useMutation({
     mutationFn:(payload:IweeklyAttendanceRequestPayload)=>GetAttendanceWeeklyOverviewApi(payload),
     onSuccess({payload}){
         setState(payload)
+    },
+    onError(error :any) {
+        toast.error(error.response.data.message)
+    },
+})    
+}
+
+
+export function useScheduledCustomAttendanceBase(){
+    const params = useSearchParams()
+    const module = params.get("module")
+    return useQuery({queryKey:[module,"scheduled","attendances"],queryFn:()=>GetScheduledCustomAttendance(module??""),enabled:!!module,staleTime:3600*10,refetchOnMount:false,retry:2,refetchOnWindowFocus:false})
+}
+
+
+export function useScheduleAttendance(){
+    const params = useSearchParams()
+    const module = params.get("module")
+    const{refetch} = useScheduledCustomAttendanceBase()
+return useMutation({
+    mutationFn:(payload:{att_date:string,att_base?:string})=>ScheduleCustomAttendanceApi(module||"",payload.att_date,payload.att_base),
+    onSuccess(){
+        toast.success("Attendance is scheduled successfully")
+        refetch()
     },
     onError(error :any) {
         toast.error(error.response.data.message)

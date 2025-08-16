@@ -47,3 +47,14 @@ export async function GetAttendanceWeeklyOverviewApi(payload:IweeklyAttendanceRe
   return res.data
 }
 
+export async function GetScheduledCustomAttendance(module:string) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.get<{payload:{docs:{att_date:string;id:string;created_at:string}[],total:number}}>(`/attendance/scheduled/custom/${module}`, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+export async function ScheduleCustomAttendanceApi(module:string,att_date:string,att_base?:string,){
+const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.post<{payload:{att_date:string;id:string;created_at:string}}>(`/attendance/schedule/custom/${module}?base=${att_base}`,{payload:att_date}, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}

@@ -94,10 +94,9 @@ const data = {
       title:"Attendance" ,
       navs:[
         {
-        title: "Attendance",
+        title: "Attendance Groups",
         url: "/dashboard/attendance",
-        exact:false,
-        exact_exclude_urls: ["/dashboard/attendance/groups/","/dashboard/attendance/groups/attendance","/dashboard/attendance/module","/dashboard/attendance/module/new"],
+        exact:true,
         icon: LibraryBig  ,
       } 
       ,

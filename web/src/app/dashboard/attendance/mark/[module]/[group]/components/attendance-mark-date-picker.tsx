@@ -6,10 +6,10 @@ import { Button } from '@/shadcn/components/ui/button'
 import { Calendar } from '@/shadcn/components/ui/calendar'
 import { Label } from '@/shadcn/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shadcn/components/ui/popover'
-import { AxiosError } from 'axios'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { CalendarIcon } from 'lucide-react'
 import moment from 'moment'
+import { useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
 function AttendanceMarkDatePicker() {
@@ -18,6 +18,8 @@ function AttendanceMarkDatePicker() {
   const {general:{att_date}} = state
   const {isPending,mutate} = useFetchMarkAttDateAndDocId()
   const [date,setDate] = useState(new Date())
+  const params = useSearchParams()
+
   function ChangeDate(){
     if(att_date.toLocaleDateString()!=date.toLocaleDateString()){
         mutate(moment(date).format("YYYY-MM-DD") )
@@ -26,7 +28,10 @@ function AttendanceMarkDatePicker() {
   }
 
   useEffect(() => {
-      mutate(moment().format("YYYY-MM-DD"))
+    const att_date = params.get("att_date")
+    if(att_date){
+    setDate(new Date(att_date))
+    }
   }, [])
 
   return ( <div className="">

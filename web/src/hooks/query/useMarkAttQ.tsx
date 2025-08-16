@@ -2,7 +2,8 @@ import { GetMetaAttendanceInfo, MarkAttendanceApi, ValidateDateAndIdApi } from "
 import { MarkAttendanceAtom, MarkAttendanceListAtom } from "@/lib/atoms/mark-att.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useParams, useRouter } from "next/navigation";
+import moment from "moment";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -11,7 +12,9 @@ export function useGetMarkAttMetaData() {
   const setAttendances= useSetAtom(MarkAttendanceListAtom)  
   const params = useParams();
   const { group, module } = params as { group: string; module: string };
-
+  const {mutate} = useFetchMarkAttDateAndDocId()
+  const searchParams = useSearchParams()
+  
   const query = useQuery({
     queryKey: ["mark", "att", module, group],
     queryFn: () => GetMetaAttendanceInfo(module, group),
@@ -25,6 +28,8 @@ export function useGetMarkAttMetaData() {
     setState({...state,module:query.data.payload.module,group:query.data.payload.group,general:{...state.general,total_individuals:query.data.payload.total_individuals,unmarked:query.data.payload.total_individuals}})
     const reporting_time =(new Date().toLocaleTimeString()).split(":").slice(0,2).join(":")
     setAttendances(query.data.payload.individuals.map(e=>({individual:e,status:"",reporting_time:reporting_time,att_note:""})))
+
+    mutate(moment(searchParams.get("att_date")??(new Date())).format("YYYY-MM-DD"))
   }
   }, [query.data,query.isSuccess])
   return query
@@ -39,7 +44,7 @@ export function useFetchMarkAttDateAndDocId() {
     {
       mutationFn:(date:string)=>ValidateDateAndIdApi(module,group,{date}),
       onSuccess({payload}){
-        setTimeout(() => {setState({...state,general:{...state.general,attendance_group_id:payload.attendance_group,att_date:new Date(payload.date),status:payload.status}})}, 100);
+        setState({...state,general:{...state.general,attendance_group_id:payload.attendance_group,att_date:new Date(payload.date),status:payload.status}})
       },
       onError(err :any){
         const payload = err?.response?.data?.payload
