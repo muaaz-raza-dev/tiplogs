@@ -9,3 +9,11 @@ class IweeklyAttendanceRequestPayload(BaseModel):
 
 class IScheduleCustomAttendancePayload(BaseModel):
     att_date:str
+
+
+
+
+class IViewAttedanceRequestPayload(BaseModel):
+    att_date:str;
+    group:str;
+    module:str;

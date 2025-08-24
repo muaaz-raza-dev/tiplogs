@@ -1,0 +1,28 @@
+import { AttendanceStatus } from "@/types/atoms/mark-attendance.t";
+import { IattDetailedViewPayload } from "@/types/IdetailedAttendanceView";
+import {atom} from "jotai"
+
+interface IattViewEachAtomFilterState {
+group:string;
+module:string;
+att_date:string;
+status_selected:AttendanceStatus;
+}
+export const AttViewEachFilterAtom = atom<IattViewEachAtomFilterState>(
+    {
+    group:"",
+    module:"",
+    att_date:"",
+    status_selected:""
+    }
+);
+
+
+
+export const AttViewEachListAtom = atom<IattDetailedViewPayload>({
+    attendances:[],
+    overview:{present:0,absent:0,leave:0,late:0,half:0},
+    attendance_meta:{},
+    is_attendance:false,
+    is_taken:false
+})

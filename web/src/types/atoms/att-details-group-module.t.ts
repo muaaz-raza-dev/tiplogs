@@ -6,7 +6,7 @@ export interface IattDetailsOverviewFilters{
 
 
 export interface IattDetailsOverviewDoc{
-att_date:string;
+  att_date:string;
     is_taken: boolean;
     is_base_exists: boolean;
 

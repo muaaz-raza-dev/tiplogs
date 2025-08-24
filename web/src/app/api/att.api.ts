@@ -1,5 +1,6 @@
 import { IattDetailsOverviewDoc } from "@/types/atoms/att-details-group-module.t";
 import { Axios } from "./axios";
+import { IattDetailedViewPayload } from "@/types/IdetailedAttendanceView";
 interface IGetAttModulesUserSpecificPayload{
     payload:{
         modules:{name:string,description:string,frequency:"daily"|"custom",id:string}[]
@@ -62,5 +63,12 @@ const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||""
 export async function DeleteScheduleCustomAttendanceApi(att_base:string){
 const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
   const res = await Axios.delete(`/attendance/schedule/custom/${att_base}/delete`,{headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+
+export async function FetchEachAttendanceDetailedViewApi(payload:{module:string,group:string,att_date:string}) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.post<{payload:IattDetailedViewPayload,message:string}>(`/attendance/view/detailed`, payload,{headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }

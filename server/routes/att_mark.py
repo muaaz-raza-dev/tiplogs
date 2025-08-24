@@ -129,7 +129,6 @@ async def MarkAttendance(id:str,payload:MarkAttendanceBodyPayload,user=Depends(a
             if not att_group:
                 return Respond(message="Invalid Id", status_code=402)
 
-            print(att_group.attendance_status)
             if att_group.attendance_status == "complete":
                 return Respond(message="Attendance is already taken ", status_code=402)
             

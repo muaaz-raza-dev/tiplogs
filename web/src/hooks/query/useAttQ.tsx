@@ -1,6 +1,7 @@
 "use client";
-import { DeleteScheduleCustomAttendanceApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
+import { DeleteScheduleCustomAttendanceApi, FetchEachAttendanceDetailedViewApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
 import { AttOverviewDailyDocsAtom } from "@/lib/atoms/att-details-group-module.atom";
+import { AttViewEachListAtom } from "@/lib/atoms/att-view-each.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
@@ -72,4 +73,18 @@ return useMutation({
         toast.error(error.response.data.message)
     },
 })    
+}
+
+
+export function useFetchEachAttendanceDetailedView(){
+    const setState = useSetAtom(AttViewEachListAtom)
+    return useMutation({
+        mutationFn:({module,group,att_date}:{module:string,group:string,att_date:string})=>FetchEachAttendanceDetailedViewApi({module,group,att_date}),
+        onSuccess({payload}){
+            setState(payload)
+        },
+        onError(error :any) {
+            toast.error(error.response.data.message)
+        },
+    })
 }

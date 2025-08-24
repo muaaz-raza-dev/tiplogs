@@ -1,4 +1,7 @@
 from fastapi import APIRouter,  Depends,HTTPException,Response,Query
+from models.att_main import Attendance
+from fastapi.responses import JSONResponse
+from utils.att_authorization import AuthorizeAttendanceRequests
 from typing import Optional;
 from models.user import User
 from models.att_module import attendance_frequency
@@ -16,7 +19,7 @@ import traceback
 import asyncio
 from models.att_groups import AttendanceGroup
 from models.Individual import Individual
-from tschema.att import IweeklyAttendanceRequestPayload,IScheduleCustomAttendancePayload
+from tschema.att import IweeklyAttendanceRequestPayload,IScheduleCustomAttendancePayload,IViewAttedanceRequestPayload
 from utils.date import GetAttendanceDate
 
 router = APIRouter(prefix="/attendance")
@@ -269,3 +272,65 @@ async def DeleteCustomScheduledAttendance(base:str,user=Depends(authorize_user))
     except Exception as e:
         traceback.print_exc()
         return Respond(status_code=500,message=f"An unexpected error occurred: {str(e)}")
+
+
+
+@router.post("/view/detailed")
+async def ViewEachAttendance(payload:IViewAttedanceRequestPayload,user=Depends(authorize_user)):
+    try :
+
+        report = await AuthorizeAttendanceRequests(payload.module,payload.group,user)
+        if isinstance(report,JSONResponse) : # must be error 
+            return report
+        
+        payload = {"attendances":[],"overview":{},"attendance_meta":{},"is_attendance":False,"is_taken":False}
+        att_date = GetAttendanceDate(payload.att_date)
+        att_base = await AttendanceBase.find_one(AttendanceBase.att_module.id==ObjectId(payload.module),AttendanceBase.att_date == att_date)
+        if not att_base :
+            return Respond(payload=payload,message="No attendance is taken on this date");
+        att_group = await AttendanceGroup.find_one(AttendanceGroup.att_base.id == att_base.id)
+        if not att_group:
+            payload["is_attendance"] = True
+            return Respond(payload=payload,message="No attendance is taken of this group on this date");
+
+        payload["overview"] = att_group.status_counts
+        attendance_taken_by =await att_group.taken_by.fetch()
+        payload["attendance_meta"] = {
+            "att_group_id":str(att_group.id),
+            "att_base_id":str(att_base.id),
+            "created_at":att_group.created_at.date().isoformat(),
+            "updated_at":att_group.updated_at.date().isoformat(),
+            "taken_by":{
+                "full_name":attendance_taken_by.full_name,
+                "username":attendance_taken_by.username,
+                "photo":attendance_taken_by.photo,
+                "id":str(attendance_taken_by.id),
+            }
+        }
+        attendances = await Attendance.find(Attendance.att_group.id==att_group.id).to_list()
+        individual_ids = {att.individual for att in attendances}
+        Individuals = await Individual.find(In(Individual.id,individual_ids)).to_list()
+        individual_details = [{str(ind.id):{"full_name":ind.full_name,"father_name":ind.father_name,"grno":ind.grno,"roll_no":ind.roll_no,"id":str(ind.id)}} for ind in Individuals]
+        individual_id_details_map = individual_details.flatten()[0] if individual_details else {}
+        payload["attendances"] = [{
+            "id":str(att.id),   
+            "status":att.status,
+            "att_note":att.att_note,
+            "reporting_time":att.reporting_time,
+            "individual":individual_id_details_map[str(att.individual)]
+        } if att else {} for att in attendances ]
+        payload["is_attendance"] = True
+        payload["is_taken"] = True
+        return Respond(payload=payload)
+         
+    except HTTPException:
+        raise  
+    except PyMongoError as e:
+            return Respond(status_code=500,message=f"Database error: {str(e)}")
+    except Exception as e:
+        traceback.print_exc()
+        return Respond(status_code=500,message=f"An unexpected error occurred: {str(e)}")
+    
+
+
+
