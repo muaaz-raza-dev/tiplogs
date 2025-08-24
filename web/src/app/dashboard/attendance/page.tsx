@@ -65,9 +65,8 @@ export default function GroupsPage() {
               </SelectContent>
             </Select>
           </div>
-          {
-            data?.payload.modules.some(e=>e.id==module&&e.frequency=="custom") ?  <Link href={`/dashboard/attendance/schedule?module=${module}`}><Button>Schedule Attendance <Clock/> </Button> </Link> : null
-          }
+          
+          <Link href={`/dashboard/attendance/schedule`}><Button variant={"secondary"}>Schedule Custom Attendance <Clock/> </Button> </Link>
         </div>
 
         {/* Groups Grid */}

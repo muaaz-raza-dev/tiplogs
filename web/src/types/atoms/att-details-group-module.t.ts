@@ -11,6 +11,7 @@ att_date:string;
     is_base_exists: boolean;
 
     att_group?: {
+      id: string;
       att_base: string;  
       attendance_status?: string; 
       status_counts:{

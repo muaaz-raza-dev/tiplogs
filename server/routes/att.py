@@ -175,7 +175,7 @@ async def GetUserGroupModuleWeekRecord(
         if not ObjectId.is_valid(module):
             return Respond(status_code=400,message="Invalid module ID")
         
-        att_bases = await AttendanceBase.find(AttendanceBase.att_module.id==ObjectId(module),AttendanceBase.status == "upcoming",sort="-att_date").to_list()
+        att_bases = await AttendanceBase.find(AttendanceBase.att_module.id==ObjectId(module),AttendanceBase.status == "upcoming",sort="att_date").to_list()
         
         return Respond(payload={"docs":[{"id":str(att.id),"att_date":att.att_date.date().isoformat(),"created_at":att.created_at.date().isoformat()} for att in att_bases],"total":len(att_bases)})
     
@@ -205,14 +205,19 @@ async def ScheduleAttendance(payload:IScheduleCustomAttendancePayload,module:str
             if not module or str(module.organization.ref.id) != user["organization"]:
                 return Respond(message="Invalid payload is provided",status_code=402)
             
-            att_base =( await AttendanceBase.find_one(AttendanceBase.att_module.id==ObjectId(module),AttendanceBase.id == ObjectId(base)) )if base else None
+            att_base =( await AttendanceBase.find_one(AttendanceBase.att_module.id==module.id,AttendanceBase.id == ObjectId(base)) )if base else None
+            att_base_check = await AttendanceBase.find_one(AttendanceBase.att_module.id==module.id,AttendanceBase.att_date == GetAttendanceDate(payload.att_date))
+
+            if att_base_check:
+                return Respond(message="An attendance with the given date already exists for the selected module",status_code=402)
+            
             att_date = GetAttendanceDate(payload.att_date)
 
-            if att_date < datetime.now():
+            if att_date.date() < datetime.now().date():
                 return Respond(message="Your given date is in the past",status_code=402)
             user =await User.get(user["id"])
             if not att_base:
-                att_base = AttendanceBase(att_date=att_date,att_module=ObjectId(module),frequency=attendance_frequency.custom,status=AttendanceEventStatus.upcoming,created_by=user)
+                att_base = AttendanceBase(att_date=att_date,att_module=module.id,frequency=attendance_frequency.custom,status=AttendanceEventStatus.upcoming,created_by=user)
                 await att_base.insert()
                 return Respond(payload={"id":str(att_base.id),"att_date":att_base.att_date.date().isoformat(),"created_at":att_base.created_at.date().isoformat()})
             
@@ -239,3 +244,28 @@ async def ScheduleAttendance(payload:IScheduleCustomAttendancePayload,module:str
 
     
 
+@router.delete("/schedule/custom/{base}/delete")
+async def DeleteCustomScheduledAttendance(base:str,user=Depends(authorize_user)):
+    try :
+        response = AuthorizeRole(role_to_allow=["manager","admin"],user_role=user["role"])
+        if isinstance(response,Response):
+                return response 
+        if not ObjectId.is_valid(base) :
+            return Respond(status_code=400,message="Invalid attendance module ID")
+
+        att_base = await AttendanceBase.find_one(AttendanceBase.id == ObjectId(base))
+        if not att_base:
+            return Respond(message="Invalid Attendance module is selected",status_code=403)
+        att_module = await att_base.att_module.fetch()
+        if str(att_module.organization.ref.id) != user["organization"]:
+            return Respond(message="Invalid Attendance document is selected",status_code=403)
+        await att_base.delete()
+        return Respond(message="Scheduled Attendance is deleted succesfully")
+      
+    except HTTPException:
+        raise  
+    except PyMongoError as e:
+            return Respond(status_code=500,message=f"Database error: {str(e)}")
+    except Exception as e:
+        traceback.print_exc()
+        return Respond(status_code=500,message=f"An unexpected error occurred: {str(e)}")

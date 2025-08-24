@@ -1,9 +1,10 @@
 "use client";
-import { GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
+import { DeleteScheduleCustomAttendanceApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
 import { AttOverviewDailyDocsAtom } from "@/lib/atoms/att-details-group-module.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 export function useGetAttModulesUserSpecific(disabled?:boolean){
@@ -51,6 +52,20 @@ return useMutation({
     mutationFn:(payload:{att_date:string,att_base?:string})=>ScheduleCustomAttendanceApi(module||"",payload.att_date,payload.att_base),
     onSuccess(){
         toast.success("Attendance is scheduled successfully")
+        refetch()
+    },
+    onError(error :any) {
+        toast.error(error.response.data.message)
+    },
+})    
+}
+
+export function useDeleteScheduleAttendance(){
+    const{refetch} = useScheduledCustomAttendanceBase()
+return useMutation({
+    mutationFn:(att_base:string)=>DeleteScheduleCustomAttendanceApi(att_base||""),
+    onSuccess({message}){
+        toast.success(message)
         refetch()
     },
     onError(error :any) {

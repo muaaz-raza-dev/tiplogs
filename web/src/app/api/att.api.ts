@@ -55,6 +55,12 @@ export async function GetScheduledCustomAttendance(module:string) {
 
 export async function ScheduleCustomAttendanceApi(module:string,att_date:string,att_base?:string,){
 const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
-  const res = await Axios.post<{payload:{att_date:string;id:string;created_at:string}}>(`/attendance/schedule/custom/${module}?base=${att_base}`,{payload:att_date}, {headers: { Authorization: `Bearer ${t}` } }) 
+  const res = await Axios.post<{payload:{att_date:string;id:string;created_at:string}}>(`/attendance/schedule/custom/${module}${att_base ? `?base=${att_base}`:""}`,{att_date}, {headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}
+
+export async function DeleteScheduleCustomAttendanceApi(att_base:string){
+const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.delete(`/attendance/schedule/custom/${att_base}/delete`,{headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }

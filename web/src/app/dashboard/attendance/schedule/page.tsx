@@ -18,7 +18,7 @@ export default function AttendancePage() {
           <p className="text-muted-foreground">Register and manage upcoming attendance dates</p>
         </div>
 
-        <ScheduleAttBar/>
+      <ScheduleAttBar/>
       <ScheduledAttListing/>
       </div>
     </div>

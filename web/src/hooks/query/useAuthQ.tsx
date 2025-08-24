@@ -20,7 +20,6 @@ export function useSignUpAdminQ({ reset }: { reset?: () => void; } = {}) {
             toast.success("Registration successful !");
             reset?.();
             setAccessToken(data.payload.accessToken)
-
             setState({
                 isLoggedIn: true,
                 user: data.payload.user,
@@ -49,6 +48,9 @@ export function useLogin({ reset }: { reset?: () => void; } = {}) {
             });
             if (data?.payload?.user.role == UserRole.ADMIN && !data?.payload?.user.is_verified){
               router.push("/auth/request/verify");
+            }
+            else {
+              router.push("/dashboard");
             }
 
         },
