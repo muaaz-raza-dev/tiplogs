@@ -1,36 +1,36 @@
+"use client";
 import { AttViewEachFilterAtom } from '@/lib/atoms/att-view-each.atom'
 import { Button } from '@/shadcn/components/ui/button'
 import { AttendanceStatus } from '@/types/atoms/mark-attendance.t'
+import clsx from 'clsx';
 import { useAtom } from 'jotai'
 import React from 'react'
-
+const TextColorMaps = {
+"All":"text-white",
+"Present":"text-green-400",
+"Absent":"text-red-400",
+"Late":"text-yellow-400",
+"Half Day":"text-orange-400",
+"Leave":"text-sky-400",
+}
 function AttendanceViewToggleFilterbar() {
   const [state,setState] = useAtom(AttViewEachFilterAtom)
-  function ToggleStatuses(status:AttendanceStatus){
-    setState({...state,status_selected:status})
+  function ToggleStatuses(status:AttendanceStatus | "All"){
+    const Status = status.toLowerCase() as AttendanceStatus
+    setState({...state,status_selected:status == "All" ? "" :  Status })
   }
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={()=>ToggleStatuses("")}>
-              All
-            </Button>
-            <Button variant="ghost" size="sm" className="text-green-300" onClick={()=>ToggleStatuses("present")}>
-              Present
-            </Button>
-            <Button variant="ghost" size="sm" className="text-red-300" onClick={()=>ToggleStatuses("absent")}>
-              Absent
-            </Button>
-            <Button variant="ghost" size="sm" className="text-yellow-300" onClick={()=>ToggleStatuses("late")}>
-              Late
-            </Button>
-            <Button variant="ghost" size="sm" className="text-orange-300" onClick={()=>ToggleStatuses("half_day")}>
-              Late
-            </Button>
-            <Button variant="ghost" size="sm" className="text-blue-300" onClick={()=>ToggleStatuses("leave")}>
-              Leave
-            </Button>
+            {
+              ["All","Present","Absent","Late","Half Day","Leave"].map((e)=><Button variant={state.status_selected==""&&e=="All"? "outline":state.status_selected==e.toLowerCase()?"outline":"ghost"} size="sm" onClick={()=>ToggleStatuses(e as AttendanceStatus | "All")} key={e} 
+              className={clsx(TextColorMaps[e as keyof typeof TextColorMaps])}
+              >
+              {e}
+            </Button>)
+            }
+            
           </div>
         </div>
   )

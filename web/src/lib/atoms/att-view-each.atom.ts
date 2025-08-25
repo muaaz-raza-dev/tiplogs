@@ -21,8 +21,14 @@ export const AttViewEachFilterAtom = atom<IattViewEachAtomFilterState>(
 
 export const AttViewEachListAtom = atom<IattDetailedViewPayload>({
     attendances:[],
-    overview:{present:0,absent:0,leave:0,late:0,half:0},
-    attendance_meta:{},
+    overview:{present:0,absent:0,leave:0,late:0,half:0,total:0},
+    attendance_meta:{
+        taken_by:{username:"",full_name:"",id:"",photo:"",},
+        created_at:"",
+        updated_at:"",
+        att_group_id:"",
+        att_base_id:""
+    },
     is_attendance:false,
     is_taken:false
 })

@@ -3,11 +3,12 @@ import { AttendanceStatus } from "./atoms/mark-attendance.t";
 export interface IattDetailedViewPayload {
   attendances: IattDetailedViewPayloadAttendance[];
   overview: IattDetailedViewPayloadOverview;
-  attendance_meta: {};
+  attendance_meta: IattDetailedViewPayloadAttendanceMeta;
   is_attendance: boolean;
   is_taken: boolean;
 }
 export interface IattDetailedViewPayloadOverview {
+    total:number;
     present: number;
     absent: number;
     leave: number;
@@ -16,7 +17,7 @@ export interface IattDetailedViewPayloadOverview {
 }
 
 export interface IattDetailedViewPayloadAttendanceMeta{
-    taken_by:{full_name:string,id:string,father_name:string,grno:string,roll_no:string} ;
+    taken_by:{username:string;full_name:string;id:string,photo:string};
     created_at:string;
     updated_at:string;
     att_group_id:string;
