@@ -288,7 +288,7 @@ async def ViewEachAttendance(request_payload:IViewAttedanceRequestPayload,user=D
         att_base = await AttendanceBase.find_one(AttendanceBase.att_module.id==ObjectId(request_payload.module),AttendanceBase.att_date == att_date)
         if not att_base :
             return Respond(payload=payload,message="No attendance is taken on this date");
-        att_group = await AttendanceGroup.find_one(AttendanceGroup.att_base.id == att_base.id)
+        att_group = await AttendanceGroup.find_one(AttendanceGroup.group.id==ObjectId(request_payload.group), AttendanceGroup.att_base.id == att_base.id,)
         if not att_group:
             payload["is_attendance"] = True
             return Respond(payload=payload,message="No attendance is taken of this group on this date");

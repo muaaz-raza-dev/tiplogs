@@ -27,7 +27,6 @@ import {
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Separator } from "@/shadcn/components/ui/separator"
 import SideBarUserInfo from "./side-bar-user-info"
 
 // Navigation data
@@ -94,7 +93,7 @@ const data = {
       title:"Attendance" ,
       navs:[
         {
-        title: "Attendance Groups",
+        title: "Attendance",
         url: "/dashboard/attendance",
         exact:true,
         icon: LibraryBig  ,

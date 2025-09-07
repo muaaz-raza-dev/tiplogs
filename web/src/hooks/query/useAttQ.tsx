@@ -1,9 +1,9 @@
 "use client";
 import { DeleteScheduleCustomAttendanceApi, FetchEachAttendanceDetailedViewApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
 import { AttOverviewDailyDocsAtom } from "@/lib/atoms/att-details-group-module.atom";
-import { AttViewEachListAtom } from "@/lib/atoms/att-view-each.atom";
+import { AttViewEachFilterAtom, AttViewEachListAtom } from "@/lib/atoms/att-view-each.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
@@ -76,8 +76,9 @@ return useMutation({
 }
 
 
-export function useFetchEachAttendanceDetailedView(){
+export function useFetchEachAttendanceDetailedView(init_payload?:{module:string,group:string,att_date:string}){
     const setState = useSetAtom(AttViewEachListAtom)
+    const [filters,setFilters] = useAtom(AttViewEachFilterAtom)
     return useMutation({
         mutationFn:({module,group,att_date}:{module:string,group:string,att_date:string})=>FetchEachAttendanceDetailedViewApi({module,group,att_date}),
         onSuccess({payload}){
@@ -86,5 +87,14 @@ export function useFetchEachAttendanceDetailedView(){
         onError(error :any) {
             toast.error(error.response.data.message)
         },
+        onSettled(){
+            if (init_payload){
+                const {module,group,att_date} = init_payload||{module:"",group:"",att_date:""}
+                setFilters({att_date,group,module,status_selected:"",is_fetched:true})
+            }
+            else {
+                setFilters({...filters,is_fetched:true})
+            }
+        }
     })
 }

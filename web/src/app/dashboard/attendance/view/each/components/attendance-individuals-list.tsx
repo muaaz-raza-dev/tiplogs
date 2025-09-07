@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/ui
 import { AttendanceStatus } from '@/types/atoms/mark-attendance.t';
 import { useAtomValue } from 'jotai'
 import { Users } from 'lucide-react'
+import moment from 'moment';
 import React, { useEffect } from 'react'
 
 function AttendanceIndividualsList() {
@@ -13,7 +14,7 @@ function AttendanceIndividualsList() {
       const [attendanceList, setAttendanceList] = React.useState(data.attendances);
       useEffect(() => {
         if (data.attendances.length){
-            const filtered =(filters.status_selected != "" ) ?data.attendances.filter(att => att.status === filters.status_selected):data.attendances
+            const filtered =(filters.status_selected != "" ) ?data?.attendances?.filter(att => att.status === filters.status_selected):data?.attendances
               setAttendanceList(filtered)
         }
       }, [data.is_taken,filters.status_selected])
@@ -34,30 +35,45 @@ function AttendanceIndividualsList() {
         }
       }
     
-
-  return (
-    <div className="lg:col-span-3">
+        return (
+          <div className="lg:col-span-3">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center justify-between gap-2">
+                  
+                  <div className="flex items-center gap-2">
+
                   <Users className="h-5 w-5" />
-                  Attendance List - {filters.module} ({filters.group}) - {filters.att_date}
+                  Attendance List - {moment(filters.att_date).format("dddd DD-MMMM-YYYY")}
+                  </div>
+
+          <div className="flex justify-between gap-4 items-center border rounded p-1 px-2 text-sm">
+                  <span className=" text-muted-foreground">Total Students</span>
+                  <span className="font-semibold">{data.attendances.length}</span>
+                </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
+                  {
+                    attendanceList?.length == 0 &&
+                    <div className="text-center py-10 text-sm text-muted-foreground">No records in this category found</div>
+                  }
                   {attendanceList?.map((e) => (
                     <div
-                      key={e.individual.id}
-                      className="flex items-center justify-between p-4 border rounded-lg "
+                    key={e.individual.id}
+                    className="flex items-center justify-between p-4 border rounded-lg "
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex  gap-2 items-center text-sm">
                         <Badge variant={"secondary"} className='h-full'>{e.individual.grno} </Badge>
-                        <div>
-                            <div className="flex gap-2 items-center"> <p className="font-medium "> {e.individual.full_name}</p> <Badge variant={"outline"}>{e.individual.roll_no||"-"}</Badge>
-                            </div>
-                          <p className="text-sm text-muted-foreground">{e.individual.father_name}</p>
-                        </div>
+                        
+                            <div className="flex gap-2 items-center"> <p className="font-medium "> {e.individual.full_name}</p> 
+                            {e.individual.roll_no &&
+                            <Badge variant={"outline"}>{e.individual.roll_no||"-"}</Badge>
+                            }
+                            </div> -
+                          <p className=" text-muted-foreground">{e.individual.father_name}</p>
+                        
                       </div>
 
                       <div className="flex items-center gap-4">
@@ -74,6 +90,7 @@ function AttendanceIndividualsList() {
             </Card>
           </div>
   )
+
 }
 
 export default AttendanceIndividualsList

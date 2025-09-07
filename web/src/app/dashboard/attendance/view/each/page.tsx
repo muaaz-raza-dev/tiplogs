@@ -3,6 +3,7 @@ import AttendanceViewToggleFilterbar from "./components/toggle-filterbar";
 import AttendanceStatsCard from "./components/attendance-stats-card";
 import AttendanceTakenInfoCard from "./components/attendance-info-card";
 import AttendanceIndividualsList from "./components/attendance-individuals-list";
+import AttendanceViewManager from "./components/attendance-view-manager";
 
 export default function AttendancePage() {
   return (
@@ -14,8 +15,9 @@ export default function AttendancePage() {
         </div>
 
         <AttendanceViewEachSelectbar />
-        <AttendanceViewToggleFilterbar />
 
+        <AttendanceViewManager>
+        <AttendanceViewToggleFilterbar />
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <AttendanceIndividualsList />
           <div className="space-y-6">
@@ -23,6 +25,7 @@ export default function AttendancePage() {
             <AttendanceTakenInfoCard />
           </div>
         </div>
+        </AttendanceViewManager>
       </div>
     </div>
   );

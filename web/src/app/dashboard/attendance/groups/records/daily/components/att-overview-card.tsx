@@ -1,3 +1,4 @@
+import { useFetchEachAttendanceDetailedView } from "@/hooks/query/useAttQ"
 import { AttOverviewDailyDocsAtom, AttOverviewDailyFiltersAtom } from "@/lib/atoms/att-details-group-module.atom"
 import { Badge } from "@/shadcn/components/ui/badge"
 import { Button } from "@/shadcn/components/ui/button"
@@ -26,6 +27,7 @@ export default function AttendanceOverviewCards() {
 function AttendanceCard({
     data:{att_date,is_base_exists,is_taken,att_group},module,group
 }: {data:IattDetailsOverviewDoc,module:string,group:string}) {
+  const {mutate} = useFetchEachAttendanceDetailedView({module,group,att_date})
   if (!is_base_exists||!is_taken) {
     return (
       <Card className="w-[30%] ">
@@ -108,7 +110,7 @@ function AttendanceCard({
           </div>
             <div className="text-xs text-muted-foreground">Total: {total}</div>
             <Link href={"/dashboard/attendance/view/each"}>
-            <Button variant={"secondary"} className="w-full">View Details <ArrowRight/> </Button>
+            <Button variant={"secondary"} className="w-full" onClick={()=>mutate({module,group,att_date:moment(att_date).format("YYYY-MM-DD")})}>View Details <ArrowRight/> </Button>
             </Link>
       </CardContent>
     </Card>

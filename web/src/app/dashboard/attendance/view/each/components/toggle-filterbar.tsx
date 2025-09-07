@@ -25,7 +25,7 @@ function AttendanceViewToggleFilterbar() {
           <div className="flex items-center gap-2">
             {
               ["All","Present","Absent","Late","Half Day","Leave"].map((e)=><Button variant={state.status_selected==""&&e=="All"? "outline":state.status_selected==e.toLowerCase()?"outline":"ghost"} size="sm" onClick={()=>ToggleStatuses(e as AttendanceStatus | "All")} key={e} 
-              className={clsx(TextColorMaps[e as keyof typeof TextColorMaps])}
+              className={clsx("hover:bg-transparent",TextColorMaps[e as keyof typeof TextColorMaps],)}
               >
               {e}
             </Button>)

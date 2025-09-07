@@ -7,13 +7,15 @@ group:string;
 module:string;
 att_date:string;
 status_selected:AttendanceStatus;
+is_fetched:boolean;
 }
 export const AttViewEachFilterAtom = atom<IattViewEachAtomFilterState>(
     {
     group:"",
     module:"",
     att_date:"",
-    status_selected:""
+    status_selected:"",
+    is_fetched:false,
     }
 );
 
