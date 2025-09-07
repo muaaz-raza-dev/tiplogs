@@ -49,7 +49,7 @@ function AssignGroupUsersDialog() {
   const { data: group_users_list, isPending: isFetchingGroupUsersList } = useGetAttModuleGroupUsers();
   const { data: fetched_users, isPending: isFetchingUserPairs } = useGetUserPairs();
   const group_to_users = group_users_list?.payload.groups_to_users
-
+  
   const users = fetched_users?.payload.list;
   const filled_groups = group_to_users?.map((e) => e.group); 
   const available_groups = data?.payload.filter((e) => !filled_groups?.includes(e.id));
@@ -66,7 +66,6 @@ function AssignGroupUsersDialog() {
     setSelectedUsers(atomState.selected_users);
   }, [
     atomState.selected_group,
-    atomState.selected_users,
     atomState.open_dialog,
   ]);
   function onSuccess(){
@@ -89,7 +88,6 @@ function AssignGroupUsersDialog() {
     e.preventDefault();
     update({group:selectedGroup,users:selectedUsers})
   };
-
   return (
     <Dialog
       open={open}
@@ -127,10 +125,12 @@ function AssignGroupUsersDialog() {
                 />
               </SelectTrigger>
               <SelectContent>
-                {available_groups?.length == 0 ? (
+                {!atomState.group_selection_disabled && available_groups?.length == 0 ? (
                   <p className="text-sm text-muted-foreground">0 Group found</p>
                 ) : (
-                  (atomState.group_selection_disabled ? [] : available_groups)?.map((group) => (
+                  isFetchingGroupPairs ? 
+                  <ServerRequestLoader/> :
+                  (atomState.group_selection_disabled ? data?.payload : available_groups)?.map((group) => (
                     <SelectItem key={group.id} value={group.id}>
                       {group.name}
                     </SelectItem>

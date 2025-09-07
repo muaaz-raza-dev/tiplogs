@@ -7,7 +7,7 @@ export const MarkAttendanceAtom = atom<ImarkAttendaneAtom>(
         attendance_group_id:"",
         total_individuals: 0,
         unmarked: 0,
-        att_date: new Date(),
+        att_date: null,
         status:"pending",
         is_holiday:false,
     },

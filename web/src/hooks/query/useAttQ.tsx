@@ -1,11 +1,10 @@
 "use client";
-import { DeleteScheduleCustomAttendanceApi, FetchEachAttendanceDetailedViewApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
-import { AttOverviewDailyDocsAtom } from "@/lib/atoms/att-details-group-module.atom";
+import { DeleteAttendanceRecordApi, DeleteScheduleCustomAttendanceApi, FetchEachAttendanceDetailedViewApi, GetAttendanceModuleGroupPairsApi, GetAttendanceModuleSpecificGroupsApi, GetAttendanceModulesUserSpecific, GetAttendanceWeeklyOverviewApi, GetScheduledCustomAttendance, IweeklyAttendanceRequestPayload, ScheduleCustomAttendanceApi } from "@/app/api/att.api";
+import { AttOverviewDailyDocsAtom, AttOverviewDailyFiltersAtom } from "@/lib/atoms/att-details-group-module.atom";
 import { AttViewEachFilterAtom, AttViewEachListAtom } from "@/lib/atoms/att-view-each.atom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 export function useGetAttModulesUserSpecific(disabled?:boolean){
@@ -15,7 +14,7 @@ export function useGetAttModulesUserSpecific(disabled?:boolean){
 export function useGetAttGroupsSpecificModule(){
     const {data} = useGetAttModulesUserSpecific(true)
     const searchParams = useSearchParams()
-    const module = (searchParams.get("module") || data?.payload.modules[0].id )as string
+    const module = (searchParams.get("module") || (data?.payload.modules[0]?.id ?? "") )as string
     return useQuery({queryFn:()=>GetAttendanceModuleSpecificGroupsApi(module),enabled:!!module,queryKey:["user","group","specific"],staleTime:3600*10,refetchOnMount:false,retry:2,refetchOnWindowFocus:false})
 }
 
@@ -96,5 +95,20 @@ export function useFetchEachAttendanceDetailedView(init_payload?:{module:string,
                 setFilters({...filters,is_fetched:true})
             }
         }
+    })
+} 
+
+export function useDeleteAttendanceRecord(){
+    
+    const state = useAtomValue(AttOverviewDailyFiltersAtom)    
+    return useMutation({
+        mutationFn:(att_base:string)=>DeleteAttendanceRecordApi(att_base),
+        onSuccess({message}){
+            
+            toast.success(message)
+        },
+        onError(error :any) {
+            toast.error(error.response.data.message)
+        },
     })
 }

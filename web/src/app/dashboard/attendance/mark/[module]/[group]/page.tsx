@@ -9,9 +9,6 @@ import ErrorPage from "@/components/error-page";
 import AttMarkSubmit from "./components/att-mark-submit";
 import BatchActionInputBar from "./components/batch-action-input-bar";
 import AttStateNotifier from "./components/att-state-notifier";
-import { Button } from "@/shadcn/components/ui/button";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 
 export default function AttendancePage() {
   const {isPending,isError} = useGetMarkAttMetaData()

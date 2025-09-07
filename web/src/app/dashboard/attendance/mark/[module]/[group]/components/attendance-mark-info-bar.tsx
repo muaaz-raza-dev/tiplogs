@@ -1,12 +1,10 @@
 import React from 'react'
 import { Card, CardHeader, CardTitle } from '@/shadcn/components/ui/card'
-import { Badge } from '@/shadcn/components/ui/badge'
-import { ChevronLeft, Lock, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import AttendanceMarkDatePicker from './attendance-mark-date-picker'
-import { Button } from '@/shadcn/components/ui/button'
-import Link from 'next/link'
 import { useAtomValue } from 'jotai'
-import { MarkAttendanceAtom, MarkAttendanceListAtom } from '@/lib/atoms/mark-att.atom'
+import { MarkAttendanceAtom } from '@/lib/atoms/mark-att.atom'
+import moment from 'moment'
 
 function AttendanceMarkInfoBar() {
   const state = useAtomValue(MarkAttendanceAtom)
@@ -18,11 +16,12 @@ function AttendanceMarkInfoBar() {
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="gap-1">
-              <Lock className="h-3.5 w-3.5" />
-              Locked Group
-            </Badge>
-            <h1 className="text-xl font-semibold">{state.group.name}</h1>
+            <h1 className="text-xl font-semibold">{state.group.name}</h1> 
+            {
+              state.general.att_date ?
+            <h2 className='text-muted-foreground text-sm'>{moment(state.general.att_date).format("dddd DD-MMMM-YYYY")}</h2> :
+            <p className='text-destructive text-sm px-2'>No date selected</p>
+          }
           </div>      
             <CardTitle className="flex items-center gap-2 text-xl">
               <Users className="h-5 w-5 text-muted-foreground" /> {state.module.name}

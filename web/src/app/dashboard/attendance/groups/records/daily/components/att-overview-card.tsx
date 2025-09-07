@@ -1,15 +1,19 @@
-import { useFetchEachAttendanceDetailedView } from "@/hooks/query/useAttQ"
+import ServerRequestLoader from "@/components/loaders/server-request-loader"
+import { useAttendanceWeeklyOverview, useDeleteAttendanceRecord, useFetchEachAttendanceDetailedView } from "@/hooks/query/useAttQ"
 import { AttOverviewDailyDocsAtom, AttOverviewDailyFiltersAtom } from "@/lib/atoms/att-details-group-module.atom"
 import { Badge } from "@/shadcn/components/ui/badge"
 import { Button } from "@/shadcn/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shadcn/components/ui/card"
-import { IattDetailsOverviewDoc } from "@/types/atoms/att-details-group-module.t"
+import { IattDetailsOverviewDoc, IattDetailsOverviewFilters } from "@/types/atoms/att-details-group-module.t"
 import { useAtomValue } from "jotai"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Trash } from "lucide-react"
 import moment from "moment"
 import Link from "next/link"
+import AttDeleteButton from "./att-delete-button"
 
 export default function AttendanceOverviewCards() {
+  
+      
     const records = useAtomValue(AttOverviewDailyDocsAtom)
     const state = useAtomValue(AttOverviewDailyFiltersAtom)
 
@@ -17,7 +21,7 @@ export default function AttendanceOverviewCards() {
   return (
         <div className="flex flex-wrap gap-2">
             {
-                records.map(e=><AttendanceCard key={e.att_date} data={e} module={state.module} group={state.group}/>)
+                records.map(e=><AttendanceCard key={e.att_date} data={e} module={state.module} group={state.group} filters={state}/>)
             }
         </div>
   )
@@ -25,8 +29,11 @@ export default function AttendanceOverviewCards() {
 
 
 function AttendanceCard({
-    data:{att_date,is_base_exists,is_taken,att_group},module,group
-}: {data:IattDetailsOverviewDoc,module:string,group:string}) {
+    data:{att_date,is_base_exists,is_taken,att_group},module,group,filters
+}: {data:IattDetailsOverviewDoc,module:string,group:string,filters:IattDetailsOverviewFilters}) {
+  
+  const {mutate:fetch_week_record} = useAttendanceWeeklyOverview()
+  
   const {mutate} = useFetchEachAttendanceDetailedView({module,group,att_date})
   if (!is_base_exists||!is_taken) {
     return (
@@ -109,9 +116,12 @@ function AttendanceCard({
 
           </div>
             <div className="text-xs text-muted-foreground">Total: {total}</div>
-            <Link href={"/dashboard/attendance/view/each"}>
+            <div className="flex gap-2 flex-wrap">
+            <Link href={"/dashboard/attendance/view/each"} className="w-full">
             <Button variant={"secondary"} className="w-full" onClick={()=>mutate({module,group,att_date:moment(att_date).format("YYYY-MM-DD")})}>View Details <ArrowRight/> </Button>
             </Link>
+    <AttDeleteButton att_group={att_group?.id} att_date={att_date} onDelete={()=>{fetch_week_record(filters)}}/>
+            </div>
       </CardContent>
     </Card>
   )

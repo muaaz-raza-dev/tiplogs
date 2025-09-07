@@ -3,6 +3,7 @@
 import {
   Bell,
   Box,
+  CalendarClock,
   CircleUser,
   FileText,
   Home,
@@ -96,7 +97,7 @@ const data = {
         title: "Attendance",
         url: "/dashboard/attendance",
         exact:true,
-        icon: LibraryBig  ,
+        icon: CalendarClock  ,
       } 
       ,
        {

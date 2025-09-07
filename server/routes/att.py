@@ -34,7 +34,7 @@ async def GetUserModules(user=Depends(authorize_user)):
             payload["modules"] = [
                 {**module.model_dump(include={"frequency", "name", "description"}), "id": str(module.id)} for module in modules]
         else:
-            modules = await AttendanceModule.find(AttendanceModule.organization.id == ObjectId(user["organization"]),    AttendanceModule.users == ObjectId(user["id"])).to_list()
+            modules = await AttendanceModule.find(AttendanceModule.organization.id == ObjectId(user["organization"]), AttendanceModule.users == ObjectId(user["id"])).to_list()
             payload["modules"] = [
                 {**module.model_dump(include={"frequency", "name", "description"}), "id": str(module.id)} for module in modules]
         return Respond(payload=payload)
@@ -147,13 +147,13 @@ async def GetUserGroupModuleWeekRecord(
                     if att_group.attendance_status == AttendanceEventStatus.complete :
                         response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":True,"att_group":{"att_base":str(att_base.id),
                         "attendance_status":att_base.status,"created_at":att_base.created_at.date().isoformat(),
-                        "status_counts":att_group.status_counts.model_dump()
+                        "status_counts":att_group.status_counts.model_dump(),"id":str(att_group.id)
                         }})
                     else:
                         response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":False,"att_group":{"att_base":str(att_base.id)}})
                 else:
                     response_payload.append({"att_date":date_str,"is_base_exists":True,"is_taken":False,"att_group":{"att_base":str(att_base.id)}})
-
+        print(response_payload)
         return Respond(payload=response_payload)
 
     except HTTPException:
@@ -333,4 +333,34 @@ async def ViewEachAttendance(request_payload:IViewAttedanceRequestPayload,user=D
     
 
 
+@router.delete("/delete/day/{id}")
+async def DeleteDayAttendance(id:str,user=Depends(authorize_user)):
+    try:
+        if not ObjectId.is_valid(id) :
+            return Respond(status_code=400,message="Invalid attendance id")
+        
+        att_group = await AttendanceGroup.find_one(AttendanceGroup.id==ObjectId(id));
 
+        if not att_group:
+            return Respond(message="Invalid attendance id",status_code=400)
+        
+        att_base = await att_group.att_base.fetch();
+        att_module = await att_base.att_module.fetch();
+
+        if str(att_module.organization.ref.id) != user["organization"]:
+            return Respond(message="Invalid credentials",status_code=401);
+    
+        if(str(att_group.taken_by.ref.id) != user["id"] and (not (user["role"] in ("admin" ,"manager")))) :
+            return Respond(message="Invalid credentials",status_code=401);
+        
+        await Attendance.find(Attendance.att_group.id == att_group.id).delete();
+        await att_group.delete();
+        return Respond(message="deleted successfully")
+        
+    except HTTPException:
+        raise  
+    except PyMongoError as e:
+            return Respond(status_code=500,message=f"Database error: {str(e)}")
+    except Exception as e:
+        traceback.print_exc()
+        return Respond(status_code=500,message=f"An unexpected error occurred: {str(e)}")

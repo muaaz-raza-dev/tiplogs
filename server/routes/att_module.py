@@ -132,7 +132,7 @@ async def GetModuleGroupUsers(id:str,payload:AddGroupToAttendanceModulePayloadBo
         module.groups_to_users = group_to_user
         module.users = unique_users_list
         await module.save()
-        return Respond(message="New group is added successfully")
+        return Respond(message="Updated successfully")
     except Exception as e :
         traceback.print_exc()
         print(e)

@@ -72,3 +72,9 @@ export async function FetchEachAttendanceDetailedViewApi(payload:{module:string,
   const res = await Axios.post<{payload:IattDetailedViewPayload,message:string}>(`/attendance/view/detailed`, payload,{headers: { Authorization: `Bearer ${t}` } }) 
   return res.data
 }
+
+export async function DeleteAttendanceRecordApi(att_base:string) {
+  const t = sessionStorage.getItem(process.env["NEXT_PUBLIC_ACCESS_TOKEN_KEY"]||"") ;
+  const res = await Axios.delete<{message:string}>(`/attendance/delete/day/${att_base}`,{headers: { Authorization: `Bearer ${t}` } }) 
+  return res.data
+}

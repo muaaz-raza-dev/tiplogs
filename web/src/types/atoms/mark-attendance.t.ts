@@ -2,7 +2,7 @@ export interface ImarkAttendaneAtom {
   general:{
       total_individuals: number;
       unmarked: number;
-      att_date: Date;
+      att_date: Date|null;
       attendance_group_id:string
       status:"pending"|"complete",
       is_holiday:boolean;

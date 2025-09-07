@@ -21,7 +21,7 @@ export default function GroupsPage() {
     useEffect(() => {
     if (!module&&data){
     const newSearchParams = new URLSearchParams(searchParams.toString())
-    newSearchParams.set('module', data?.payload.modules[0].id ??"")
+    newSearchParams.set('module', data?.payload.modules[0]?.id ??"")
     const newUrl = `/dashboard/attendance?${newSearchParams.toString()}`
     router.replace(newUrl)
     }

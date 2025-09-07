@@ -55,7 +55,7 @@ function IndividualFilterbar() {
      
             </div>
           </div>
-          <p className="text-sm text-muted-foreground self-end pt-2 ">Total results: 10</p>
+          <p className="text-sm text-muted-foreground self-end pt-2 ">Total registered : {state.total}</p>
           </>
           )
 }

@@ -9,6 +9,14 @@ att_date:string;
 status_selected:AttendanceStatus;
 is_fetched:boolean;
 }
+
+export const defaultAttViewFilters : IattViewEachAtomFilterState = {
+    group:"",
+    module:"",
+    att_date:"",
+    status_selected:"",
+    is_fetched:false,
+}
 export const AttViewEachFilterAtom = atom<IattViewEachAtomFilterState>(
     {
     group:"",
@@ -19,9 +27,7 @@ export const AttViewEachFilterAtom = atom<IattViewEachAtomFilterState>(
     }
 );
 
-
-
-export const AttViewEachListAtom = atom<IattDetailedViewPayload>({
+export const defaultAttendanceDetailedView : IattDetailedViewPayload = {
     attendances:[],
     overview:{present:0,absent:0,leave:0,late:0,half:0,total:0},
     attendance_meta:{
@@ -33,4 +39,6 @@ export const AttViewEachListAtom = atom<IattDetailedViewPayload>({
     },
     is_attendance:false,
     is_taken:false
-})
+}
+
+export const AttViewEachListAtom = atom<IattDetailedViewPayload>(defaultAttendanceDetailedView)

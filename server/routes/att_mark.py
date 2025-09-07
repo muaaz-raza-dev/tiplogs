@@ -88,12 +88,14 @@ async def CheckAttendanceStatus(module:str,group:str,payload:ValidateAttendanceD
                 attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[],attendance_status=AttendanceEventStatus.progess)
                 await attendance_group.insert()
                 return Respond(message="Start your attendance",payload={"attendance_group":str(attendance_group.id),"status":"pending","date":attendance_base.att_date.date().isoformat()})
+
+            
             
             if attendance_base.is_holiday:
                 return Respond(message="Admin assigned today as holiday",status_code=403,payload={"status":"complete","is_holiday":True,"attendance_group":str(attendance_group.id),"date":attendance_base.att_date.date().isoformat()})
             
             attendance_group =await AttendanceGroup.find_one(AttendanceGroup.att_base.id==attendance_base.id,AttendanceGroup.group.id==group_doc.id)
-
+            
             if not attendance_group :
                 attendance_group = AttendanceGroup(att_base=attendance_base,group=group_doc,attendance=[],attendance_status=AttendanceEventStatus.progess)
                 await attendance_group.insert()

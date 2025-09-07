@@ -21,7 +21,10 @@ function AttendanceMarkDatePicker() {
   const params = useSearchParams()
 
   function ChangeDate(){
-    if(att_date.toLocaleDateString()!=date.toLocaleDateString()){
+    if (!att_date){
+        mutate(moment(date).format("YYYY-MM-DD") )
+    }    
+    if(att_date && att_date.toLocaleDateString()!=date.toLocaleDateString()){
         mutate(moment(date).format("YYYY-MM-DD") )
     }
     setState({...state,general:{...state.general,att_date:date}})
@@ -33,7 +36,7 @@ function AttendanceMarkDatePicker() {
     setDate(new Date(att_date))
     }
   }, [])
-
+  console.log(att_date,date)
   return ( <div className="">
     <Label className='pb-2'>Attendance date</Label>
     <div className="flex items-center gap-4">
@@ -51,8 +54,16 @@ function AttendanceMarkDatePicker() {
         <Calendar mode="single" selected={date} modifiers={{today:undefined}} onSelect={(date)=>{date&&setDate(date);setOpen(false)}} disabled={{ after: new Date() }}  />
       </PopoverContent>
     </Popover>
-    <Button onClick={ChangeDate} variant={"secondary"}>{isPending ? <ServerRequestLoader/>:  "Change Date"} </Button>
+    <div className="">
     </div>
+      
+    <Button onClick={ChangeDate} variant={"secondary"}>{isPending ? <ServerRequestLoader/>:  "Select Date"} </Button>
+    
+      </div>
+      {
+      (!att_date || att_date.toLocaleDateString()!=date.toLocaleDateString() )&& 
+      <div className="text-sm pt-1 text-orange-500">select the date to get started</div>
+    }
     </div>
   )
 }

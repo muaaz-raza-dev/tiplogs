@@ -70,7 +70,7 @@ function AttendanceViewEachSelectbar() {
               <div className="flex items-end">
                 <Button className="w-full" onClick={onSetFilter} disabled={isMutatePending|| !state.att_date || !state.group || !state.module}>
                   {
-                    isMutatePending? <ServerRequestLoader/> : "Apply Filter"
+                    isMutatePending? <ServerRequestLoader/> : "Search"
                   }
                   </Button>
               </div>
@@ -78,6 +78,8 @@ function AttendanceViewEachSelectbar() {
         isPending && <ServerRequestLoader size={32} stroke={4}/>
       }
             </div>
+    
+
           </CardContent>
         </Card>
   )
